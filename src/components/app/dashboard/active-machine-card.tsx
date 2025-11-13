@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { Transaction } from "@/lib/data";
+import { useAccount } from "@/contexts/account-context";
 
 interface ActiveMachineCardProps {
     transaction: Transaction;
@@ -14,8 +15,8 @@ interface ActiveMachineCardProps {
 
 export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const { toast } = useToast();
+  const { addBalance } = useAccount();
   
-  // Assuming duration is in a parsable format like "45 Days"
   const getDays = (durationStr: string) => {
     if (durationStr.includes("Month")) {
         return 30;
@@ -29,7 +30,11 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const [earnings, setEarnings] = useState(0.0012);
   const [cashedOutAmount, setCashedOutAmount] = useState(0);
   const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
-  const [canCashOut, setCanCashOut] = useState(true);
+  const [canCashOut, setCanCashOut] = useState(false);
+
+  const purchaseDate = new Date(transaction.date);
+  const twentyFourHoursAfterPurchase = new Date(purchaseDate.getTime() + 24 * 60 * 60 * 1000);
+
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -43,29 +48,39 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   useEffect(() => {
     const checkCashOutStatus = () => {
       const today = new Date();
-      if (lastCashOutDate && lastCashOutDate.toDateString() === today.toDateString()) {
-        setCanCashOut(false);
-      } else {
-        setCanCashOut(true);
-      }
+      const isAfter24Hours = today > twentyFourHoursAfterPurchase;
+      const hasNotCashedOutToday = !lastCashOutDate || lastCashOutDate.toDateString() !== today.toDateString();
+      
+      setCanCashOut(isAfter24Hours && hasNotCashedOutToday);
     };
 
     checkCashOutStatus();
-    // Check every minute to see if it's a new day
+    // Check every minute to see if it's a new day or if 24hr mark passed
     const interval = setInterval(checkCashOutStatus, 60000);
     return () => clearInterval(interval);
-  }, [lastCashOutDate]);
+  }, [lastCashOutDate, twentyFourHoursAfterPurchase]);
 
   const handleCashOut = () => {
-    const cashOutable = earnings - cashedOutAmount;
-    if (cashOutable > 0) {
+    const availableToCashOut = earnings - cashedOutAmount;
+    if (availableToCashOut > 0 && canCashOut) {
+      // For demonstration, let's say 1 BTC = 9,000,000 KES
+      const amountInKES = availableToCashOut * 9000000;
+      addBalance(amountInKES);
+      
       setCashedOutAmount(earnings);
       setLastCashOutDate(new Date());
       setCanCashOut(false);
+      
       toast({
         title: "Cash Out Successful!",
-        description: `You've cashed out ${cashOutable.toFixed(8)} BTC. You can cash out again tomorrow.`,
+        description: `You've cashed out ${availableToCashOut.toFixed(8)} BTC (approx. KES ${amountInKES.toLocaleString()}). It has been added to your main account balance and is available for withdrawal.`,
       });
+    } else if (!canCashOut) {
+         toast({
+            title: "Cash Out Unavailable",
+            description: "You can only cash out once per day, 24 hours after hiring the machine.",
+            variant: "destructive",
+        });
     } else {
       toast({
         title: "No Earnings to Cash Out",
@@ -83,6 +98,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   };
 
   const progressPercentage = ((totalDuration - timeRemaining) / totalDuration) * 100;
+  const availableToCashOut = earnings - cashedOutAmount;
 
   return (
     <Card>
@@ -114,7 +130,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
           <div className="flex items-center space-x-3">
             <Bitcoin className="w-6 h-6 text-muted-foreground" />
             <div>
-              <p className="text-sm text-muted-foreground">Potential Earnings</p>
+              <p className="text-sm text-muted-foreground">Total Earnings</p>
               <p className="font-semibold font-mono">{earnings.toFixed(8)} BTC</p>
             </div>
           </div>
@@ -123,11 +139,11 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
             <div className="flex items-center space-x-3">
                  <Wallet className="w-6 h-6 text-muted-foreground" />
                 <div>
-                    <p className="text-sm text-muted-foreground">Available to Cash Out</p>
-                    <p className="font-semibold font-mono">{(earnings - cashedOutAmount).toFixed(8)} BTC</p>
+                    <p className="text-sm text-muted-foreground">Available Earnings</p>
+                    <p className="font-semibold font-mono">{availableToCashOut.toFixed(8)} BTC</p>
                 </div>
             </div>
-            <Button onClick={handleCashOut} size="sm" disabled={!canCashOut}>Cash Out</Button>
+            <Button onClick={handleCashOut} size="sm" disabled={!canCashOut || availableToCashOut <= 0}>Cash Out</Button>
         </div>
         <div>
           <Progress value={progressPercentage} className="w-full h-2 mt-4" />
