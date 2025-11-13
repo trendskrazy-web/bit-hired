@@ -74,14 +74,13 @@ export function TopUpCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Redeem a Code</CardTitle>
-        <CardDescription>Enter a code to add funds to your wallet.</CardDescription>
+        <CardTitle>Top Up Wallet</CardTitle>
+        <CardDescription>Add funds to your wallet using M-PESA.</CardDescription>
       </CardHeader>
-      <form onSubmit={handleVerify}>
         <CardContent className="space-y-4">
           <div>
             <p className="text-sm text-muted-foreground">
-              To get a redeem code, send money to the following number using M-PESA Paybill or Send Money:
+              1. Send money to the following number:
             </p>
             <div className="flex items-center justify-between p-3 my-2 bg-secondary rounded-md">
               <p className="font-mono text-lg font-semibold">{phoneNumber}</p>
@@ -106,24 +105,26 @@ export function TopUpCard() {
                 </Button>
               </div>
             </div>
+             <p className="text-sm text-muted-foreground">
+              2. Enter the M-PESA redeem code you receive below.
+            </p>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="redeem-code">Redeem Code</Label>
-            <Input
-              id="redeem-code"
-              placeholder="e.g. SFD345KMNL"
-              value={redeemCode}
-              onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
-              required
-            />
-          </div>
+          <form onSubmit={handleVerify} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="redeem-code">Redeem Code</Label>
+              <Input
+                id="redeem-code"
+                placeholder="e.g. SFD345KMNL"
+                value={redeemCode}
+                onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isVerifying}>
+              {isVerifying ? "Verifying..." : "Confirm Payment"}
+            </Button>
+          </form>
         </CardContent>
-        <CardFooter>
-          <Button type="submit" className="w-full" disabled={isVerifying}>
-            {isVerifying ? "Verifying..." : "Confirm Payment"}
-          </Button>
-        </CardFooter>
-      </form>
     </Card>
   );
 }
