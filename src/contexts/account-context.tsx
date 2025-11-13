@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -52,7 +53,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (user && firestore) {
-      // User-specific data
+      // User-specific data listeners
       const userDocRef = doc(firestore, 'users', user.uid);
       const unsubscribeUser = onSnapshot(
         userDocRef,
@@ -83,14 +84,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       );
       
       const userDepositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid), orderBy('createdAt', 'desc'));
-      const unsubscribeDeposits = onSnapshot(
+      const unsubscribeUserDeposits = onSnapshot(
         userDepositsQuery,
         (snapshot) => {
           const depositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as DepositTransaction));
           setDeposits(depositData);
         },
         (error) => {
-          const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+           const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
            errorEmitter.emit('permission-error', permissionError);
         }
       );
@@ -107,13 +108,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
             const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
             errorEmitter.emit('permission-error', permissionError);
         });
+      } else {
+        // Clear admin data when not on an admin page
+        setAllDeposits([]);
+        setPendingDeposits([]);
       }
-
 
       return () => {
         unsubscribeUser();
         unsubscribeRentals();
-        unsubscribeDeposits();
+        unsubscribeUserDeposits();
         unsubscribeAllDeposits();
       };
     }
@@ -147,9 +151,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // This function is now for legacy redeem codes, not the main deposit flow.
   const addDeposit = (deposit: Omit<Deposit, 'id'>) => {
-     // This function is deprecated in favor of addDepositRequest and approveDeposit
+     // This function is deprecated
   };
   
   const addDepositRequest = async (amount: number, mobileNumber: string): Promise<DepositTransaction> => {
