@@ -25,7 +25,7 @@ export default function AccountPage() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Account Balance</span>
-                <span className="font-medium text-primary">$1,234.56</span>
+                <span className="font-medium text-primary">KES 1,234.56</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Member Since</span>

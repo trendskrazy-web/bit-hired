@@ -109,7 +109,7 @@ export function MachineCard({ machine, image }: MachineCardProps) {
           </div>
           <div className="flex items-center justify-between w-full">
             <div className="text-xl font-bold text-primary">
-              ${selectedDuration.cost.toFixed(2)}
+              KES {selectedDuration.cost.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <Button type="submit" disabled={isHiring}>
               {isHiring ? "Processing..." : "Hire Now"}

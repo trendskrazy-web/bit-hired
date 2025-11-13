@@ -160,7 +160,7 @@ export function ProfitProjectionCard({ machines }: { machines: Machine[] }) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-primary">
-                            ${state.projectedProfit.toFixed(2)}
+                            KES {state.projectedProfit.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                         <p className="text-xs text-muted-foreground">
                             After hiring costs for {selectedDuration}
