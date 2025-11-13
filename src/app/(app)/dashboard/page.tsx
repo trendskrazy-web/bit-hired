@@ -1,5 +1,4 @@
 import { ActiveMachineCard } from "@/components/app/dashboard/active-machine-card";
-import { ProfitProjectionCard } from "@/components/app/dashboard/profit-projection-card";
 import { Separator } from "@/components/ui/separator";
 import { getMachines, getTransactions } from "@/lib/data";
 
@@ -30,9 +29,6 @@ export default async function DashboardPage() {
             You have no active mining machines.
           </p>
         )}
-      </div>
-      <div className="pt-6">
-        <ProfitProjectionCard machines={machines} />
       </div>
     </div>
   );
