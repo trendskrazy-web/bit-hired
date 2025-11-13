@@ -6,10 +6,25 @@ import { Bitcoin, Clock, Cpu, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import type { Transaction } from "@/lib/data";
 
-export function DashboardClient() {
+interface ActiveMachineCardProps {
+    transaction: Transaction;
+}
+
+export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const { toast } = useToast();
-  const totalDuration = 3 * 24 * 60 * 60; // 3 days in seconds
+  
+  // Assuming duration is in a parsable format like "45 Days"
+  const getDays = (durationStr: string) => {
+    if (durationStr.includes("Month")) {
+        return 30;
+    }
+    const days = parseInt(durationStr.split(" ")[0]);
+    return isNaN(days) ? 30 : days;
+  }
+  
+  const totalDuration = getDays(transaction.duration) * 24 * 60 * 60; // duration in seconds
   const [timeRemaining, setTimeRemaining] = useState(totalDuration - 3600 * 5); // 5 hours passed
   const [earnings, setEarnings] = useState(0.0012);
   const [cashedOutAmount, setCashedOutAmount] = useState(0);
@@ -70,7 +85,7 @@ export function DashboardClient() {
   const progressPercentage = ((totalDuration - timeRemaining) / totalDuration) * 100;
 
   return (
-    <Card className="md:col-span-2 lg:col-span-3">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Active Mining Session</span>
@@ -86,7 +101,7 @@ export function DashboardClient() {
             <Cpu className="w-6 h-6 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Machine</p>
-              <p className="font-semibold">Antminer S19 Pro</p>
+              <p className="font-semibold">{transaction.machineName}</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
