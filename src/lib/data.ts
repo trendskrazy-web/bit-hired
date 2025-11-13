@@ -42,6 +42,14 @@ export interface DepositTransaction {
   createdAt: string;
 }
 
+export interface Notification {
+  id: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+  adminId: string;
+}
+
 
 const machines: Machine[] = [
   {

@@ -11,12 +11,14 @@
  * - `/mining_machines/{machineId}`: Stores publicly readable mining machine data.
  * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
  * - `/deposit_transactions/{depositId}`: Stores all deposit transactions for admin review and user access.
+ * - `/notifications/{notificationId}`: Stores admin action notifications.
  *
  * @key_security_decisions
  * - Users can only create their own user account and can only read/write their own data.
  * - Mining machine data is publicly readable, but write access is restricted.
  * - The `deposit_transactions` collection is readable by admins. Users can create their own deposit requests and read them, but cannot modify them after creation.
  * - Admins can update the status of any deposit transaction.
+ * - The `notifications` collection is only accessible by admins.
  *
  * @denormalization_for_authorization
  * - Transaction documents contain `userAccountId` for direct ownership checks in rules.
@@ -68,6 +70,14 @@ service cloud.firestore {
 
       // Users can read their own deposit requests.
       allow get: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
+    }
+
+    /**
+     * @description Protects notification documents. Only accessible by admins.
+     * @path /notifications/{notificationId}
+     */
+    match /notifications/{notificationId} {
+      allow read, list, create, update, delete: if isAdmin();
     }
   }
 

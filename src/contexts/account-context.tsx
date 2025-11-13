@@ -9,7 +9,7 @@ import {
   useEffect,
   useCallback,
 } from 'react';
-import type { Transaction, Deposit, DepositTransaction } from '@/lib/data';
+import type { Transaction, Deposit, DepositTransaction, Notification } from '@/lib/data';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
 import { collection, doc, onSnapshot, increment, query, where, orderBy } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -32,7 +32,9 @@ interface AccountContextType {
   addDepositRequest: (amount: number, mobileNumber: string) => Promise<DepositTransaction>;
   pendingDeposits: DepositTransaction[];
   approveDeposit: (depositId: string, userId: string, amount: number) => void;
+  declineDeposit: (depositId: string) => void;
   allDeposits: DepositTransaction[];
+  notifications: Notification[];
   mobileNumber: string;
 }
 
@@ -44,6 +46,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [deposits, setDeposits] = useState<DepositTransaction[]>([]);
   const [pendingDeposits, setPendingDeposits] = useState<DepositTransaction[]>([]);
   const [allDeposits, setAllDeposits] = useState<DepositTransaction[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [mobileNumber, setMobileNumber] = useState('');
 
   const { user } = useUser();
@@ -52,73 +55,82 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const isAdminPage = pathname.startsWith('/admin');
 
   useEffect(() => {
-    if (user && firestore) {
-      const userDocRef = doc(firestore, 'users', user.uid);
-      const unsubscribeUser = onSnapshot(
-        userDocRef,
-        (doc) => {
-          if (doc.exists()) {
-            const userData = doc.data();
-            setBalance(userData.virtualBalance || 0);
-            setMobileNumber(userData.mobileNumber || '');
-          }
-        },
-        (error) => {
-          const permissionError = new FirestorePermissionError({ path: userDocRef.path, operation: 'get' });
-          errorEmitter.emit('permission-error', permissionError);
-        }
-      );
+    if (!user || !firestore) return;
 
-      const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
-      const unsubscribeRentals = onSnapshot(
-        rentalsColRef,
-        (snapshot) => {
-          const rentalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Transaction));
-          setTransactions(rentalData);
-        },
-        (error) => {
-          const permissionError = new FirestorePermissionError({ path: rentalsColRef.path, operation: 'list' });
-          errorEmitter.emit('permission-error', permissionError);
-        }
-      );
-      
-      const userDepositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid));
-      const unsubscribeUserDeposits = onSnapshot(
-        userDepositsQuery,
-        (snapshot) => {
-          const depositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as DepositTransaction));
-          setDeposits(depositData);
-        },
-        (error) => {
-           const permissionError = new FirestorePermissionError({ path: `deposit_transactions where userAccountId == ${user.uid}`, operation: 'list' });
-           errorEmitter.emit('permission-error', permissionError);
-        }
-      );
-
-      let unsubscribeAllDeposits = () => {};
-      if (isAdminPage) {
-        const allDepositsQuery = query(collection(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
-        unsubscribeAllDeposits = onSnapshot(allDepositsQuery, (snapshot) => {
-            const allDepositData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DepositTransaction));
-            setAllDeposits(allDepositData);
-            setPendingDeposits(allDepositData.filter(d => d.status === 'pending'));
-        }, (error) => {
-            const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
-            errorEmitter.emit('permission-error', permissionError);
-        });
-      } else {
-        setAllDeposits([]);
-        setPendingDeposits([]);
+    const userDocRef = doc(firestore, 'users', user.uid);
+    const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
+      if (doc.exists()) {
+        const userData = doc.data();
+        setBalance(userData.virtualBalance || 0);
+        setMobileNumber(userData.mobileNumber || '');
       }
+    }, (error) => {
+      const permissionError = new FirestorePermissionError({ path: userDocRef.path, operation: 'get' });
+      errorEmitter.emit('permission-error', permissionError);
+    });
 
-      return () => {
-        unsubscribeUser();
-        unsubscribeRentals();
-        unsubscribeUserDeposits();
-        unsubscribeAllDeposits();
-      };
+    const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
+    const unsubscribeRentals = onSnapshot(rentalsColRef, (snapshot) => {
+      const rentalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Transaction));
+      setTransactions(rentalData);
+    }, (error) => {
+      const permissionError = new FirestorePermissionError({ path: rentalsColRef.path, operation: 'list' });
+      errorEmitter.emit('permission-error', permissionError);
+    });
+
+    const userDepositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid));
+    const unsubscribeUserDeposits = onSnapshot(userDepositsQuery, (snapshot) => {
+      const depositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as DepositTransaction));
+      setDeposits(depositData);
+    }, (error) => {
+       const permissionError = new FirestorePermissionError({ path: `deposit_transactions where userAccountId == ${user.uid}`, operation: 'list' });
+       errorEmitter.emit('permission-error', permissionError);
+    });
+    
+    let unsubAllDeposits = () => {};
+    let unsubNotifications = () => {};
+
+    if (isAdminPage) {
+      const allDepositsQuery = query(collection(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
+      unsubAllDeposits = onSnapshot(allDepositsQuery, (snapshot) => {
+        const allDepositData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DepositTransaction));
+        setAllDeposits(allDepositData);
+        setPendingDeposits(allDepositData.filter(d => d.status === 'pending'));
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
+      const notificationsQuery = query(collection(firestore, 'notifications'), orderBy('createdAt', 'desc'));
+      unsubNotifications = onSnapshot(notificationsQuery, (snapshot) => {
+        const notificationsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification));
+        setNotifications(notificationsData);
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({ path: 'notifications', operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
     }
+
+    return () => {
+      unsubscribeUser();
+      unsubscribeRentals();
+      unsubscribeUserDeposits();
+      unsubAllDeposits();
+      unsubNotifications();
+    };
   }, [user, firestore, isAdminPage]);
+
+  const createNotification = (message: string) => {
+    if (!firestore || !user) return;
+    const notificationsColRef = collection(firestore, 'notifications');
+    addDocumentNonBlocking(notificationsColRef, {
+      message,
+      read: false,
+      createdAt: new Date().toISOString(),
+      adminId: user.uid,
+    });
+  };
 
   const updateUserBalance = (amount: number, userId: string = user?.uid || '') => {
       if(userId && firestore) {
@@ -177,6 +189,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
     updateDocumentNonBlocking(depositDocRef, { status: 'completed' });
     updateUserBalance(amount, userId);
+    createNotification(`Approved deposit of KES ${amount} for user ${userId}.`);
+  };
+
+  const declineDeposit = (depositId: string) => {
+    if (!firestore) return;
+    const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
+    updateDocumentNonBlocking(depositDocRef, { status: 'cancelled' });
+    createNotification(`Declined deposit request ${depositId}.`);
   };
 
   const updateTransactionStatus = useCallback(
@@ -204,7 +224,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         addDepositRequest,
         pendingDeposits,
         approveDeposit,
+        declineDeposit,
         allDeposits,
+        notifications,
         mobileNumber,
       }}
     >

@@ -5,7 +5,7 @@ import {
   Cpu,
   History,
   LayoutDashboard,
-  ShieldCheck,
+  Bell,
   User,
   Gift,
   WalletCards,
@@ -38,6 +38,7 @@ const menuItems = [
 const adminMenuItems = [
   { href: '/admin/deposits', label: 'Deposits', icon: WalletCards },
   { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
+  { href: '/admin/notifications', label: 'Notifications', icon: Bell },
 ];
 
 function AdminMenu() {
