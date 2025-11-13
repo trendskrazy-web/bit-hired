@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAccount } from "@/contexts/account-context";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
@@ -23,7 +24,7 @@ export function WithdrawCard({ accountBalance, onWithdraw }: WithdrawCardProps) 
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const userPhoneNumber = "+254 712 345 678";
+  const { mobileNumber } = useAccount();
 
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +74,7 @@ export function WithdrawCard({ accountBalance, onWithdraw }: WithdrawCardProps) 
             <Label htmlFor="withdraw-number">Receiving Number</Label>
             <Input
               id="withdraw-number"
-              value={userPhoneNumber}
+              value={mobileNumber}
               disabled
             />
           </div>

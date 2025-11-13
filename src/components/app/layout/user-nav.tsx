@@ -1,5 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+'use client';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,11 +10,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { CreditCard, LogOut, User } from "lucide-react";
-import Link from "next/link";
+} from '@/components/ui/dropdown-menu';
+import { useAuth, useUser } from '@/firebase';
+import { CreditCard, LogOut, User } from 'lucide-react';
+import Link from 'next/link';
 
 export function UserNav() {
+  const { user } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = () => {
+    auth.signOut();
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -28,7 +38,7 @@ export function UserNav() {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">User</p>
             <p className="text-xs leading-none text-muted-foreground">
-              +254 712 345 678
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -41,18 +51,16 @@ export function UserNav() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-             <Link href="/account">
+            <Link href="/account">
               <CreditCard className="mr-2 h-4 w-4" />
               <span>Billing</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/login">
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </Link>
+        <DropdownMenuItem onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

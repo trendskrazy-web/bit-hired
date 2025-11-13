@@ -1,8 +1,17 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
-import type { Transaction, Deposit } from "@/lib/data";
-import { getTransactions } from "@/lib/data";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from 'react';
+import type { Transaction, Deposit } from '@/lib/data';
+import { getTransactions } from '@/lib/data';
+import { useFirestore, useUser } from '@/firebase';
+import { collection, doc, onSnapshot } from 'firebase/firestore';
 
 interface AccountContextType {
   balance: number;
@@ -10,26 +19,63 @@ interface AccountContextType {
   deductBalance: (amount: number) => void;
   addBalance: (amount: number) => void;
   transactions: Transaction[];
-  addTransaction: (transaction: Omit<Transaction, "id">) => void;
-  updateTransactionStatus: (transactionId: string, status: "Active" | "Expired" | "Pending") => void;
+  addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
+  updateTransactionStatus: (
+    transactionId: string,
+    status: 'Active' | 'Expired' | 'Pending'
+  ) => void;
   deposits: Deposit[];
-  addDeposit: (deposit: Omit<Deposit, "id">) => void;
+  addDeposit: (deposit: Omit<Deposit, 'id'>) => void;
+  mobileNumber: string;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
 
 export function AccountProvider({ children }: { children: ReactNode }) {
-  const [balance, setBalance] = useState(1234.56);
+  const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [mobileNumber, setMobileNumber] = useState('');
+
+  const { user } = useUser();
+  const firestore = useFirestore();
 
   useEffect(() => {
-    async function fetchTransactions() {
-      const initialTransactions = await getTransactions();
-      setTransactions(initialTransactions);
+    if (user && firestore) {
+      const userDocRef = doc(firestore, 'users', user.uid);
+
+      const unsubscribe = onSnapshot(userDocRef, (doc) => {
+        if (doc.exists()) {
+          const userData = doc.data();
+          setBalance(userData.virtualBalance || 0);
+          setMobileNumber(userData.mobileNumber || '');
+        }
+      });
+
+      const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
+      const unsubscribeRentals = onSnapshot(rentalsColRef, (snapshot) => {
+        const rentalData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() } as Transaction)
+        );
+        setTransactions(rentalData);
+      });
+      
+      const depositsColRef = collection(firestore, 'users', user.uid, 'deposits');
+      const unsubscribeDeposits = onSnapshot(depositsColRef, (snapshot) => {
+        const depositData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() } as Deposit)
+        );
+        setDeposits(depositData);
+      });
+
+
+      return () => {
+        unsubscribe();
+        unsubscribeRentals();
+        unsubscribeDeposits();
+      };
     }
-    fetchTransactions();
-  }, []);
+  }, [user, firestore]);
 
   const deductBalance = (amount: number) => {
     setBalance((prevBalance) => prevBalance - amount);
@@ -38,8 +84,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const addBalance = (amount: number) => {
     setBalance((prevBalance) => prevBalance + amount);
   };
-  
-  const addTransaction = (transaction: Omit<Transaction, "id">) => {
+
+  const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
       ...transaction,
       id: `txn${transactions.length + 1}`,
@@ -47,7 +93,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     setTransactions((prevTransactions) => [newTransaction, ...prevTransactions]);
   };
 
-  const addDeposit = (deposit: Omit<Deposit, "id">) => {
+  const addDeposit = (deposit: Omit<Deposit, 'id'>) => {
     const newDeposit: Deposit = {
       ...deposit,
       id: `dep${deposits.length + 1}`,
@@ -56,16 +102,30 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     setDeposits((prevDeposits) => [newDeposit, ...prevDeposits]);
   };
 
-  const updateTransactionStatus = useCallback((transactionId: string, status: "Active" | "Expired" | "Pending") => {
-    setTransactions(prev => 
-      prev.map(t => 
-        t.id === transactionId ? { ...t, status } : t
-      )
-    );
-  }, []);
+  const updateTransactionStatus = useCallback(
+    (transactionId: string, status: 'Active' | 'Expired' | 'Pending') => {
+      setTransactions((prev) =>
+        prev.map((t) => (t.id === transactionId ? { ...t, status } : t))
+      );
+    },
+    []
+  );
 
   return (
-    <AccountContext.Provider value={{ balance, setBalance, deductBalance, addBalance, transactions, addTransaction, updateTransactionStatus, deposits, addDeposit }}>
+    <AccountContext.Provider
+      value={{
+        balance,
+        setBalance,
+        deductBalance,
+        addBalance,
+        transactions,
+        addTransaction,
+        updateTransactionStatus,
+        deposits,
+        addDeposit,
+        mobileNumber
+      }}
+    >
       {children}
     </AccountContext.Provider>
   );
@@ -74,7 +134,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 export function useAccount() {
   const context = useContext(AccountContext);
   if (context === undefined) {
-    throw new Error("useAccount must be used within an AccountProvider");
+    throw new Error('useAccount must be used within an AccountProvider');
   }
   return context;
 }

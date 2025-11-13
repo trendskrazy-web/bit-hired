@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAccount } from "@/contexts/account-context";
 
 export default function AccountPage() {
-  const { balance, addBalance, deductBalance } = useAccount();
+  const { balance, addBalance, deductBalance, mobileNumber } = useAccount();
 
   return (
     <div className="space-y-6">
@@ -27,7 +27,7 @@ export default function AccountPage() {
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Mobile Number</span>
-                <span className="font-medium">+254 712 345 678</span>
+                <span className="font-medium">{mobileNumber}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Account Balance</span>
@@ -47,7 +47,7 @@ export default function AccountPage() {
           />
         </div>
         <div className="lg:col-span-1">
-          <TopUpCard onTopUp={addBalance} />
+          <TopUpCard />
         </div>
       </div>
     </div>

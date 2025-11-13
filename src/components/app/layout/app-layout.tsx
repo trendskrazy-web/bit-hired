@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Bitcoin,
@@ -7,10 +7,10 @@ import {
   LayoutDashboard,
   ShieldCheck,
   User,
-} from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import {
   SidebarProvider,
@@ -22,20 +22,20 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
-} from "@/components/ui/sidebar";
-import { AppHeader } from "./header";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/sidebar';
+import { AppHeader } from './header';
+import { Button } from '@/components/ui/button';
 
 const menuItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/hire", label: "Hire Machines", icon: Cpu },
-  { href: "/transactions", label: "Transactions", icon: History },
-  { href: "/account", label: "Account", icon: User },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/hire', label: 'Hire Machines', icon: Cpu },
+  { href: '/transactions', label: 'Transactions', icon: History },
+  { href: '/account', label: 'Account', icon: User },
 ];
 
 const adminMenuItems = [
-    { href: "/admin/redeem-codes", label: "Redeem Codes", icon: ShieldCheck },
-]
+  { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: ShieldCheck },
+];
 
 function AdminMenu() {
   const pathname = usePathname();
@@ -48,12 +48,12 @@ function AdminMenu() {
   if (!isAdminRoute) {
     return null;
   }
-  
+
   return (
     <SidebarMenu className="mt-auto">
-        <SidebarMenuItem>
-          <span className="text-xs text-muted-foreground px-2">Admin</span>
-        </SidebarMenuItem>
+      <SidebarMenuItem>
+        <span className="text-xs text-muted-foreground px-2">Admin</span>
+      </SidebarMenuItem>
       {adminMenuItems.map((item) => (
         <SidebarMenuItem key={item.href}>
           <SidebarMenuButton
@@ -61,7 +61,7 @@ function AdminMenu() {
             isActive={pathname.startsWith(item.href)}
             tooltip={{
               children: item.label,
-              className: "bg-sidebar-background text-sidebar-foreground",
+              className: 'bg-sidebar-background text-sidebar-foreground',
             }}
           >
             <Link href={item.href}>
@@ -72,7 +72,7 @@ function AdminMenu() {
         </SidebarMenuItem>
       ))}
     </SidebarMenu>
-  )
+  );
 }
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -96,13 +96,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarMenuButton
                   asChild
                   isActive={
-                    item.href === "/dashboard"
+                    item.href === '/dashboard'
                       ? pathname === item.href
                       : pathname.startsWith(item.href)
                   }
                   tooltip={{
                     children: item.label,
-                    className: "bg-sidebar-background text-sidebar-foreground",
+                    className: 'bg-sidebar-background text-sidebar-foreground',
                   }}
                 >
                   <Link href={item.href}>
