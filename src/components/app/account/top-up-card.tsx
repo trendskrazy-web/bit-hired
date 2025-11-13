@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 
-const PAYBILL_NUMBER = "400200";
+const MERCHANT_PHONE_NUMBER = "+254 712 345 678";
 
 export function TopUpCard() {
   const { toast } = useToast();
@@ -85,13 +86,13 @@ export function TopUpCard() {
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div>
-            <Label>PayBill Number</Label>
-            <p className="font-bold text-lg">{PAYBILL_NUMBER}</p>
+            <Label>Send Money To</Label>
+            <p className="font-bold text-lg">{MERCHANT_PHONE_NUMBER}</p>
           </div>
           <div>
-            <Label>Account Number</Label>
+            <Label>Transaction Reference</Label>
             <p className="font-bold text-lg text-primary">{generatedCode}</p>
-            <p className="text-xs text-muted-foreground">Use this as the account number in your M-PESA transaction.</p>
+            <p className="text-xs text-muted-foreground">This code helps us identify your deposit. The admin will use it to confirm your payment.</p>
           </div>
           <div className="pt-2">
              <p className="text-muted-foreground">Your account will be credited once an admin confirms your payment. You can track the status on this page.</p>
