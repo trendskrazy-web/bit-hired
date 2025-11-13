@@ -13,8 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAccount } from "@/contexts/account-context";
-import { RefreshCw } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { RefreshCw, Copy } from "lucide-react";
+import { useState, useMemo } from "react";
 
 const mpesaNumbers = ["+254704367623", "+254728477718"];
 
@@ -30,6 +30,15 @@ export function TopUpCard() {
   const cyclePhoneNumber = () => {
     setPhoneNumberIndex((prevIndex) => (prevIndex + 1) % mpesaNumbers.length);
   };
+  
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(phoneNumber);
+    toast({
+      title: "Copied!",
+      description: "Phone number copied to clipboard.",
+    });
+  };
+
 
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,15 +85,26 @@ export function TopUpCard() {
             </p>
             <div className="flex items-center justify-between p-3 my-2 bg-secondary rounded-md">
               <p className="font-mono text-lg font-semibold">{phoneNumber}</p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={cyclePhoneNumber}
-                aria-label="Generate new number"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={copyToClipboard}
+                    aria-label="Copy number"
+                  >
+                    <Copy className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={cyclePhoneNumber}
+                  aria-label="Generate new number"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
           <div className="space-y-2">
@@ -100,7 +120,7 @@ export function TopUpCard() {
         </CardContent>
         <CardFooter>
           <Button type="submit" className="w-full" disabled={isVerifying}>
-            {isVerifying ? "Verifying..." : "Redeem & Top Up"}
+            {isVerifying ? "Verifying..." : "Confirm Payment"}
           </Button>
         </CardFooter>
       </form>
