@@ -2,13 +2,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Bitcoin, Clock, Cpu } from "lucide-react";
+import { Bitcoin, Clock, Cpu, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export function DashboardClient() {
+  const { toast } = useToast();
   const totalDuration = 3 * 24 * 60 * 60; // 3 days in seconds
   const [timeRemaining, setTimeRemaining] = useState(totalDuration - 3600 * 5); // 5 hours passed
   const [earnings, setEarnings] = useState(0.0012);
+  const [cashedOutAmount, setCashedOutAmount] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -18,6 +22,22 @@ export function DashboardClient() {
 
     return () => clearInterval(timer);
   }, []);
+
+  const handleCashOut = () => {
+    const cashOutable = earnings - cashedOutAmount;
+    if (cashOutable > 0) {
+      setCashedOutAmount(earnings);
+      toast({
+        title: "Cash Out Successful!",
+        description: `You've cashed out ${cashOutable.toFixed(8)} BTC.`,
+      });
+    } else {
+      toast({
+        title: "No Earnings to Cash Out",
+        variant: "destructive",
+      });
+    }
+  };
 
   const formatDuration = (seconds: number) => {
     const d = Math.floor(seconds / (3600 * 24));
@@ -46,7 +66,7 @@ export function DashboardClient() {
             <Cpu className="w-6 h-6 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Machine</p>
-              <p className="font-semibold">Antminer S19</p>
+              <p className="font-semibold">Antminer S19 Pro</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -63,6 +83,16 @@ export function DashboardClient() {
               <p className="font-semibold font-mono">{earnings.toFixed(8)} BTC</p>
             </div>
           </div>
+        </div>
+        <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center space-x-3">
+                 <Wallet className="w-6 h-6 text-muted-foreground" />
+                <div>
+                    <p className="text-sm text-muted-foreground">Available to Cash Out</p>
+                    <p className="font-semibold font-mono">{(earnings - cashedOutAmount).toFixed(8)} BTC</p>
+                </div>
+            </div>
+            <Button onClick={handleCashOut} size="sm">Cash Out</Button>
         </div>
         <div>
           <Progress value={progressPercentage} className="w-full h-2 mt-4" />
