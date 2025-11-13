@@ -13,6 +13,7 @@ import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlockin
 import { collection, doc, onSnapshot, increment, query, where, orderBy } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { usePathname } from 'next/navigation';
 
 interface AccountContextType {
   balance: number;
@@ -46,6 +47,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   const { user } = useUser();
   const firestore = useFirestore();
+  const pathname = usePathname();
+  const isAdminPage = pathname.startsWith('/admin');
 
   useEffect(() => {
     if (user && firestore) {
@@ -92,16 +95,20 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         }
       );
 
-      // Admin-specific data (assuming isAdmin check is in place)
-      const allDepositsQuery = query(collection(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
-      const unsubscribeAllDeposits = onSnapshot(allDepositsQuery, (snapshot) => {
-          const allDepositData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DepositTransaction));
-          setAllDeposits(allDepositData);
-          setPendingDeposits(allDepositData.filter(d => d.status === 'pending'));
-      }, (error) => {
-          const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
-          errorEmitter.emit('permission-error', permissionError);
-      });
+      // Admin-specific data listener
+      let unsubscribeAllDeposits = () => {};
+      if (isAdminPage) {
+        const allDepositsQuery = query(collection(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
+        unsubscribeAllDeposits = onSnapshot(allDepositsQuery, (snapshot) => {
+            const allDepositData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DepositTransaction));
+            setAllDeposits(allDepositData);
+            setPendingDeposits(allDepositData.filter(d => d.status === 'pending'));
+        }, (error) => {
+            const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+            errorEmitter.emit('permission-error', permissionError);
+        });
+      }
+
 
       return () => {
         unsubscribeUser();
@@ -110,7 +117,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         unsubscribeAllDeposits();
       };
     }
-  }, [user, firestore]);
+  }, [user, firestore, isAdminPage]);
 
   const updateUserBalance = (amount: number, userId: string = user?.uid || '') => {
       if(userId && firestore) {
