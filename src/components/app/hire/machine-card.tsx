@@ -20,7 +20,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import type { Machine, DurationOption } from "@/lib/data";
 import type { ImagePlaceholder } from "@/lib/placeholder-images";
-import { Cpu, Zap, Wallet } from "lucide-react";
+import { Cpu, Zap, Wallet, CalendarDays } from "lucide-react";
 import Image from "next/image";
 import { useState, useMemo } from "react";
 
@@ -36,7 +36,7 @@ export function MachineCard({ machine, image }: MachineCardProps) {
   );
   const [isHiring, setIsHiring] = useState(false);
 
-  const potentialEarnings = useMemo(() => {
+  const { potentialEarnings, dailyEarnings } = useMemo(() => {
     let days = 0;
     if (selectedDuration.label === "3 Days") {
       days = 3;
@@ -48,13 +48,17 @@ export function MachineCard({ machine, image }: MachineCardProps) {
       days = 45;
     }
 
+    let earnings = 0;
     if (machine.id === "antminer-s19" && selectedDuration.label === "45 Days") {
-      return 1800;
+      earnings = 1800;
+    } else {
+      // Simplified earnings calculation: (hashrate * days * magic_number)
+      earnings = (machine.miningRate / 100) * days * 0.00001 * 67500 * 130; // BTC to KES
     }
 
-    // Simplified earnings calculation: (hashrate * days * magic_number)
-    const earnings = (machine.miningRate / 100) * days * 0.00001 * 67500 * 130; // BTC to KES
-    return earnings;
+    const daily = days > 0 ? earnings / days : 0;
+
+    return { potentialEarnings: earnings, dailyEarnings: daily };
   }, [selectedDuration, machine.miningRate, machine.id]);
 
 
@@ -110,7 +114,15 @@ export function MachineCard({ machine, image }: MachineCardProps) {
         </div>
         <div className="flex justify-between items-center text-sm">
           <span className="flex items-center gap-2 text-muted-foreground">
-            <Wallet className="w-4 h-4" /> Potential Earnings
+            <CalendarDays className="w-4 h-4" /> Potential Daily Earnings
+          </span>
+          <span className="font-semibold font-mono flex items-center gap-1">
+             KES {dailyEarnings.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+        </div>
+        <div className="flex justify-between items-center text-sm">
+          <span className="flex items-center gap-2 text-muted-foreground">
+            <Wallet className="w-4 h-4" /> Total Potential Earnings
           </span>
           <span className="font-semibold font-mono flex items-center gap-1">
              KES {potentialEarnings.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
