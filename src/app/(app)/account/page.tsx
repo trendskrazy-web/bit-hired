@@ -13,6 +13,10 @@ export default function AccountPage() {
     setBalance((prevBalance) => prevBalance - amount);
   };
 
+  const handleTopUp = (amount: number) => {
+    setBalance((prevBalance) => prevBalance + amount);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -51,7 +55,7 @@ export default function AccountPage() {
           />
         </div>
         <div className="lg:col-span-1">
-          <TopUpCard />
+          <TopUpCard onTopUp={handleTopUp} />
         </div>
       </div>
     </div>

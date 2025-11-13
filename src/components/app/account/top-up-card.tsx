@@ -15,7 +15,11 @@ import { useToast } from "@/hooks/use-toast";
 import { RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export function TopUpCard() {
+interface TopUpCardProps {
+  onTopUp: (amount: number) => void;
+}
+
+export function TopUpCard({ onTopUp }: TopUpCardProps) {
   const { toast } = useToast();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -43,11 +47,13 @@ export function TopUpCard() {
 
     setIsVerifying(true);
     setTimeout(() => {
+      const topUpAmount = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
+      onTopUp(topUpAmount);
       setIsVerifying(false);
       setMpesaCode("");
       toast({
-        title: "Success",
-        description: "Your account has been credited successfully!",
+        title: "Success!",
+        description: `KES ${topUpAmount.toLocaleString()} has been credited to your account.`,
       });
     }, 2000);
   };
