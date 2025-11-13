@@ -81,7 +81,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
           errorEmitter.emit('permission-error', permissionError);
         }
       );
-
+      
       const userDepositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid), orderBy('createdAt', 'desc'));
       const unsubscribeDeposits = onSnapshot(
         userDepositsQuery,
