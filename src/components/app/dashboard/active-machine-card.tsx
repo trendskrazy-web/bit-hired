@@ -3,47 +3,77 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Bitcoin, Clock, Cpu, Wallet } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import type { Transaction } from "@/lib/data";
+import type { Transaction, Machine } from "@/lib/data";
 import { useAccount } from "@/contexts/account-context";
+import { getMachines } from "@/lib/data";
 
 interface ActiveMachineCardProps {
-    transaction: Transaction;
+  transaction: Transaction;
 }
 
 export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const { toast } = useToast();
   const { addBalance } = useAccount();
+  const [machines, setMachines] = useState<Machine[]>([]);
+
+  useEffect(() => {
+    const fetchMachines = async () => {
+      const allMachines = await getMachines();
+      setMachines(allMachines);
+    };
+    fetchMachines();
+  }, []);
+
+  const machine = useMemo(
+    () => machines.find((m) => m.name === transaction.machineName),
+    [machines, transaction.machineName]
+  );
   
-  const getDays = (durationStr: string) => {
-    if (durationStr.includes("Month")) {
-        return 30;
-    }
-    const days = parseInt(durationStr.split(" ")[0]);
-    return isNaN(days) ? 30 : days;
+  const dailyEarning = useMemo(() => {
+    if (!machine) return 0;
+    const days = 45;
+    return machine.durations[0].totalEarnings / days;
+  }, [machine]);
+
+  const totalDuration = 45 * 24 * 60 * 60; // 45 days in seconds
+  
+  const getElapsedTime = () => {
+     const purchaseDate = new Date(transaction.date);
+     const now = new Date();
+     return Math.floor((now.getTime() - purchaseDate.getTime()) / 1000);
   }
-  
-  const totalDuration = getDays(transaction.duration) * 24 * 60 * 60; // duration in seconds
-  const [timeRemaining, setTimeRemaining] = useState(totalDuration - 3600 * 5); // 5 hours passed
-  const [earnings, setEarnings] = useState(0.0012);
+
+  const [timeRemaining, setTimeRemaining] = useState(totalDuration - getElapsedTime());
+  const [earnings, setEarnings] = useState(0);
   const [cashedOutAmount, setCashedOutAmount] = useState(0);
   const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
   const [canCashOut, setCanCashOut] = useState(false);
-
+  
   const purchaseDate = new Date(transaction.date);
   const twentyFourHoursAfterPurchase = new Date(purchaseDate.getTime() + 24 * 60 * 60 * 1000);
-
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-      setEarnings((prev) => prev + 0.0000001);
     }, 1000);
 
     return () => clearInterval(timer);
   }, []);
+  
+  useEffect(() => {
+    if (dailyEarning > 0) {
+      const earningsTimer = setInterval(() => {
+        const elapsedSeconds = totalDuration - timeRemaining;
+        const currentEarnings = (elapsedSeconds / (24 * 3600)) * dailyEarning;
+        setEarnings(currentEarnings);
+      }, 1000);
+      return () => clearInterval(earningsTimer);
+    }
+  }, [timeRemaining, dailyEarning, totalDuration]);
+
 
   useEffect(() => {
     const checkCashOutStatus = () => {
@@ -55,26 +85,32 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     };
 
     checkCashOutStatus();
-    // Check every minute to see if it's a new day or if 24hr mark passed
     const interval = setInterval(checkCashOutStatus, 60000);
     return () => clearInterval(interval);
   }, [lastCashOutDate, twentyFourHoursAfterPurchase]);
 
   const handleCashOut = () => {
     const availableToCashOut = earnings - cashedOutAmount;
-    if (availableToCashOut > 0 && canCashOut) {
-      // For demonstration, let's say 1 BTC = 9,000,000 KES
-      const amountInKES = availableToCashOut * 9000000;
-      addBalance(amountInKES);
-      
-      setCashedOutAmount(earnings);
-      setLastCashOutDate(new Date());
-      setCanCashOut(false);
-      
-      toast({
-        title: "Cash Out Successful!",
-        description: `You've cashed out ${availableToCashOut.toFixed(8)} BTC (approx. KES ${amountInKES.toLocaleString()}). It has been added to your main account balance and is available for withdrawal.`,
-      });
+
+    if (availableToCashOut > 0 && canCashOut && dailyEarning > 0) {
+      const cashOutAmount = dailyEarning; // Cash out one full day's earnings
+      if (availableToCashOut >= cashOutAmount) {
+        addBalance(cashOutAmount);
+        setCashedOutAmount(prev => prev + cashOutAmount);
+        setLastCashOutDate(new Date());
+        setCanCashOut(false);
+        
+        toast({
+          title: "Cash Out Successful!",
+          description: `You've cashed out KES ${cashOutAmount.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. It has been added to your main account balance.`,
+        });
+      } else {
+        toast({
+            title: "Cash Out Unavailable",
+            description: `You need at least KES ${cashOutAmount.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} available to cash out.`,
+            variant: "destructive",
+        });
+      }
     } else if (!canCashOut) {
          toast({
             title: "Cash Out Unavailable",
@@ -84,12 +120,14 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     } else {
       toast({
         title: "No Earnings to Cash Out",
+        description: "Not enough earnings have accumulated for a daily cash out.",
         variant: "destructive",
       });
     }
   };
 
   const formatDuration = (seconds: number) => {
+    if (seconds < 0) seconds = 0;
     const d = Math.floor(seconds / (3600 * 24));
     const h = Math.floor((seconds % (3600 * 24)) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -105,10 +143,14 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Active Mining Session</span>
-          <span className="text-sm font-medium text-green-500 flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            Mining
-          </span>
+           {timeRemaining > 0 ? (
+            <span className="text-sm font-medium text-green-500 flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              Mining
+            </span>
+          ) : (
+             <span className="text-sm font-medium text-red-500">Expired</span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -131,7 +173,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
             <Bitcoin className="w-6 h-6 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Total Earnings</p>
-              <p className="font-semibold font-mono">{earnings.toFixed(8)} BTC</p>
+              <p className="font-semibold font-mono">KES {earnings.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
           </div>
         </div>
@@ -140,10 +182,10 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
                  <Wallet className="w-6 h-6 text-muted-foreground" />
                 <div>
                     <p className="text-sm text-muted-foreground">Available Earnings</p>
-                    <p className="font-semibold font-mono">{availableToCashOut.toFixed(8)} BTC</p>
+                    <p className="font-semibold font-mono">KES {availableToCashOut.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
             </div>
-            <Button onClick={handleCashOut} size="sm" disabled={!canCashOut || availableToCashOut <= 0}>Cash Out</Button>
+            <Button onClick={handleCashOut} size="sm" disabled={!canCashOut || availableToCashOut < dailyEarning}>Cash Out Daily</Button>
         </div>
         <div>
           <Progress value={progressPercentage} className="w-full h-2 mt-4" />
