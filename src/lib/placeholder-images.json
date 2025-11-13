@@ -3,25 +3,25 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1745184960919-ff06316c9ea4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxBbnRtaW5lciUyMFMxOXxlbnwwfHx8fDE3NjMwMzUxMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://i.ibb.co/bF9gP2Y/antminer-s19.jpg",
       "imageHint": "Antminer S19"
     },
     {
       "id": "whatsminer-m30s",
       "description": "An efficient and powerful mining rig.",
-      "imageUrl": "https://images.unsplash.com/photo-1560191755-94cd7302cf64?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxXaGF0c21pbmVyJTIwTTMwU3xlbnwwfHx8fDE3NjMwMzUxMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1670228921437-9212d5612507?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxXaGF0c21pbmVyJTIwTTMwU3xlbnwwfHx8fDE3NjM0MTU0NDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "Whatsminer M30S"
     },
     {
       "id": "avalonminer-1246",
       "description": "A reliable choice for steady mining operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1616534846636-2372539a94a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxBdmFsb25NaW5lciUyMDEyNDZ8ZW58MHx8fHwxNzYzMDM1MTE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1639737497128-c98380a34988?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBdmFsb25NaW5lciUyMDEyNDZ8ZW58MHx8fHwxNzYzNDE1NDQ1fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "AvalonMiner 1246"
     },
     {
       "id": "dragonmint-t1",
       "description": "A classic miner known for its performance.",
-      "imageUrl": "https://images.unsplash.com/photo-1610308700652-d931026f7eec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxEcmFnb25NaW50JTIwVDF8ZW58MHx8fHwxNzYzMDM1MTE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1639737497128-c98380a34988?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBdmFsb25NaW5lciUyMDEyNDZ8ZW58MHx8fHwxNzYzNDE1NDQ1fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "DragonMint T1"
     }
   ]
