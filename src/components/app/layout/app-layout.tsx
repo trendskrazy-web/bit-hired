@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import {
   SidebarProvider,
@@ -36,10 +37,46 @@ const adminMenuItems = [
     { href: "/admin/redeem-codes", label: "Redeem Codes", icon: ShieldCheck },
 ]
 
+function AdminMenu() {
+  const pathname = usePathname();
+  const [isAdminRoute, setIsAdminRoute] = useState(false);
+
+  useEffect(() => {
+    setIsAdminRoute(pathname.startsWith('/admin'));
+  }, [pathname]);
+
+  if (!isAdminRoute) {
+    return null;
+  }
+  
+  return (
+    <SidebarMenu className="mt-auto">
+        <SidebarMenuItem>
+          <span className="text-xs text-muted-foreground px-2">Admin</span>
+        </SidebarMenuItem>
+      {adminMenuItems.map((item) => (
+        <SidebarMenuItem key={item.href}>
+          <SidebarMenuButton
+            asChild
+            isActive={pathname.startsWith(item.href)}
+            tooltip={{
+              children: item.label,
+              className: "bg-sidebar-background text-sidebar-foreground",
+            }}
+          >
+            <Link href={item.href}>
+              <item.icon />
+              <span>{item.label}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  )
+}
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith('/admin');
-
   return (
     <SidebarProvider>
       <Sidebar className="border-r" side="left" variant="sidebar">
@@ -76,30 +113,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
-          {isAdminRoute && (
-            <SidebarMenu className="mt-auto">
-                <SidebarMenuItem>
-                  <span className="text-xs text-muted-foreground px-2">Admin</span>
-                </SidebarMenuItem>
-              {adminMenuItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith(item.href)}
-                    tooltip={{
-                      children: item.label,
-                      className: "bg-sidebar-background text-sidebar-foreground",
-                    }}
-                  >
-                    <Link href={item.href}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          )}
+          <AdminMenu />
         </SidebarContent>
         <SidebarFooter className="group-data-[collapsible=icon]:hidden">
           <div className="bg-primary/10 p-4 rounded-lg text-center space-y-2">
