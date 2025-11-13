@@ -3,8 +3,8 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://storage.googleapis.com/maker-studio-project-images-prod/1f20d00f-411a-4272-9c47-3855a914717f/images/94553258-290f-42e7-9d7a-a43b2f56b3a7.png",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx0ZWNobm9sb2d5fGVufDB8fHx8MTc2Mzk5NTM5NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "technology abstract"
     },
     {
       "id": "whatsminer-m30s",
