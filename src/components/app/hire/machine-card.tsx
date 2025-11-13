@@ -37,16 +37,7 @@ export function MachineCard({ machine, image }: MachineCardProps) {
   const [isHiring, setIsHiring] = useState(false);
 
   const { potentialEarnings, dailyEarnings } = useMemo(() => {
-    let days = 0;
-    if (selectedDuration.label === "3 Days") {
-      days = 3;
-    } else if (selectedDuration.label === "1 Week") {
-      days = 7;
-    } else if (selectedDuration.label === "1 Month") {
-      days = 30;
-    } else if (selectedDuration.label === "45 Days") {
-      days = 45;
-    }
+    let days = 45; // All durations are 45 days
 
     let earnings = 0;
     if (machine.id === "antminer-s19" && selectedDuration.label === "45 Days") {
@@ -72,13 +63,6 @@ export function MachineCard({ machine, image }: MachineCardProps) {
         description: `You have successfully hired the ${machine.name} for ${selectedDuration.label}.`,
       });
     }, 1500);
-  };
-
-  const handleDurationChange = (label: string) => {
-    const newDuration = machine.durations.find((d) => d.label === label);
-    if (newDuration) {
-      setSelectedDuration(newDuration);
-    }
   };
 
   return (
@@ -132,22 +116,14 @@ export function MachineCard({ machine, image }: MachineCardProps) {
       <CardFooter>
         <form onSubmit={handleHire} className="w-full space-y-4">
           <div className="grid w-full items-center gap-2">
-            <Label htmlFor={`duration-${machine.id}`}>Select Duration</Label>
-            <Select
-              value={selectedDuration.label}
-              onValueChange={handleDurationChange}
-            >
-              <SelectTrigger id={`duration-${machine.id}`}>
-                <SelectValue placeholder="Select duration" />
-              </SelectTrigger>
-              <SelectContent>
-                {machine.durations.map((d) => (
-                  <SelectItem key={d.label} value={d.label}>
-                    {d.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor={`duration-${machine.id}`}>Duration</Label>
+            <Input
+              id={`duration-${machine.id}`}
+              type="text"
+              value="45 Days"
+              readOnly
+              className="font-semibold"
+            />
           </div>
           <div className="flex items-center justify-between w-full">
             <div className="text-xl font-bold text-primary">

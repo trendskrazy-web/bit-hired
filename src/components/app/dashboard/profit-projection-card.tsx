@@ -19,11 +19,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { type Machine, type DurationOption } from "@/lib/data";
+import { type Machine } from "@/lib/data";
 import { projectProfit } from "@/lib/actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { BrainCircuit, Loader2, Sparkles, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 
 const initialState = {
   projectedProfit: null,
@@ -53,24 +54,6 @@ function SubmitButton() {
 export function ProfitProjectionCard({ machines }: { machines: Machine[] }) {
   const [state, formAction] = useActionState(projectProfit, initialState);
   const [selectedMachineId, setSelectedMachineId] = useState(machines[0].id);
-  const [selectedDuration, setSelectedDuration] = useState(
-    machines[0].durations[0].label
-  );
-  const [selectedMachine, setSelectedMachine] = useState<Machine>(machines[0]);
-  const [durationOptions, setDurationOptions] = useState<DurationOption[]>(
-    machines[0].durations
-  );
-
-  useEffect(() => {
-    const machine = machines.find((m) => m.id === selectedMachineId);
-    if (machine) {
-      setSelectedMachine(machine);
-      setDurationOptions(machine.durations);
-      if (!machine.durations.find((d) => d.label === selectedDuration)) {
-        setSelectedDuration(machine.durations[0].label);
-      }
-    }
-  }, [selectedMachineId, machines, selectedDuration]);
 
   return (
     <Card className="w-full">
@@ -107,22 +90,13 @@ export function ProfitProjectionCard({ machines }: { machines: Machine[] }) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="duration">Hiring Duration</Label>
-              <Select
+              <Input
+                id="duration"
                 name="duration"
-                value={selectedDuration}
-                onValueChange={setSelectedDuration}
-              >
-                <SelectTrigger id="duration">
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  {durationOptions.map((option) => (
-                    <SelectItem key={option.label} value={option.label}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                type="text"
+                value="45 Days"
+                readOnly
+              />
             </div>
           </div>
           <input type="hidden" name="machineId" value={selectedMachineId} />
@@ -163,7 +137,7 @@ export function ProfitProjectionCard({ machines }: { machines: Machine[] }) {
                             KES {state.projectedProfit.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            After hiring costs for {selectedDuration}
+                            After hiring costs for 45 Days
                         </p>
                     </CardContent>
                 </Card>
