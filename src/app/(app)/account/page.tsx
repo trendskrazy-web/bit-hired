@@ -1,4 +1,5 @@
 import { TopUpCard } from "@/components/app/account/top-up-card";
+import { WithdrawCard } from "@/components/app/account/withdraw-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -33,6 +34,7 @@ export default function AccountPage() {
               </div>
             </CardContent>
           </Card>
+          <WithdrawCard />
         </div>
         <div className="lg:col-span-1">
           <TopUpCard />
