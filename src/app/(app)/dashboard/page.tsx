@@ -15,7 +15,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-headline font-bold">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back! Here's an overview of your mining operations.
+          Hire a Miner. Earn Like a Pro.
         </p>
       </div>
       <Separator />
@@ -32,7 +32,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <p className="text-muted-foreground">
-            You have no active mining machines.
+            You have no active mining machines. Go to the 'Hire Machines' page to get started.
           </p>
         )}
       </div>
