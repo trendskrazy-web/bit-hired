@@ -3,26 +3,26 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1576087414768-69e022424bb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBU0lDJTIwbWluZXJ8ZW58MHx8fHwxNzYyOTkwMTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ASIC miner"
+      "imageUrl": "https://images.unsplash.com/photo-1745184960919-ff06316c9ea4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxBbnRtaW5lciUyMFMxOXxlbnwwfHx8fDE3NjMwMzUxMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Antminer S19"
     },
     {
       "id": "whatsminer-m30s",
       "description": "An efficient and powerful mining rig.",
-      "imageUrl": "https://images.unsplash.com/photo-1720381298043-72916828b11d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYyOTkwMTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1560191755-94cd7302cf64?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxXaGF0c21pbmVyJTIwTTMwU3xlbnwwfHx8fDE3NjMwMzUxMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Whatsminer M30S"
     },
     {
       "id": "avalonminer-1246",
       "description": "A reliable choice for steady mining operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1731834452954-bef04f4d3342?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3NjMwMzUwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1616534846636-2372539a94a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxBdmFsb25NaW5lciUyMDEyNDZ8ZW58MHx8fHwxNzYzMDM1MTE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "AvalonMiner 1246"
     },
     {
       "id": "dragonmint-t1",
       "description": "A classic miner known for its performance.",
-      "imageUrl": "https://images.unsplash.com/photo-1621579385187-c12061b577be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxiaXRjb2luJTIwbWluZXJ8ZW58MHx8fHwxNzYzMDM1MDc0fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "bitcoin miner"
+      "imageUrl": "https://images.unsplash.com/photo-1610308700652-d931026f7eec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxEcmFnb25NaW50JTIwVDF8ZW58MHx8fHwxNzYzMDM1MTE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "DragonMint T1"
     }
   ]
 }
