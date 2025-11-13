@@ -7,6 +7,8 @@ import {
   LayoutDashboard,
   ShieldCheck,
   User,
+  Archive,
+  WalletCards,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -34,7 +36,8 @@ const menuItems = [
 ];
 
 const adminMenuItems = [
-  { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: ShieldCheck },
+  { href: '/admin/deposits', label: 'Deposits', icon: WalletCards },
+  { href: '/admin/redeem-codes', label: 'Legacy Codes', icon: Archive },
 ];
 
 function AdminMenu() {
@@ -42,6 +45,7 @@ function AdminMenu() {
   const [isAdminRoute, setIsAdminRoute] = useState(false);
 
   useEffect(() => {
+    // This effect runs only on the client, avoiding hydration errors.
     setIsAdminRoute(pathname.startsWith('/admin'));
   }, [pathname]);
 

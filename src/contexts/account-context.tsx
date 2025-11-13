@@ -8,9 +8,9 @@ import {
   useEffect,
   useCallback,
 } from 'react';
-import type { Transaction, Deposit } from '@/lib/data';
+import type { Transaction, Deposit, DepositTransaction } from '@/lib/data';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
-import { collection, doc, onSnapshot, increment } from 'firebase/firestore';
+import { collection, doc, onSnapshot, increment, query, where, orderBy } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -25,8 +25,12 @@ interface AccountContextType {
     transactionId: string,
     status: 'Active' | 'Expired' | 'Pending'
   ) => void;
-  deposits: Deposit[];
+  deposits: DepositTransaction[];
   addDeposit: (deposit: Omit<Deposit, 'id'>) => void;
+  addDepositRequest: (amount: number, mobileNumber: string) => Promise<DepositTransaction>;
+  pendingDeposits: DepositTransaction[];
+  approveDeposit: (depositId: string, userId: string, amount: number) => void;
+  allDeposits: DepositTransaction[];
   mobileNumber: string;
 }
 
@@ -35,7 +39,9 @@ const AccountContext = createContext<AccountContextType | undefined>(undefined);
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [deposits, setDeposits] = useState<DepositTransaction[]>([]);
+  const [pendingDeposits, setPendingDeposits] = useState<DepositTransaction[]>([]);
+  const [allDeposits, setAllDeposits] = useState<DepositTransaction[]>([]);
   const [mobileNumber, setMobileNumber] = useState('');
 
   const { user } = useUser();
@@ -43,9 +49,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (user && firestore) {
+      // User-specific data
       const userDocRef = doc(firestore, 'users', user.uid);
-
-      const unsubscribe = onSnapshot(
+      const unsubscribeUser = onSnapshot(
         userDocRef,
         (doc) => {
           if (doc.exists()) {
@@ -55,11 +61,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
           }
         },
         (error) => {
-          console.error('Error fetching user data:', error);
-          const permissionError = new FirestorePermissionError({
-            path: userDocRef.path,
-            operation: 'get',
-          });
+          const permissionError = new FirestorePermissionError({ path: userDocRef.path, operation: 'get' });
           errorEmitter.emit('permission-error', permissionError);
         }
       );
@@ -68,56 +70,51 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       const unsubscribeRentals = onSnapshot(
         rentalsColRef,
         (snapshot) => {
-          const rentalData = snapshot.docs.map(
-            (doc) => ({ id: doc.id, ...doc.data() } as Transaction)
-          );
+          const rentalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Transaction));
           setTransactions(rentalData);
         },
         (error) => {
-          console.error('Error fetching rentals:', error);
-          const permissionError = new FirestorePermissionError({
-            path: rentalsColRef.path,
-            operation: 'list',
-          });
+          const permissionError = new FirestorePermissionError({ path: rentalsColRef.path, operation: 'list' });
           errorEmitter.emit('permission-error', permissionError);
         }
       );
 
-      const depositsColRef = collection(
-        firestore,
-        'users',
-        user.uid,
-        'deposits'
-      );
+      const userDepositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid), orderBy('createdAt', 'desc'));
       const unsubscribeDeposits = onSnapshot(
-        depositsColRef,
+        userDepositsQuery,
         (snapshot) => {
-          const depositData = snapshot.docs.map(
-            (doc) => ({ id: doc.id, ...doc.data() } as Deposit)
-          );
+          const depositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as DepositTransaction));
           setDeposits(depositData);
         },
         (error) => {
-          console.error('Error fetching deposits:', error);
-          const permissionError = new FirestorePermissionError({
-            path: depositsColRef.path,
-            operation: 'list',
-          });
-          errorEmitter.emit('permission-error', permissionError);
+          const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+           errorEmitter.emit('permission-error', permissionError);
         }
       );
 
+      // Admin-specific data (assuming isAdmin check is in place)
+      const allDepositsQuery = query(collection(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
+      const unsubscribeAllDeposits = onSnapshot(allDepositsQuery, (snapshot) => {
+          const allDepositData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DepositTransaction));
+          setAllDeposits(allDepositData);
+          setPendingDeposits(allDepositData.filter(d => d.status === 'pending'));
+      }, (error) => {
+          const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+          errorEmitter.emit('permission-error', permissionError);
+      });
+
       return () => {
-        unsubscribe();
+        unsubscribeUser();
         unsubscribeRentals();
         unsubscribeDeposits();
+        unsubscribeAllDeposits();
       };
     }
   }, [user, firestore]);
 
-  const updateUserBalance = (amount: number) => {
-      if(user && firestore) {
-          const userDocRef = doc(firestore, 'users', user.uid);
+  const updateUserBalance = (amount: number, userId: string = user?.uid || '') => {
+      if(userId && firestore) {
+          const userDocRef = doc(firestore, 'users', userId);
           updateDocumentNonBlocking(userDocRef, {
               virtualBalance: increment(amount)
           });
@@ -143,12 +140,36 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // This function is now for legacy redeem codes, not the main deposit flow.
   const addDeposit = (deposit: Omit<Deposit, 'id'>) => {
-    if(user && firestore) {
-        const depositsColRef = collection(firestore, 'users', user.uid, 'deposits');
-        addDocumentNonBlocking(depositsColRef, deposit);
-        addBalance(deposit.amount);
+     // This function is deprecated in favor of addDepositRequest and approveDeposit
+  };
+  
+  const addDepositRequest = async (amount: number, mobileNumber: string): Promise<DepositTransaction> => {
+    if (!user || !firestore) {
+      throw new Error("User not authenticated");
     }
+
+    const transactionCode = `BHT${Date.now().toString().slice(-6)}`;
+    const newDeposit: Omit<DepositTransaction, 'id'> = {
+      userAccountId: user.uid,
+      amount,
+      mobileNumber,
+      transactionCode,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    };
+
+    const docRef = await addDocumentNonBlocking(collection(firestore, 'deposit_transactions'), newDeposit);
+    
+    return { id: docRef.id, ...newDeposit };
+  };
+
+  const approveDeposit = (depositId: string, userId: string, amount: number) => {
+    if (!firestore) return;
+    const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
+    updateDocumentNonBlocking(depositDocRef, { status: 'completed' });
+    updateUserBalance(amount, userId);
   };
 
   const updateTransactionStatus = useCallback(
@@ -173,6 +194,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         updateTransactionStatus,
         deposits,
         addDeposit,
+        addDepositRequest,
+        pendingDeposits,
+        approveDeposit,
+        allDeposits,
         mobileNumber,
       }}
     >

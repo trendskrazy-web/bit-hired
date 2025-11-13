@@ -1,19 +1,21 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import type { Deposit } from "@/lib/data";
+import type { Deposit, DepositTransaction } from "@/lib/data";
 import { type ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, CheckCircle } from "lucide-react";
+import { ArrowUpDown, CheckCircle, Clock, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const statusIcons = {
-  Completed: <CheckCircle className="mr-2 h-4 w-4 text-green-500" />,
+const statusIcons: { [key: string]: React.ReactNode } = {
+  completed: <CheckCircle className="mr-2 h-4 w-4 text-green-500" />,
+  pending: <Clock className="mr-2 h-4 w-4 text-yellow-500" />,
+  cancelled: <XCircle className="mr-2 h-4 w-4 text-red-500" />,
 };
 
-export const columns: ColumnDef<Deposit>[] = [
+export const columns: ColumnDef<DepositTransaction>[] = [
   {
-    accessorKey: "redeemCode",
-    header: "Redeem Code",
+    accessorKey: "transactionCode",
+    header: "Transaction Code",
   },
   {
     accessorKey: "amount",
@@ -29,7 +31,7 @@ export const columns: ColumnDef<Deposit>[] = [
     },
   },
   {
-    accessorKey: "date",
+    accessorKey: "createdAt",
     header: ({ column }) => {
       return (
         <Button
@@ -42,17 +44,23 @@ export const columns: ColumnDef<Deposit>[] = [
       );
     },
     cell: ({ row }) => {
-      const date = new Date(row.getValue("date"));
-      return <div>{date.toLocaleDateString()}</div>;
+      const date = new Date(row.getValue("createdAt"));
+      return <div>{date.toLocaleString()}</div>;
     },
   },
   {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as "Completed";
+      const status = row.getValue("status") as string;
+      const variant =
+        status === "completed"
+          ? "default"
+          : status === "cancelled"
+          ? "destructive"
+          : "secondary";
       return (
-        <Badge variant="default" className="capitalize bg-green-500/20 text-green-700 hover:bg-green-500/30">
+        <Badge variant={variant} className={`capitalize ${status === 'completed' ? 'bg-green-500/20 text-green-700 hover:bg-green-500/30' : ''}`}>
           {statusIcons[status]}
           {status}
         </Badge>

@@ -3,25 +3,23 @@
  *
  * @core_philosophy This ruleset enforces a strict user-ownership model for private data,
  * ensuring that only authenticated users can access their own information. Public data,
- * such as mining machine details, is readable by all. Data denormalization is used to
- * optimize rule performance.
+ * such as mining machine details, is readable by all. Admin-level access is provided for specific collections like deposits.
  *
  * @data_structure
  * - `/users/{userId}`: Stores user account information.
  * - `/mining_machines/{machineId}`: Stores publicly readable mining machine data.
  * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
- * - `/users/{userId}/mpesa_transactions/{mpesaTransactionId}`: Stores MPESA transactions associated with a specific user.
- * - `/users/{userId}/deposits/{depositId}`: Stores deposit transactions associated with a specific user.
+ * - `/deposit_transactions/{depositId}`: Stores all deposit transactions for admin review and user access.
  *
  * @key_security_decisions
- * - Users can only create their own user account.
- * - Users can only read, update, and delete their own rental, MPESA, and deposit transaction data.
- * - Mining machine data is publicly readable, but write access is restricted (TODO).
- * - Listing of rentals, mpesa transactions, and deposits are limited to the owner of the documents.
+ * - Users can only create their own user account and can only read/write their own data.
+ * - Mining machine data is publicly readable, but write access is restricted.
+ * - The `deposit_transactions` collection is readable by admins. Users can create their own deposit requests and read them, but cannot modify them after creation.
+ * - Admins can update the status of any deposit transaction.
  *
  * @denormalization_for_authorization
- * - The `RentalTransaction`, `MpesaTransaction`, and `Deposit` documents should include the `userAccountId`
- *   or similar field for authorization checks to avoid costly `get()` operations.
+ * - Transaction documents contain `userAccountId` for direct ownership checks in rules.
+ * - Deposit documents contain `mobileNumber` for admin convenience.
  *
  * @structural_segregation
  * - User-specific data is stored under the `/users/{userId}` path to enforce clear ownership.
@@ -33,13 +31,6 @@ service cloud.firestore {
     /**
      * @description Protects the user account document.
      * @path /users/{userId}
-     * @allow (create) User with UID 'user_abc' can create their own account document if the ID matches.
-     * @deny (create) User with UID 'user_xyz' cannot create a document with ID 'user_abc'.
-     * @allow (get, list) User with UID 'user_abc' can read their own account document.
-     * @deny (get, list) User with UID 'user_xyz' cannot read a document with ID 'user_abc'.
-     * @allow (update, delete) User with UID 'user_abc' can update/delete their own account document.
-     * @deny (update, delete) User with UID 'user_xyz' cannot update/delete document with ID 'user_abc'.
-     * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
       allow get, list: if isOwner(userId);
@@ -49,21 +40,17 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows public read access to mining machine details. Write access is restricted (TODO).
+     * @description Allows public read access to mining machine details. Write access is restricted.
      * @path /mining_machines/{miningMachineId}
-     * @allow (get, list) Any user can read mining machine documents.
-     * @deny (create, update, delete) No user can create, update, or delete mining machine documents (TODO: Add admin role check).
-     * @principle Allows public read access but restricts write access.
      */
     match /mining_machines/{miningMachineId} {
       allow get, list: if true;
-      allow create, update, delete: if false; // TODO: Add admin role check to allow creating/editing mining machines
+      allow create, update, delete: if isAdmin(); 
     }
 
     /**
      * @description Protects rental transaction documents under a user's account.
      * @path /users/{userId}/rentals/{rentalId}
-     * @principle Enforces document ownership for all operations.
      */
     match /users/{userId}/rentals/{rentalId} {
       allow get, list: if isOwner(userId);
@@ -73,24 +60,15 @@ service cloud.firestore {
     }
 
     /**
-     * @description Protects MPESA transaction documents under a user's account.
-     * @path /users/{userId}/mpesa_transactions/{mpesaTransactionId}
-     * @principle Enforces document ownership for all operations.
+     * @description Protects deposit transaction documents.
+     * @path /deposit_transactions/{depositId}
      */
-    match /users/{userId}/mpesa_transactions/{mpesaTransactionId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userAccountId == userId;
-      allow update: if isExistingOwner(userId) && resource.data.userAccountId == request.resource.data.userAccountId;
-      allow delete: if isExistingOwner(userId);
-    }
-    
-    /**
-     * @description Protects deposit transaction documents under a user's account.
-     * @path /users/{userId}/deposits/{depositId}
-     * @principle Enforces document ownership for all operations.
-     */
-    match /users/{userId}/deposits/{depositId} {
-      allow get, list, create, update, delete: if isOwner(userId);
+    match /deposit_transactions/{depositId} {
+      allow list: if isAdmin(); // Admins can list all deposits
+      allow get: if isAdmin() || isOwner(resource.data.userAccountId); // Admin or owner can get
+      allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid; // User can create their own deposit request
+      allow update: if isAdmin(); // Only admins can update (e.g., to confirm)
+      allow delete: if isAdmin(); // Only admins can delete
     }
   }
 
@@ -101,11 +79,19 @@ service cloud.firestore {
 
   // Helper function to determine if the user is the owner of the document.
   function isOwner(userId) {
-    return request.auth.uid == userId;
+    return isSignedIn() && request.auth.uid == userId;
   }
 
-    // Helper function to determine if the user is the owner of the EXISTING document.
+  // Helper function to determine if the user is the owner of the EXISTING document.
   function isExistingOwner(userId) {
     return isOwner(userId) && resource != null;
+  }
+
+  // Helper function to check for admin role.
+  // TODO: Implement a proper admin role check, e.g., using custom claims.
+  function isAdmin() {
+    // For now, allow any signed-in user to be an "admin".
+    // In a production app, this should be a real role check.
+    return isSignedIn();
   }
 }

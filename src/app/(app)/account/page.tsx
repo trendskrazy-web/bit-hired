@@ -5,9 +5,10 @@ import { WithdrawCard } from "@/components/app/account/withdraw-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useAccount } from "@/contexts/account-context";
+import { PendingDepositsList } from "@/components/app/account/pending-deposits-list";
 
 export default function AccountPage() {
-  const { balance, addBalance, deductBalance, mobileNumber } = useAccount();
+  const { balance, deductBalance, mobileNumber } = useAccount();
 
   return (
     <div className="space-y-6">
@@ -39,6 +40,14 @@ export default function AccountPage() {
                 <span className="text-muted-foreground">Member Since</span>
                 <span className="font-medium">Jan 1, 2024</span>
               </div>
+            </CardContent>
+          </Card>
+           <Card>
+            <CardHeader>
+              <CardTitle>Pending Deposits</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PendingDepositsList />
             </CardContent>
           </Card>
           <WithdrawCard

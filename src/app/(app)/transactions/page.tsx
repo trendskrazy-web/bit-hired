@@ -50,7 +50,7 @@ export default function TransactionsPage() {
             </Tabs>
         </TabsContent>
         <TabsContent value="deposits">
-            <DataTable columns={depositColumns} data={deposits} filterColumn="redeemCode" filterPlaceholder="Filter by code..." />
+            <DataTable columns={depositColumns} data={deposits} filterColumn="transactionCode" filterPlaceholder="Filter by code..." />
         </TabsContent>
       </Tabs>
     </div>

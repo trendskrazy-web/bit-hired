@@ -12,9 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAccount } from "@/contexts/account-context";
-import { useRedeemCodes } from "@/contexts/redeem-code-context";
-import { RefreshCw, Copy } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,147 +24,115 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 
-const mpesaNumbers = ["+254704367623", "+254728477718"];
+const PAYBILL_NUMBER = "400200";
 
 export function TopUpCard() {
   const { toast } = useToast();
-  const [phoneNumberIndex, setPhoneNumberIndex] = useState(0);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [redeemCodeInput, setRedeemCodeInput] = useState("");
-  const { addDeposit } = useAccount();
-  const { redeemCode, markCodeAsUsed } = useRedeemCodes();
+  const [amount, setAmount] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  const { addDepositRequest, mobileNumber } = useAccount();
 
-  const phoneNumber = useMemo(() => mpesaNumbers[phoneNumberIndex], [phoneNumberIndex]);
+  const handleDepositRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const depositAmount = parseFloat(amount);
 
-  const cyclePhoneNumber = () => {
-    setPhoneNumberIndex((prevIndex) => (prevIndex + 1) % mpesaNumbers.length);
-  };
-  
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(phoneNumber);
-    toast({
-      title: "Copied!",
-      description: "Phone number copied to clipboard.",
-    });
-  };
-
-
-  const handleRedeem = () => {
-    if (!redeemCodeInput) {
-        toast({
-            title: "Error",
-            description: "Please enter the redeem code.",
-            variant: "destructive",
-        });
-        return;
+    if (!depositAmount || depositAmount <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid amount to deposit.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setIsVerifying(true);
-    
-    setTimeout(() => {
-      const result = redeemCode(redeemCodeInput);
-
-      if (result.success) {
-        const { amount } = result;
-        addDeposit({
-          amount: amount,
-          date: new Date().toISOString().split("T")[0],
-          redeemCode: redeemCodeInput,
-          status: "Completed"
-        });
-
-        markCodeAsUsed(redeemCodeInput);
-
-        toast({
-          title: "Success!",
-          description: `KES ${amount.toLocaleString()} has been credited to your account.`,
-        });
-        setRedeemCodeInput("");
-      } else {
-        toast({
-          title: "Invalid Code",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-
-      setIsVerifying(false);
-    }, 1000);
+    setIsProcessing(true);
+    try {
+      const newDeposit = await addDepositRequest(depositAmount, mobileNumber);
+      setGeneratedCode(newDeposit.transactionCode);
+      toast({
+        title: "Deposit Request Created",
+        description: `Use the transaction code ${newDeposit.transactionCode} to complete your M-PESA payment.`,
+      });
+      setAmount("");
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Could not create deposit request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
+  const resetForm = () => {
+    setGeneratedCode(null);
+    setAmount("");
+  };
+
+  if (generatedCode) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Complete Your Deposit</CardTitle>
+          <CardDescription>
+            Use the details below to complete your M-PESA payment.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm">
+          <div>
+            <Label>PayBill Number</Label>
+            <p className="font-bold text-lg">{PAYBILL_NUMBER}</p>
+          </div>
+          <div>
+            <Label>Account Number</Label>
+            <p className="font-bold text-lg text-primary">{generatedCode}</p>
+            <p className="text-xs text-muted-foreground">Use this as the account number in your M-PESA transaction.</p>
+          </div>
+          <div className="pt-2">
+             <p className="text-muted-foreground">Your account will be credited once an admin confirms your payment. You can track the status on this page.</p>
+          </div>
+          <Button onClick={resetForm} className="w-full">
+            Make Another Deposit
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Top Up Wallet</CardTitle>
-        <CardDescription>Add funds to your wallet using M-PESA.</CardDescription>
+        <CardDescription>
+          Enter the amount you wish to add to your wallet.
+        </CardDescription>
       </CardHeader>
+      <form onSubmit={handleDepositRequest}>
         <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm text-muted-foreground">
-              1. Send money to the following number:
-            </p>
-            <div className="flex items-center justify-between p-3 my-2 bg-secondary rounded-md">
-              <p className="font-mono text-lg font-semibold">{phoneNumber}</p>
-              <div className="flex items-center gap-1">
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={copyToClipboard}
-                    aria-label="Copy number"
-                  >
-                    <Copy className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={cyclePhoneNumber}
-                  aria-label="Generate new number"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-             <p className="text-sm text-muted-foreground">
-              2. Enter the redeem code you are provided with below.
-            </p>
-          </div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="redeem-code">Redeem Code</Label>
-              <Input
-                id="redeem-code"
-                placeholder="e.g. SFD345KMNL"
-                value={redeemCodeInput}
-                onChange={(e) => setRedeemCodeInput(e.target.value.toUpperCase())}
-                required
-              />
-            </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button className="w-full" disabled={isVerifying}>
-                  {isVerifying ? "Verifying..." : "Redeem Code"}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will redeem the code and add the corresponding amount to your account balance. This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleRedeem}>
-                    Confirm
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+          <div className="space-y-2">
+            <Label htmlFor="deposit-amount">Amount (KES)</Label>
+            <Input
+              id="deposit-amount"
+              type="number"
+              placeholder="e.g. 1000"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+              min="1"
+            />
           </div>
         </CardContent>
+        <CardContent>
+          <Button type="submit" className="w-full" disabled={isProcessing}>
+            {isProcessing ? "Generating Code..." : "Get Transaction Code"}
+          </Button>
+        </CardContent>
+      </form>
     </Card>
   );
 }
