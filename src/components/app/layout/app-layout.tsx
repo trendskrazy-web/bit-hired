@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
   ShieldCheck,
   User,
-  Archive,
+  Gift,
   WalletCards,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -37,7 +37,7 @@ const menuItems = [
 
 const adminMenuItems = [
   { href: '/admin/deposits', label: 'Deposits', icon: WalletCards },
-  { href: '/admin/redeem-codes', label: 'Legacy Codes', icon: Archive },
+  { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
 ];
 
 function AdminMenu() {

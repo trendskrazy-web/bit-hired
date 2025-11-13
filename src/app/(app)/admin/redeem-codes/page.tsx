@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useRedeemCodes } from "@/contexts/redeem-code-context";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Download, Archive } from "lucide-react";
+import { Copy, Download, Gift } from "lucide-react";
 
 export default function RedeemCodesPage() {
   const [count, setCount] = useState(10);
@@ -49,17 +49,17 @@ export default function RedeemCodesPage() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-2">
-            <Archive className="h-6 w-6 text-muted-foreground" />
+            <Gift className="h-6 w-6 text-muted-foreground" />
             <div>
-                 <h1 className="text-2xl font-headline font-bold">Legacy Redeem Codes</h1>
+                 <h1 className="text-2xl font-headline font-bold">Redeem Codes</h1>
                 <p className="text-muted-foreground">
-                This feature is deprecated. Use the new admin deposit confirmation system.
+                Generate batches of redeem codes for promotional use.
                 </p>
             </div>
         </div>
       </div>
       <Separator />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 opacity-50 pointer-events-none">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1">
           <Card>
             <CardHeader>
@@ -74,8 +74,7 @@ export default function RedeemCodesPage() {
                   value={count}
                   onChange={(e) => setCount(Number(e.target.value))}
                   min="1"
-                  max="100"
-                  disabled
+                  max="1000"
                 />
               </div>
               <div className="space-y-2">
@@ -86,10 +85,9 @@ export default function RedeemCodesPage() {
                   value={amount}
                   onChange={(e) => setAmount(Number(e.target.value))}
                   min="1"
-                  disabled
                 />
               </div>
-              <Button onClick={handleGenerate} className="w-full" disabled>
+              <Button onClick={handleGenerate} className="w-full">
                 Generate Codes
               </Button>
             </CardContent>
@@ -107,11 +105,11 @@ export default function RedeemCodesPage() {
                 {lastGenerated.length > 0 && (
                     <div className="space-y-4">
                          <div className="flex items-center gap-2">
-                             <Button variant="outline" size="sm" onClick={() => copyToClipboard(lastGenerated.join("\n"))} disabled>
+                             <Button variant="outline" size="sm" onClick={() => copyToClipboard(lastGenerated.join("\n"))}>
                                 <Copy className="mr-2 h-4 w-4" />
                                 Copy All
                             </Button>
-                            <Button variant="outline" size="sm" onClick={downloadCodes} disabled>
+                            <Button variant="outline" size="sm" onClick={downloadCodes}>
                                 <Download className="mr-2 h-4 w-4" />
                                 Download .txt
                             </Button>
