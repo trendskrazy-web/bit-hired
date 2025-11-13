@@ -32,13 +32,15 @@ interface AccountContextType {
   addDepositRequest: (amount: number, mobileNumber: string) => Promise<DepositTransaction>;
   pendingDeposits: DepositTransaction[];
   approveDeposit: (depositId: string, userId: string, amount: number) => void;
-  declineDeposit: (depositId: string) => void;
+  declineDeposit: (depositId: string, reason?: string) => void;
   allDeposits: DepositTransaction[];
   notifications: Notification[];
   mobileNumber: string;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
+
+const AUTO_DECLINE_MINUTES = 20;
 
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(0);
@@ -53,6 +55,26 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const firestore = useFirestore();
   const pathname = usePathname();
   const isAdminPage = pathname.startsWith('/admin');
+
+  const declineDeposit = useCallback((depositId: string, reason: string = 'Declined by admin.') => {
+    if (!firestore) return;
+    const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
+    updateDocumentNonBlocking(depositDocRef, { status: 'cancelled' });
+    
+    // The notification creation is now inside declineDeposit
+    if (!firestore || !user) return;
+    const notificationsColRef = collection(firestore, 'notifications');
+    const message = reason === 'auto-declined' 
+      ? `Automatically declined deposit request ${depositId} (expired).`
+      : `Declined deposit request ${depositId}.`;
+    addDocumentNonBlocking(notificationsColRef, {
+      message,
+      read: false,
+      createdAt: new Date().toISOString(),
+      adminId: user.uid,
+    });
+  }, [firestore, user]);
+
 
   useEffect(() => {
     if (!user || !firestore) return;
@@ -95,7 +117,24 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       unsubAllDeposits = onSnapshot(allDepositsQuery, (snapshot) => {
         const allDepositData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DepositTransaction));
         setAllDeposits(allDepositData);
-        setPendingDeposits(allDepositData.filter(d => d.status === 'pending'));
+
+        const now = new Date();
+        const pending = allDepositData.filter(d => {
+          if (d.status !== 'pending') return false;
+          
+          const createdAt = new Date(d.createdAt);
+          const timeDiffMinutes = (now.getTime() - createdAt.getTime()) / (1000 * 60);
+
+          if (timeDiffMinutes > AUTO_DECLINE_MINUTES) {
+            // This transaction is expired, so auto-decline it.
+            declineDeposit(d.id, 'auto-declined');
+            return false; // Exclude it from the pending list UI
+          }
+          return true;
+        });
+
+        setPendingDeposits(pending);
+
       }, (error) => {
         const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
         errorEmitter.emit('permission-error', permissionError);
@@ -119,7 +158,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       unsubAllDeposits();
       unsubNotifications();
     };
-  }, [user, firestore, isAdminPage]);
+  }, [user, firestore, isAdminPage, declineDeposit]);
 
   const createNotification = (message: string) => {
     if (!firestore || !user) return;
@@ -190,13 +229,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     updateDocumentNonBlocking(depositDocRef, { status: 'completed' });
     updateUserBalance(amount, userId);
     createNotification(`Approved deposit of KES ${amount} for user ${userId}.`);
-  };
-
-  const declineDeposit = (depositId: string) => {
-    if (!firestore) return;
-    const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
-    updateDocumentNonBlocking(depositDocRef, { status: 'cancelled' });
-    createNotification(`Declined deposit request ${depositId}.`);
   };
 
   const updateTransactionStatus = useCallback(
