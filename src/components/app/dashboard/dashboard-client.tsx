@@ -13,6 +13,8 @@ export function DashboardClient() {
   const [timeRemaining, setTimeRemaining] = useState(totalDuration - 3600 * 5); // 5 hours passed
   const [earnings, setEarnings] = useState(0.0012);
   const [cashedOutAmount, setCashedOutAmount] = useState(0);
+  const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
+  const [canCashOut, setCanCashOut] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -23,13 +25,31 @@ export function DashboardClient() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const checkCashOutStatus = () => {
+      const today = new Date();
+      if (lastCashOutDate && lastCashOutDate.toDateString() === today.toDateString()) {
+        setCanCashOut(false);
+      } else {
+        setCanCashOut(true);
+      }
+    };
+
+    checkCashOutStatus();
+    // Check every minute to see if it's a new day
+    const interval = setInterval(checkCashOutStatus, 60000);
+    return () => clearInterval(interval);
+  }, [lastCashOutDate]);
+
   const handleCashOut = () => {
     const cashOutable = earnings - cashedOutAmount;
     if (cashOutable > 0) {
       setCashedOutAmount(earnings);
+      setLastCashOutDate(new Date());
+      setCanCashOut(false);
       toast({
         title: "Cash Out Successful!",
-        description: `You've cashed out ${cashOutable.toFixed(8)} BTC.`,
+        description: `You've cashed out ${cashOutable.toFixed(8)} BTC. You can cash out again tomorrow.`,
       });
     } else {
       toast({
@@ -92,7 +112,7 @@ export function DashboardClient() {
                     <p className="font-semibold font-mono">{(earnings - cashedOutAmount).toFixed(8)} BTC</p>
                 </div>
             </div>
-            <Button onClick={handleCashOut} size="sm">Cash Out</Button>
+            <Button onClick={handleCashOut} size="sm" disabled={!canCashOut}>Cash Out</Button>
         </div>
         <div>
           <Progress value={progressPercentage} className="w-full h-2 mt-4" />
