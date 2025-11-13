@@ -34,10 +34,8 @@ service cloud.firestore {
      * @path /users/{userId}
      */
     match /users/{userId} {
-      allow get, list: if isOwner(userId);
+      allow get, list, update: if isOwner(userId);
       allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId;
-      allow update: if isOwner(userId) && resource.data.id == request.resource.data.id;
-      allow delete: if isOwner(userId);
     }
 
     /**
@@ -68,8 +66,8 @@ service cloud.firestore {
       // Users can create their own deposit requests.
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
 
-      // Users can read/delete their own deposit requests (get, list, delete).
-      allow read, delete: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
+      // Users can read their own deposit requests.
+      allow get: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
     }
   }
 
@@ -91,4 +89,3 @@ service cloud.firestore {
     return isSignedIn();
   }
 }
-

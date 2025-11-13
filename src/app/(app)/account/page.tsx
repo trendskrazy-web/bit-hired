@@ -7,49 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { useAccount } from "@/contexts/account-context";
 import { PendingDepositsList } from "@/components/app/account/pending-deposits-list";
-import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { AlertTriangle } from "lucide-react";
 
 export default function AccountPage() {
-  const { balance, deductBalance, mobileNumber, deleteUserAccount } = useAccount();
-  const { toast } = useToast();
-  const router = useRouter();
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleDeleteAccount = async () => {
-    setIsDeleting(true);
-    try {
-      await deleteUserAccount();
-      toast({
-        title: "Account Deleted",
-        description: "Your account has been permanently deleted.",
-      });
-      router.push('/login');
-    } catch (error: any) {
-      console.error("Account deletion failed:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete account. Please try again.",
-        variant: "destructive",
-      });
-      setIsDeleting(false);
-    }
-  };
-
+  const { balance, deductBalance, mobileNumber } = useAccount();
+  
   return (
     <div className="space-y-6">
       <div>
@@ -97,46 +58,8 @@ export default function AccountPage() {
         </div>
         <div className="lg:col-span-1 space-y-6">
           <TopUpCard />
-           <Card className="border-destructive">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="text-destructive" />
-                Danger Zone
-              </CardTitle>
-              <CardDescription>
-                This action is permanent and cannot be undone. All your data will be removed.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="w-full">Delete Account</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your
-                      account and remove all your data from our servers.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDeleteAccount}
-                      disabled={isDeleting}
-                      className="bg-destructive hover:bg-destructive/90"
-                    >
-                      {isDeleting ? "Deleting..." : "Yes, delete my account"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
   );
 }
-

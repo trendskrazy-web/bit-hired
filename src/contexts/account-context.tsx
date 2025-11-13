@@ -10,12 +10,11 @@ import {
   useCallback,
 } from 'react';
 import type { Transaction, Deposit, DepositTransaction } from '@/lib/data';
-import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
-import { collection, doc, onSnapshot, increment, query, where, orderBy, writeBatch, getDocs } from 'firebase/firestore';
+import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
+import { collection, doc, onSnapshot, increment, query, where, orderBy } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { usePathname } from 'next/navigation';
-import { deleteUser } from 'firebase/auth';
 
 interface AccountContextType {
   balance: number;
@@ -35,7 +34,6 @@ interface AccountContextType {
   approveDeposit: (depositId: string, userId: string, amount: number) => void;
   allDeposits: DepositTransaction[];
   mobileNumber: string;
-  deleteUserAccount: () => Promise<void>;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -55,7 +53,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (user && firestore) {
-      // --- User-specific data listeners (for all users) ---
       const userDocRef = doc(firestore, 'users', user.uid);
       const unsubscribeUser = onSnapshot(
         userDocRef,
@@ -98,7 +95,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         }
       );
 
-      // --- Admin-specific data listener ---
       let unsubscribeAllDeposits = () => {};
       if (isAdminPage) {
         const allDepositsQuery = query(collection(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
@@ -111,20 +107,18 @@ export function AccountProvider({ children }: { children: ReactNode }) {
             errorEmitter.emit('permission-error', permissionError);
         });
       } else {
-        // Clear admin data when not on an admin page to prevent stale data
         setAllDeposits([]);
         setPendingDeposits([]);
       }
 
-      // Cleanup function
       return () => {
         unsubscribeUser();
         unsubscribeRentals();
         unsubscribeUserDeposits();
-        unsubscribeAllDeposits(); // This will be an empty function if not on an admin page
+        unsubscribeAllDeposits();
       };
     }
-  }, [user, firestore, isAdminPage]); // Re-run effect when user, firestore, or admin page status changes
+  }, [user, firestore, isAdminPage]);
 
   const updateUserBalance = (amount: number, userId: string = user?.uid || '') => {
       if(userId && firestore) {
@@ -195,30 +189,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [user, firestore]
   );
   
-  const deleteUserAccount = async () => {
-    if (!user || !firestore) {
-      throw new Error("User not authenticated or Firestore not available.");
-    }
-    const userId = user.uid;
-
-    const batch = writeBatch(firestore);
-
-    const rentalsRef = collection(firestore, 'users', userId, 'rentals');
-    const rentalsSnapshot = await getDocs(rentalsRef);
-    rentalsSnapshot.forEach(doc => batch.delete(doc.ref));
-
-    const depositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', userId));
-    const depositsSnapshot = await getDocs(depositsQuery);
-    depositsSnapshot.forEach(doc => batch.delete(doc.ref));
-
-    const userDocRef = doc(firestore, 'users', userId);
-    batch.delete(userDocRef);
-    
-    await batch.commit();
-
-    await deleteUser(user);
-  };
-
   return (
     <AccountContext.Provider
       value={{
@@ -236,7 +206,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         approveDeposit,
         allDeposits,
         mobileNumber,
-        deleteUserAccount,
       }}
     >
       {children}
