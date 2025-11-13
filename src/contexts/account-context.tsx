@@ -12,6 +12,8 @@ import type { Transaction, Deposit } from '@/lib/data';
 import { getTransactions } from '@/lib/data';
 import { useFirestore, useUser } from '@/firebase';
 import { collection, doc, onSnapshot } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 interface AccountContextType {
   balance: number;
@@ -44,30 +46,67 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     if (user && firestore) {
       const userDocRef = doc(firestore, 'users', user.uid);
 
-      const unsubscribe = onSnapshot(userDocRef, (doc) => {
-        if (doc.exists()) {
-          const userData = doc.data();
-          setBalance(userData.virtualBalance || 0);
-          setMobileNumber(userData.mobileNumber || '');
+      const unsubscribe = onSnapshot(
+        userDocRef,
+        (doc) => {
+          if (doc.exists()) {
+            const userData = doc.data();
+            setBalance(userData.virtualBalance || 0);
+            setMobileNumber(userData.mobileNumber || '');
+          }
+        },
+        (error) => {
+          console.error('Error fetching user data:', error);
+          const permissionError = new FirestorePermissionError({
+            path: userDocRef.path,
+            operation: 'get',
+          });
+          errorEmitter.emit('permission-error', permissionError);
         }
-      });
+      );
 
       const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
-      const unsubscribeRentals = onSnapshot(rentalsColRef, (snapshot) => {
-        const rentalData = snapshot.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() } as Transaction)
-        );
-        setTransactions(rentalData);
-      });
-      
-      const depositsColRef = collection(firestore, 'users', user.uid, 'deposits');
-      const unsubscribeDeposits = onSnapshot(depositsColRef, (snapshot) => {
-        const depositData = snapshot.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() } as Deposit)
-        );
-        setDeposits(depositData);
-      });
+      const unsubscribeRentals = onSnapshot(
+        rentalsColRef,
+        (snapshot) => {
+          const rentalData = snapshot.docs.map(
+            (doc) => ({ id: doc.id, ...doc.data() } as Transaction)
+          );
+          setTransactions(rentalData);
+        },
+        (error) => {
+          console.error('Error fetching rentals:', error);
+          const permissionError = new FirestorePermissionError({
+            path: rentalsColRef.path,
+            operation: 'list',
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        }
+      );
 
+      const depositsColRef = collection(
+        firestore,
+        'users',
+        user.uid,
+        'deposits'
+      );
+      const unsubscribeDeposits = onSnapshot(
+        depositsColRef,
+        (snapshot) => {
+          const depositData = snapshot.docs.map(
+            (doc) => ({ id: doc.id, ...doc.data() } as Deposit)
+          );
+          setDeposits(depositData);
+        },
+        (error) => {
+          console.error('Error fetching deposits:', error);
+          const permissionError = new FirestorePermissionError({
+            path: depositsColRef.path,
+            operation: 'list',
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        }
+      );
 
       return () => {
         unsubscribe();
@@ -123,7 +162,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         updateTransactionStatus,
         deposits,
         addDeposit,
-        mobileNumber
+        mobileNumber,
       }}
     >
       {children}
