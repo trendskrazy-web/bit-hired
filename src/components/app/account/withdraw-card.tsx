@@ -19,13 +19,25 @@ export function WithdrawCard() {
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const userPhoneNumber = "+254 712 345 678"; 
+  const accountBalance = 1234.56;
 
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || parseFloat(amount) <= 0) {
+    const withdrawAmount = parseFloat(amount);
+
+    if (!amount || withdrawAmount <= 0) {
       toast({
         title: "Invalid Amount",
         description: "Please enter a valid amount to withdraw.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (withdrawAmount > accountBalance) {
+      toast({
+        title: "Insufficient Funds",
+        description: "You cannot withdraw more than your account balance.",
         variant: "destructive",
       });
       return;
@@ -71,6 +83,9 @@ export function WithdrawCard() {
               required
               min="1"
             />
+             <p className="text-xs text-muted-foreground">
+              Universal network fees may apply.
+            </p>
           </div>
            <p className="text-xs text-muted-foreground">
               Withdrawals are processed within 2-3 working days.
