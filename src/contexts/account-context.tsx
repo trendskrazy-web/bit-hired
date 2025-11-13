@@ -9,9 +9,8 @@ import {
   useCallback,
 } from 'react';
 import type { Transaction, Deposit } from '@/lib/data';
-import { getTransactions } from '@/lib/data';
-import { useFirestore, useUser } from '@/firebase';
-import { collection, doc, onSnapshot } from 'firebase/firestore';
+import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
+import { collection, doc, onSnapshot, increment } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -21,7 +20,7 @@ interface AccountContextType {
   deductBalance: (amount: number) => void;
   addBalance: (amount: number) => void;
   transactions: Transaction[];
-  addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
+  addTransaction: (transaction: Omit<Transaction, 'id' | 'status'> & { status?: 'Active' | 'Expired' | 'Pending' }) => void;
   updateTransactionStatus: (
     transactionId: string,
     status: 'Active' | 'Expired' | 'Pending'
@@ -116,38 +115,50 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   }, [user, firestore]);
 
+  const updateUserBalance = (amount: number) => {
+      if(user && firestore) {
+          const userDocRef = doc(firestore, 'users', user.uid);
+          updateDocumentNonBlocking(userDocRef, {
+              virtualBalance: increment(amount)
+          });
+      }
+  }
+
   const deductBalance = (amount: number) => {
-    setBalance((prevBalance) => prevBalance - amount);
+    updateUserBalance(-amount);
   };
 
   const addBalance = (amount: number) => {
-    setBalance((prevBalance) => prevBalance + amount);
+    updateUserBalance(amount);
   };
 
-  const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: `txn${transactions.length + 1}`,
-    };
-    setTransactions((prevTransactions) => [newTransaction, ...prevTransactions]);
+  const addTransaction = (transaction: Omit<Transaction, 'id' | 'status'> & { status?: 'Active' | 'Expired' | 'Pending' }) => {
+    if(user && firestore) {
+        const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
+        addDocumentNonBlocking(rentalsColRef, {
+            ...transaction,
+            userAccountId: user.uid,
+            status: transaction.status || 'Active',
+        });
+    }
   };
 
   const addDeposit = (deposit: Omit<Deposit, 'id'>) => {
-    const newDeposit: Deposit = {
-      ...deposit,
-      id: `dep${deposits.length + 1}`,
-    };
-    addBalance(deposit.amount);
-    setDeposits((prevDeposits) => [newDeposit, ...prevDeposits]);
+    if(user && firestore) {
+        const depositsColRef = collection(firestore, 'users', user.uid, 'deposits');
+        addDocumentNonBlocking(depositsColRef, deposit);
+        addBalance(deposit.amount);
+    }
   };
 
   const updateTransactionStatus = useCallback(
     (transactionId: string, status: 'Active' | 'Expired' | 'Pending') => {
-      setTransactions((prev) =>
-        prev.map((t) => (t.id === transactionId ? { ...t, status } : t))
-      );
+      if(user && firestore) {
+          const transactionDocRef = doc(firestore, 'users', user.uid, 'rentals', transactionId);
+          updateDocumentNonBlocking(transactionDocRef, { status });
+      }
     },
-    []
+    [user, firestore]
   );
 
   return (

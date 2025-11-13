@@ -8,19 +8,20 @@
  *
  * @data_structure
  * - `/users/{userId}`: Stores user account information.
- * - `/mining_machines/{miningMachineId}`: Stores publicly readable mining machine data.
+ * - `/mining_machines/{machineId}`: Stores publicly readable mining machine data.
  * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
  * - `/users/{userId}/mpesa_transactions/{mpesaTransactionId}`: Stores MPESA transactions associated with a specific user.
+ * - `/users/{userId}/deposits/{depositId}`: Stores deposit transactions associated with a specific user.
  *
  * @key_security_decisions
  * - Users can only create their own user account.
- * - Users can only read, update, and delete their own rental and MPESA transaction data.
+ * - Users can only read, update, and delete their own rental, MPESA, and deposit transaction data.
  * - Mining machine data is publicly readable, but write access is restricted (TODO).
- * - Listing of rentals and mpesa transactions are limited to the owner of the documents.
+ * - Listing of rentals, mpesa transactions, and deposits are limited to the owner of the documents.
  *
  * @denormalization_for_authorization
- * - The `RentalTransaction` and `MpesaTransaction` documents include the `userAccountId`,
- * which is used for authorization checks to avoid costly `get()` operations.
+ * - The `RentalTransaction`, `MpesaTransaction`, and `Deposit` documents should include the `userAccountId`
+ *   or similar field for authorization checks to avoid costly `get()` operations.
  *
  * @structural_segregation
  * - User-specific data is stored under the `/users/{userId}` path to enforce clear ownership.
@@ -41,7 +42,6 @@ service cloud.firestore {
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
-      // Verifies that the user is signed in
       allow get, list: if isOwner(userId);
       allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId;
       allow update: if isOwner(userId) && resource.data.id == request.resource.data.id;
@@ -63,12 +63,6 @@ service cloud.firestore {
     /**
      * @description Protects rental transaction documents under a user's account.
      * @path /users/{userId}/rentals/{rentalId}
-     * @allow (create) User with UID 'user_abc' can create a rental under their account.
-     * @deny (create) User with UID 'user_xyz' cannot create a rental under account 'user_abc'.
-     * @allow (get, list) User with UID 'user_abc' can read their own rental document.
-     * @deny (get, list) User with UID 'user_xyz' cannot read rental document under 'user_abc'.
-     * @allow (update, delete) User with UID 'user_abc' can update/delete their own rental document.
-     * @deny (update, delete) User with UID 'user_xyz' cannot update/delete rental document under account 'user_abc'.
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId}/rentals/{rentalId} {
@@ -81,12 +75,6 @@ service cloud.firestore {
     /**
      * @description Protects MPESA transaction documents under a user's account.
      * @path /users/{userId}/mpesa_transactions/{mpesaTransactionId}
-     * @allow (create) User with UID 'user_abc' can create an MPESA transaction under their account.
-     * @deny (create) User with UID 'user_xyz' cannot create an MPESA transaction under account 'user_abc'.
-     * @allow (get, list) User with UID 'user_abc' can read their own MPESA transaction document.
-     * @deny (get, list) User with UID 'user_xyz' cannot read MPESA transaction document under 'user_abc'.
-     * @allow (update, delete) User with UID 'user_abc' can update/delete their own MPESA transaction document.
-     * @deny (update, delete) User with UID 'user_xyz' cannot update/delete MPESA transaction document under account 'user_abc'.
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId}/mpesa_transactions/{mpesaTransactionId} {
@@ -94,6 +82,15 @@ service cloud.firestore {
       allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userAccountId == userId;
       allow update: if isExistingOwner(userId) && resource.data.userAccountId == request.resource.data.userAccountId;
       allow delete: if isExistingOwner(userId);
+    }
+    
+    /**
+     * @description Protects deposit transaction documents under a user's account.
+     * @path /users/{userId}/deposits/{depositId}
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/deposits/{depositId} {
+      allow get, list, create, update, delete: if isOwner(userId);
     }
   }
 

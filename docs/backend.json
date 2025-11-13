@@ -131,6 +131,37 @@
         "transactionDate",
         "systemGeneratedNumber"
       ]
+    },
+    "Deposit": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Deposit",
+      "type": "object",
+      "description": "Represents a deposit transaction made by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the deposit."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount deposited."
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date of the deposit."
+        },
+        "redeemCode": {
+          "type": "string",
+          "description": "The redeem code used for the deposit."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Completed"],
+          "description": "The status of the deposit."
+        }
+      },
+      "required": ["id", "amount", "date", "redeemCode", "status"]
     }
   },
   "auth": {
@@ -209,6 +240,26 @@
             {
               "name": "mpesaTransactionId",
               "description": "The unique identifier for the MPESA transaction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/deposits/{depositId}",
+        "definition": {
+          "entityName": "Deposit",
+          "schema": {
+            "$ref": "#/backend/entities/Deposit"
+          },
+          "description": "Stores deposit transaction data for a user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user account that made this deposit."
+            },
+            {
+              "name": "depositId",
+              "description": "The unique identifier for the deposit transaction."
             }
           ]
         }
