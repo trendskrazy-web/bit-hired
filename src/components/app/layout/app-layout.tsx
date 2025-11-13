@@ -9,6 +9,7 @@ import {
   User,
   Gift,
   WalletCards,
+  Info,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -29,10 +30,11 @@ import { AppHeader } from './header';
 import { Button } from '@/components/ui/button';
 
 const menuItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/hire', label: 'Hire Machines', icon: Cpu },
-  { href: '/transactions', label: 'Transactions', icon: History },
   { href: '/account', label: 'Account', icon: User },
+  { href: '/hire', label: 'Hire Machines', icon: Cpu },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/transactions', label: 'Transactions', icon: History },
+  { href: '/about', label: 'About', icon: Info },
 ];
 
 const adminMenuItems = [
