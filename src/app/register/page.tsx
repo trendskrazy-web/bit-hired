@@ -42,6 +42,15 @@ export default function RegisterPage() {
       return;
     }
 
+    if (password.length < 6) {
+      toast({
+        title: 'Error',
+        description: 'Password must be at least 6 characters long.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       const email = `${mobileNumber.replace(/\D/g, '')}@bithired.com`;
       initiateEmailSignUp(auth, email, password);
