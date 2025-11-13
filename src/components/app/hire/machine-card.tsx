@@ -17,6 +17,7 @@ import { Cpu, Zap, Wallet, CalendarDays } from "lucide-react";
 import Image from "next/image";
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
+import { useAccount } from "@/contexts/account-context";
 
 interface MachineCardProps {
   machine: Machine;
@@ -29,6 +30,8 @@ export function MachineCard({ machine, image }: MachineCardProps) {
     machine.durations[0]
   );
   const [isHiring, setIsHiring] = useState(false);
+  const { balance, deductBalance } = useAccount();
+
 
   const { potentialEarnings, dailyEarnings } = useMemo(() => {
     const days = 45; // All durations are 45 days
@@ -41,8 +44,18 @@ export function MachineCard({ machine, image }: MachineCardProps) {
 
   const handleHire = (e: React.FormEvent) => {
     e.preventDefault();
+    if (balance < selectedDuration.cost) {
+      toast({
+        title: "Insufficient Funds",
+        description: "Your account balance is too low to hire this machine.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsHiring(true);
     setTimeout(() => {
+      deductBalance(selectedDuration.cost);
       setIsHiring(false);
       toast({
         title: "Machine Hired!",

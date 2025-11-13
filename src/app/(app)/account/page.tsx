@@ -4,18 +4,10 @@ import { TopUpCard } from "@/components/app/account/top-up-card";
 import { WithdrawCard } from "@/components/app/account/withdraw-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+import { useAccount } from "@/contexts/account-context";
 
 export default function AccountPage() {
-  const [balance, setBalance] = useState(1234.56);
-
-  const handleWithdrawal = (amount: number) => {
-    setBalance((prevBalance) => prevBalance - amount);
-  };
-
-  const handleTopUp = (amount: number) => {
-    setBalance((prevBalance) => prevBalance + amount);
-  };
+  const { balance, addBalance, deductBalance } = useAccount();
 
   return (
     <div className="space-y-6">
@@ -51,11 +43,11 @@ export default function AccountPage() {
           </Card>
           <WithdrawCard
             accountBalance={balance}
-            onWithdraw={handleWithdrawal}
+            onWithdraw={deductBalance}
           />
         </div>
         <div className="lg:col-span-1">
-          <TopUpCard onTopUp={handleTopUp} />
+          <TopUpCard onTopUp={addBalance} />
         </div>
       </div>
     </div>
