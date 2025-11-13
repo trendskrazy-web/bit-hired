@@ -14,12 +14,16 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
-export function WithdrawCard() {
+interface WithdrawCardProps {
+  accountBalance: number;
+  onWithdraw: (amount: number) => void;
+}
+
+export function WithdrawCard({ accountBalance, onWithdraw }: WithdrawCardProps) {
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const userPhoneNumber = "+254 712 345 678"; 
-  const accountBalance = 1234.56;
+  const userPhoneNumber = "+254 712 345 678";
 
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +51,7 @@ export function WithdrawCard() {
     setTimeout(() => {
       setIsProcessing(false);
       setAmount("");
+      onWithdraw(withdrawAmount);
       toast({
         title: "Withdrawal Request Received",
         description: `Your request to withdraw KES ${amount} has been received. It will be processed in 2-3 working days.`,

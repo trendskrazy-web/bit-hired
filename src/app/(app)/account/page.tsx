@@ -1,9 +1,18 @@
+"use client";
+
 import { TopUpCard } from "@/components/app/account/top-up-card";
 import { WithdrawCard } from "@/components/app/account/withdraw-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
 
 export default function AccountPage() {
+  const [balance, setBalance] = useState(1234.56);
+
+  const handleWithdrawal = (amount: number) => {
+    setBalance((prevBalance) => prevBalance - amount);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -26,7 +35,9 @@ export default function AccountPage() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Account Balance</span>
-                <span className="font-medium text-primary">KES 1,234.56</span>
+                <span className="font-medium text-primary">
+                  KES {balance.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Member Since</span>
@@ -34,7 +45,10 @@ export default function AccountPage() {
               </div>
             </CardContent>
           </Card>
-          <WithdrawCard />
+          <WithdrawCard
+            accountBalance={balance}
+            onWithdraw={handleWithdrawal}
+          />
         </div>
         <div className="lg:col-span-1">
           <TopUpCard />
