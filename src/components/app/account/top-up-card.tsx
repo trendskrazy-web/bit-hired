@@ -13,28 +13,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAccount } from "@/contexts/account-context";
-import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
+import { Copy } from "lucide-react";
 
-const MERCHANT_PHONE_NUMBER = "+254 712 345 678";
+const MERCHANT_PHONE_NUMBERS = ["0704367623", "0728477718"];
 
 export function TopUpCard() {
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  const [selectedPhoneNumber, setSelectedPhoneNumber] = useState<string | null>(null);
   const { addDepositRequest, mobileNumber } = useAccount();
+
+  useEffect(() => {
+    if (!generatedCode) {
+      // Pick a random number when the component loads or resets
+      const randomIndex = Math.floor(Math.random() * MERCHANT_PHONE_NUMBERS.length);
+      setSelectedPhoneNumber(MERCHANT_PHONE_NUMBERS[randomIndex]);
+    }
+  }, [generatedCode]);
 
   const handleDepositRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,12 +68,20 @@ export function TopUpCard() {
     }
   };
 
+  const copyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: `${type} Copied!`,
+      description: `${text} copied to clipboard.`,
+    });
+  };
+
   const resetForm = () => {
     setGeneratedCode(null);
     setAmount("");
   };
 
-  if (generatedCode) {
+  if (generatedCode && selectedPhoneNumber) {
     return (
       <Card>
         <CardHeader>
@@ -87,11 +93,31 @@ export function TopUpCard() {
         <CardContent className="space-y-4 text-sm">
           <div>
             <Label>Send Money To</Label>
-            <p className="font-bold text-lg">{MERCHANT_PHONE_NUMBER}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-bold text-lg">{selectedPhoneNumber}</p>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => copyToClipboard(selectedPhoneNumber, "Number")}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <div>
             <Label>Transaction Reference</Label>
-            <p className="font-bold text-lg text-primary">{generatedCode}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-bold text-lg text-primary">{generatedCode}</p>
+               <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => copyToClipboard(generatedCode, "Code")}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
             <p className="text-xs text-muted-foreground">This code helps us identify your deposit. The admin will use it to confirm your payment.</p>
           </div>
           <div className="pt-2">
