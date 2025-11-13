@@ -92,25 +92,17 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const handleCashOut = () => {
     const availableToCashOut = earnings - cashedOutAmount;
 
-    if (availableToCashOut > 0 && canCashOut && dailyEarning > 0) {
-      const cashOutAmount = dailyEarning; // Cash out one full day's earnings
-      if (availableToCashOut >= cashOutAmount) {
-        addBalance(cashOutAmount);
-        setCashedOutAmount(prev => prev + cashOutAmount);
-        setLastCashOutDate(new Date());
-        setCanCashOut(false);
-        
-        toast({
-          title: "Cash Out Successful!",
-          description: `You've cashed out KES ${cashOutAmount.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. It has been added to your main account balance.`,
-        });
-      } else {
-        toast({
-            title: "Cash Out Unavailable",
-            description: `You need at least KES ${cashOutAmount.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} available to cash out.`,
-            variant: "destructive",
-        });
-      }
+    if (availableToCashOut > 0 && canCashOut) {
+      const cashOutAmount = availableToCashOut; 
+      addBalance(cashOutAmount);
+      setCashedOutAmount(prev => prev + cashOutAmount);
+      setLastCashOutDate(new Date());
+      setCanCashOut(false);
+      
+      toast({
+        title: "Cash Out Successful!",
+        description: `You've cashed out KES ${cashOutAmount.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. It has been added to your main account balance.`,
+      });
     } else if (!canCashOut) {
          toast({
             title: "Cash Out Unavailable",
@@ -120,7 +112,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     } else {
       toast({
         title: "No Earnings to Cash Out",
-        description: "Not enough earnings have accumulated for a daily cash out.",
+        description: "Not enough earnings have accumulated to cash out.",
         variant: "destructive",
       });
     }
@@ -185,7 +177,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
                     <p className="font-semibold font-mono">KES {availableToCashOut.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
             </div>
-            <Button onClick={handleCashOut} size="sm" disabled={!canCashOut || availableToCashOut < dailyEarning}>Cash Out Daily</Button>
+            <Button onClick={handleCashOut} size="sm" disabled={!canCashOut || availableToCashOut <= 0}>Cash Out</Button>
         </div>
         <div>
           <Progress value={progressPercentage} className="w-full h-2 mt-4" />
