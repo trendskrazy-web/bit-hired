@@ -3,26 +3,26 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1717667745934-53091623e8ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzZXJ2ZXIlMjBoYXJkd2FyZXxlbnwwfHx8fDE3NjMwMTgyNDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "server hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1576087414768-69e022424bb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBU0lDJTIwbWluZXJ8ZW58MHx8fHwxNzYyOTkwMTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ASIC miner"
     },
     {
       "id": "whatsminer-m30s",
       "description": "An efficient and powerful mining rig.",
-      "imageUrl": "https://images.unsplash.com/photo-1591370874773-6702e8f12fd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjb21wdXRlciUyMGhhcmR3YXJlfGVufDB8fHx8MTc2MzAzMzk4Mnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "computer hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1720381298043-72916828b11d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYyOTkwMTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     },
     {
       "id": "avalonminer-1246",
       "description": "A reliable choice for steady mining operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1682559736721-c2e77ff4c650?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkYXRhJTIwY2VudGVyfGVufDB8fHx8MTc2Mjk5MDgwMnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "data center"
+      "imageUrl": "https://images.unsplash.com/photo-1731834452954-bef04f4d3342?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3NjMwMzUwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining hardware"
     },
     {
       "id": "dragonmint-t1",
       "description": "A classic miner known for its performance.",
-      "imageUrl": "https://images.unsplash.com/photo-1631376178637-392efc9e356b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjaXJjdWl0JTIwYm9hcmR8ZW58MHx8fHwxNzYzMDEwNjQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "circuit board"
+      "imageUrl": "https://images.unsplash.com/photo-1621579385187-c12061b577be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxiaXRjb2luJTIwbWluZXJ8ZW58MHx8fHwxNzYzMDM1MDc0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bitcoin miner"
     }
   ]
 }
