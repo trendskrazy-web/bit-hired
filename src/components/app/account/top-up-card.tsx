@@ -15,6 +15,17 @@ import { useAccount } from "@/contexts/account-context";
 import { useRedeemCodes } from "@/contexts/redeem-code-context";
 import { RefreshCw, Copy } from "lucide-react";
 import { useState, useMemo } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const mpesaNumbers = ["+254704367623", "+254728477718"];
 
@@ -41,8 +52,7 @@ export function TopUpCard() {
   };
 
 
-  const handleVerify = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRedeem = () => {
     if (!redeemCodeInput) {
         toast({
             title: "Error",
@@ -123,7 +133,7 @@ export function TopUpCard() {
               2. Enter the redeem code you are provided with below.
             </p>
           </div>
-          <form onSubmit={handleVerify} className="space-y-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="redeem-code">Redeem Code</Label>
               <Input
@@ -134,10 +144,28 @@ export function TopUpCard() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isVerifying}>
-              {isVerifying ? "Verifying..." : "Redeem Code"}
-            </Button>
-          </form>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="w-full" disabled={isVerifying}>
+                  {isVerifying ? "Verifying..." : "Redeem Code"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will redeem the code and add the corresponding amount to your account balance. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleRedeem}>
+                    Confirm
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </CardContent>
     </Card>
   );
