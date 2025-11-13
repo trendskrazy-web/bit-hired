@@ -121,7 +121,7 @@ export function TopUpCard() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={isVerifying}>
-              {isVerifying ? "Verifying..." : "Confirm Payment"}
+              {isVerifying ? "Verifying..." : "Redeem Code"}
             </Button>
           </form>
         </CardContent>
