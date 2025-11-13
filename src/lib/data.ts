@@ -74,6 +74,55 @@ const machines: Machine[] = [
       { label: "1 Month", cost: 100 },
     ],
   },
+  {
+    id: "innosilicon-t3",
+    name: "Innosilicon T3+ Pro",
+    description: "A powerful and efficient miner with a strong hash rate.",
+    miningRate: 67,
+    power: 3300,
+    durations: [
+      { label: "3 Days", cost: 35 },
+      { label: "1 Week", cost: 80 },
+      { label: "1 Month", cost: 300 },
+    ],
+  },
+  {
+    id: "ebang-ebit-e12",
+    name: "Ebang Ebit E12+",
+    description: "High-performance mining with a focus on energy efficiency.",
+    miningRate: 50,
+    power: 2500,
+    durations: [
+      { label: "3 Days", cost: 30 },
+      { label: "1 Week", cost: 70 },
+      { label: "1 Month", cost: 280 },
+    ],
+  },
+  {
+    id: "bitfury-tardis",
+    name: "Bitfury Tardis",
+    description:
+      "An enterprise-grade solution offering robust performance and scalability.",
+    miningRate: 80,
+    power: 6300,
+    durations: [
+      { label: "3 Days", cost: 45 },
+      { label: "1 Week", cost: 100 },
+      { label: "1 Month", cost: 380 },
+    ],
+  },
+  {
+    id: "halong-dragonmint-t2",
+    name: "Halong Mining DragonMint T2",
+    description: "An efficient miner designed for long-term, stable operations.",
+    miningRate: 17,
+    power: 1570,
+    durations: [
+      { label: "3 Days", cost: 20 },
+      { label: "1 Week", cost: 45 },
+      { label: "1 Month", cost: 160 },
+    ],
+  },
 ];
 
 const transactions: Transaction[] = [
