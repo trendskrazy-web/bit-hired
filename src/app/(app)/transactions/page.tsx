@@ -1,10 +1,12 @@
+"use client";
+
 import { columns } from "@/components/app/transactions/columns";
 import { DataTable } from "@/components/app/transactions/data-table";
 import { Separator } from "@/components/ui/separator";
-import { getTransactions } from "@/lib/data";
+import { useAccount } from "@/contexts/account-context";
 
-export default async function TransactionsPage() {
-  const transactions = await getTransactions();
+export default function TransactionsPage() {
+  const { transactions } = useAccount();
 
   return (
     <div className="space-y-6">

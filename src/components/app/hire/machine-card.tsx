@@ -30,7 +30,7 @@ export function MachineCard({ machine, image }: MachineCardProps) {
     machine.durations[0]
   );
   const [isHiring, setIsHiring] = useState(false);
-  const { balance, deductBalance } = useAccount();
+  const { balance, deductBalance, addTransaction } = useAccount();
 
 
   const { potentialEarnings, dailyEarnings } = useMemo(() => {
@@ -56,10 +56,17 @@ export function MachineCard({ machine, image }: MachineCardProps) {
     setIsHiring(true);
     setTimeout(() => {
       deductBalance(selectedDuration.cost);
+      addTransaction({
+        machineName: machine.name,
+        duration: selectedDuration.label,
+        cost: selectedDuration.cost,
+        date: new Date().toISOString().split('T')[0],
+        status: "Active",
+      });
       setIsHiring(false);
       toast({
         title: "Machine Hired!",
-        description: `You have successfully hired the ${machine.name} for ${selectedDuration.label}.`,
+        description: `You have successfully hired the ${machine.name} for ${selectedDura_tion.label}. View it on your dashboard.`,
       });
     }, 1500);
   };

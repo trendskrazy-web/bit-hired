@@ -1,10 +1,11 @@
+"use client";
+
 import { ActiveMachineCard } from "@/components/app/dashboard/active-machine-card";
 import { Separator } from "@/components/ui/separator";
-import { getMachines, getTransactions } from "@/lib/data";
+import { useAccount } from "@/contexts/account-context";
 
-export default async function DashboardPage() {
-  const machines = await getMachines();
-  const transactions = await getTransactions();
+export default function DashboardPage() {
+  const { transactions } = useAccount();
   const activeTransactions = transactions.filter(
     (t) => t.status === "Active"
   );
