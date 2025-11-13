@@ -1,6 +1,7 @@
 export interface DurationOption {
-  label: "3 Days" | "1 Week" | "1 Month" | "45 Days";
+  label: "45 Days";
   cost: number;
+  totalEarnings: number;
 }
 
 export interface Machine {
@@ -29,7 +30,7 @@ const machines: Machine[] = [
       "A top-tier ASIC miner offering a high hash rate and efficiency for serious virtual miners.",
     miningRate: 110,
     power: 3250,
-    durations: [{ label: "45 Days", cost: 1000 }],
+    durations: [{ label: "45 Days", cost: 1000, totalEarnings: 1800 }],
   },
   {
     id: "whatsminer-m30s",
@@ -38,7 +39,7 @@ const machines: Machine[] = [
       "Known for its exceptional performance and stability, a solid choice for consistent returns.",
     miningRate: 112,
     power: 3472,
-    durations: [{ label: "45 Days", cost: 1100 }],
+    durations: [{ label: "45 Days", cost: 3000, totalEarnings: 5000 }],
   },
   {
     id: "avalonminer-1246",
@@ -47,7 +48,7 @@ const machines: Machine[] = [
       "A reliable workhorse from Canaan, balancing power with a durable design.",
     miningRate: 90,
     power: 3420,
-    durations: [{ label: "45 Days", cost: 850 }],
+    durations: [{ label: "45 Days", cost: 7500, totalEarnings: 12000 }],
   },
   {
     id: "dragonmint-t1",
@@ -56,7 +57,7 @@ const machines: Machine[] = [
       "A legacy miner still capable of delivering results. Great for entry-level exploration.",
     miningRate: 16,
     power: 1480,
-    durations: [{ label: "45 Days", cost: 250 }],
+    durations: [{ label: "45 Days", cost: 15000, totalEarnings: 30000 }],
   },
   {
     id: "innosilicon-t3",
@@ -64,7 +65,7 @@ const machines: Machine[] = [
     description: "A powerful and efficient miner with a strong hash rate.",
     miningRate: 67,
     power: 3300,
-    durations: [{ label: "45 Days", cost: 750 }],
+    durations: [{ label: "45 Days", cost: 25000, totalEarnings: 56000 }],
   },
   {
     id: "ebang-ebit-e12",
@@ -72,7 +73,7 @@ const machines: Machine[] = [
     description: "High-performance mining with a focus on energy efficiency.",
     miningRate: 50,
     power: 2500,
-    durations: [{ label: "45 Days", cost: 700 }],
+    durations: [{ label: "45 Days", cost: 50000, totalEarnings: 110000 }],
   },
   {
     id: "bitfury-tardis",
@@ -81,7 +82,7 @@ const machines: Machine[] = [
       "An enterprise-grade solution offering robust performance and scalability.",
     miningRate: 80,
     power: 6300,
-    durations: [{ label: "45 Days", cost: 950 }],
+    durations: [{ label: "45 Days", cost: 100000, totalEarnings: 210000 }],
   },
   {
     id: "halong-dragonmint-t2",
@@ -89,7 +90,7 @@ const machines: Machine[] = [
     description: "An efficient miner designed for long-term, stable operations.",
     miningRate: 17,
     power: 1570,
-    durations: [{ label: "45 Days", cost: 400 }],
+    durations: [{ label: "45 Days", cost: 200000, totalEarnings: 410000 }],
   },
 ];
 

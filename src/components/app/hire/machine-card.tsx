@@ -31,20 +31,12 @@ export function MachineCard({ machine, image }: MachineCardProps) {
   const [isHiring, setIsHiring] = useState(false);
 
   const { potentialEarnings, dailyEarnings } = useMemo(() => {
-    let days = 45; // All durations are 45 days
-
-    let earnings = 0;
-    if (machine.id === "antminer-s19" && selectedDuration.label === "45 Days") {
-      earnings = 1800;
-    } else {
-      // Simplified earnings calculation: (hashrate * days * magic_number)
-      earnings = (machine.miningRate / 100) * days * 0.00001 * 67500 * 130; // BTC to KES
-    }
-
+    const days = 45; // All durations are 45 days
+    const earnings = selectedDuration.totalEarnings;
     const daily = days > 0 ? earnings / days : 0;
 
     return { potentialEarnings: earnings, dailyEarnings: daily };
-  }, [selectedDuration, machine.miningRate, machine.id]);
+  }, [selectedDuration]);
 
 
   const handleHire = (e: React.FormEvent) => {
