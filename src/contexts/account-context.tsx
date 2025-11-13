@@ -10,11 +10,12 @@ import {
   useCallback,
 } from 'react';
 import type { Transaction, Deposit, DepositTransaction } from '@/lib/data';
-import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
-import { collection, doc, onSnapshot, increment, query, where, orderBy } from 'firebase/firestore';
+import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, doc, onSnapshot, increment, query, where, orderBy, writeBatch, getDocs } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { usePathname } from 'next/navigation';
+import { deleteUser } from 'firebase/auth';
 
 interface AccountContextType {
   balance: number;
@@ -34,6 +35,7 @@ interface AccountContextType {
   approveDeposit: (depositId: string, userId: string, amount: number) => void;
   allDeposits: DepositTransaction[];
   mobileNumber: string;
+  deleteUserAccount: () => Promise<void>;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -191,6 +193,36 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     },
     [user, firestore]
   );
+  
+  const deleteUserAccount = async () => {
+    if (!user || !firestore) {
+      throw new Error("User not authenticated or Firestore not available.");
+    }
+    const userId = user.uid;
+
+    // Use a batch to delete all documents atomically.
+    const batch = writeBatch(firestore);
+
+    // 1. Delete user's rental documents
+    const rentalsRef = collection(firestore, 'users', userId, 'rentals');
+    const rentalsSnapshot = await getDocs(rentalsRef);
+    rentalsSnapshot.forEach(doc => batch.delete(doc.ref));
+
+    // 2. Delete user's deposit transactions
+    const depositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', userId));
+    const depositsSnapshot = await getDocs(depositsQuery);
+    depositsSnapshot.forEach(doc => batch.delete(doc.ref));
+
+    // 3. Delete the main user document
+    const userDocRef = doc(firestore, 'users', userId);
+    batch.delete(userDocRef);
+    
+    // Commit the batch
+    await batch.commit();
+
+    // 4. Finally, delete the user from Firebase Authentication
+    await deleteUser(user);
+  };
 
   return (
     <AccountContext.Provider
@@ -209,6 +241,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         approveDeposit,
         allDeposits,
         mobileNumber,
+        deleteUserAccount,
       }}
     >
       {children}
@@ -223,5 +256,3 @@ export function useAccount() {
   }
   return context;
 }
-
-    

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth, useUser } from '@/firebase';
-import { CreditCard, LogOut, User } from 'lucide-react';
+import { CreditCard, LogOut, User, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 export function UserNav() {
@@ -58,9 +59,16 @@ export function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
+         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
+        </DropdownMenuItem>
+         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/account" className="text-destructive focus:text-destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            <span>Delete Account</span>
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
