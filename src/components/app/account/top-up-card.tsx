@@ -14,23 +14,22 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAccount } from "@/contexts/account-context";
 import { RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+
+const mpesaNumbers = ["+254704367623", "+254728477718"];
 
 export function TopUpCard() {
   const { toast } = useToast();
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumberIndex, setPhoneNumberIndex] = useState(0);
   const [isVerifying, setIsVerifying] = useState(false);
   const [redeemCode, setRedeemCode] = useState("");
   const { addDeposit } = useAccount();
 
-  const generateRandomNumber = () => {
-    const randomSuffix = Math.floor(1000000 + Math.random() * 9000000);
-    setPhoneNumber(`+254 7${randomSuffix}`);
-  };
+  const phoneNumber = useMemo(() => mpesaNumbers[phoneNumberIndex], [phoneNumberIndex]);
 
-  useEffect(() => {
-    generateRandomNumber();
-  }, []);
+  const cyclePhoneNumber = () => {
+    setPhoneNumberIndex((prevIndex) => (prevIndex + 1) % mpesaNumbers.length);
+  };
 
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +80,7 @@ export function TopUpCard() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={generateRandomNumber}
+                onClick={cyclePhoneNumber}
                 aria-label="Generate new number"
               >
                 <RefreshCw className="h-4 w-4" />
