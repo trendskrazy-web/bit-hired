@@ -91,7 +91,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
           setDeposits(depositData);
         },
         (error) => {
-           const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+           const permissionError = new FirestorePermissionError({ path: `deposit_transactions where userAccountId == ${user.uid}`, operation: 'list' });
            errorEmitter.emit('permission-error', permissionError);
         }
       );
@@ -121,7 +121,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         unsubscribeAllDeposits();
       };
     }
-  }, [user, firestore, isAdminPage]);
+  }, [user, firestore, isAdminPage, pathname]);
 
   const updateUserBalance = (amount: number, userId: string = user?.uid || '') => {
       if(userId && firestore) {
@@ -223,3 +223,5 @@ export function useAccount() {
   }
   return context;
 }
+
+    

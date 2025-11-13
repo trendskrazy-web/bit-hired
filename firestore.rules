@@ -1,3 +1,4 @@
+
 /**
  * @file Firebase Security Rules for BitHired Application
  *
@@ -64,11 +65,17 @@ service cloud.firestore {
      * @path /deposit_transactions/{depositId}
      */
     match /deposit_transactions/{depositId} {
-      allow list: if isAdmin(); // Admins can list all deposits
-      allow get: if isAdmin() || isOwner(resource.data.userAccountId); // Admin or owner can get
-      allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid; // User can create their own deposit request
-      allow update: if isAdmin(); // Only admins can update (e.g., to confirm)
-      allow delete: if isAdmin(); // Only admins can delete
+      // Admins can perform any action on any deposit.
+      allow read, write: if isAdmin();
+      
+      // Users can create their own deposit requests.
+      allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
+
+      // Users can read their own deposit requests.
+      allow get: if isOwner(resource.data.userAccountId);
+
+      // Users can query for their own deposits.
+      allow list: if isSignedIn() && request.query.where.userAccountId == request.auth.uid;
     }
   }
 
@@ -95,3 +102,5 @@ service cloud.firestore {
     return isSignedIn();
   }
 }
+
+    
