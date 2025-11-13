@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { useAccount } from "@/contexts/account-context";
 import { PendingDepositsList } from "@/components/app/account/pending-deposits-list";
+import { RedeemCodeCard } from "@/components/app/account/redeem-code-card";
 
 export default function AccountPage() {
   const { balance, deductBalance, mobileNumber } = useAccount();
@@ -58,6 +59,7 @@ export default function AccountPage() {
         </div>
         <div className="lg:col-span-1 space-y-6">
           <TopUpCard />
+          <RedeemCodeCard />
         </div>
       </div>
     </div>
