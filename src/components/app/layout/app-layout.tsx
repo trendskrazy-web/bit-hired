@@ -5,6 +5,7 @@ import {
   Cpu,
   History,
   LayoutDashboard,
+  ShieldCheck,
   User,
 } from "lucide-react";
 import Link from "next/link";
@@ -30,6 +31,10 @@ const menuItems = [
   { href: "/transactions", label: "Transactions", icon: History },
   { href: "/account", label: "Account", icon: User },
 ];
+
+const adminMenuItems = [
+    { href: "/admin/redeem-codes", label: "Redeem Codes", icon: ShieldCheck },
+]
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -57,6 +62,28 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                       ? pathname === item.href
                       : pathname.startsWith(item.href)
                   }
+                  tooltip={{
+                    children: item.label,
+                    className: "bg-sidebar-background text-sidebar-foreground",
+                  }}
+                >
+                  <Link href={item.href}>
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+          <SidebarMenu className="mt-auto">
+             <SidebarMenuItem>
+                <span className="text-xs text-muted-foreground px-2">Admin</span>
+             </SidebarMenuItem>
+            {adminMenuItems.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith(item.href)}
                   tooltip={{
                     children: item.label,
                     className: "bg-sidebar-background text-sidebar-foreground",

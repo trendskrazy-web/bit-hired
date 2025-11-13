@@ -1,5 +1,6 @@
 import { AppLayout } from "@/components/app/layout/app-layout";
 import { AccountProvider } from "@/contexts/account-context";
+import { RedeemCodeProvider } from "@/contexts/redeem-code-context";
 
 export default function AuthenticatedLayout({
   children,
@@ -8,7 +9,9 @@ export default function AuthenticatedLayout({
 }) {
   return (
     <AccountProvider>
-      <AppLayout>{children}</AppLayout>
+      <RedeemCodeProvider>
+        <AppLayout>{children}</AppLayout>
+      </RedeemCodeProvider>
     </AccountProvider>
   );
 }
