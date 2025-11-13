@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useEffect, useState } from "react";
+import { useFormStatus } from "react-dom";
 import {
   Card,
   CardContent,
@@ -20,7 +21,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { type Machine, type DurationOption } from "@/lib/data";
 import { projectProfit } from "@/lib/actions";
-import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { BrainCircuit, Loader2, Sparkles, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,7 +51,7 @@ function SubmitButton() {
 }
 
 export function ProfitProjectionCard({ machines }: { machines: Machine[] }) {
-  const [state, formAction] = useFormState(projectProfit, initialState);
+  const [state, formAction] = useActionState(projectProfit, initialState);
   const [selectedMachineId, setSelectedMachineId] = useState(machines[0].id);
   const [selectedDuration, setSelectedDuration] = useState(
     machines[0].durations[0].label
