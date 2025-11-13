@@ -10,19 +10,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import type { Machine, DurationOption } from "@/lib/data";
 import type { ImagePlaceholder } from "@/lib/placeholder-images";
 import { Cpu, Zap, Wallet, CalendarDays } from "lucide-react";
 import Image from "next/image";
 import { useState, useMemo } from "react";
+import { Input } from "@/components/ui/input";
 
 interface MachineCardProps {
   machine: Machine;
