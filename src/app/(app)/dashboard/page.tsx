@@ -22,9 +22,14 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-1">
         <h2 className="text-xl font-headline font-bold">Active Machines</h2>
         {activeTransactions.length > 0 ? (
-          activeTransactions.map((transaction) => (
-            <ActiveMachineCard key={transaction.id} transaction={transaction} />
-          ))
+          <div className="grid gap-6 md:grid-cols-1">
+            {activeTransactions.map((transaction) => (
+              <ActiveMachineCard
+                key={transaction.id}
+                transaction={transaction}
+              />
+            ))}
+          </div>
         ) : (
           <p className="text-muted-foreground">
             You have no active mining machines.
