@@ -40,6 +40,10 @@ export default function RegisterPage() {
             <Label htmlFor="confirm-password">Confirm Password</Label>
             <Input id="confirm-password" type="password" required />
           </div>
+           <div className="grid gap-2">
+            <Label htmlFor="invitation-code">Invitation Code (Optional)</Label>
+            <Input id="invitation-code" type="text" placeholder="Enter your code" />
+          </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button className="w-full" asChild>
