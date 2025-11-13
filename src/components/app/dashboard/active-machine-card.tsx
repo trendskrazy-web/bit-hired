@@ -16,7 +16,7 @@ interface ActiveMachineCardProps {
 
 export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const { toast } = useToast();
-  const { addBalance } = useAccount();
+  const { addBalance, updateTransactionStatus } = useAccount();
   const [machines, setMachines] = useState<Machine[]>([]);
 
   useEffect(() => {
@@ -57,11 +57,21 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+      setTimeRemaining((prev) => {
+        if (prev > 1) {
+          return prev - 1;
+        } else {
+          // Time is up, update status
+          if (transaction.status === "Active") {
+            updateTransactionStatus(transaction.id, "Expired");
+          }
+          return 0;
+        }
+      });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [transaction.id, transaction.status, updateTransactionStatus]);
   
   useEffect(() => {
     if (dailyEarning > 0) {
@@ -81,13 +91,13 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
       const isAfter24Hours = today > twentyFourHoursAfterPurchase;
       const hasNotCashedOutToday = !lastCashOutDate || lastCashOutDate.toDateString() !== today.toDateString();
       
-      setCanCashOut(isAfter24Hours && hasNotCashedOutToday);
+      setCanCashOut(isAfter24Hours && hasNotCashedOutToday && timeRemaining > 0);
     };
 
     checkCashOutStatus();
     const interval = setInterval(checkCashOutStatus, 60000);
     return () => clearInterval(interval);
-  }, [lastCashOutDate, twentyFourHoursAfterPurchase]);
+  }, [lastCashOutDate, twentyFourHoursAfterPurchase, timeRemaining]);
 
   const handleCashOut = () => {
     const availableToCashOut = earnings - cashedOutAmount;
@@ -106,7 +116,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     } else if (!canCashOut) {
          toast({
             title: "Cash Out Unavailable",
-            description: "You can only cash out once per day, 24 hours after hiring the machine.",
+            description: "You can only cash out once per day, 24 hours after hiring the machine, and only while it's active.",
             variant: "destructive",
         });
     } else {

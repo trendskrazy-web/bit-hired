@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
 import type { Transaction } from "@/lib/data";
 import { getTransactions } from "@/lib/data";
 
@@ -11,6 +11,7 @@ interface AccountContextType {
   addBalance: (amount: number) => void;
   transactions: Transaction[];
   addTransaction: (transaction: Omit<Transaction, "id">) => void;
+  updateTransactionStatus: (transactionId: string, status: "Active" | "Expired" | "Pending") => void;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -43,8 +44,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     setTransactions((prevTransactions) => [newTransaction, ...prevTransactions]);
   };
 
+  const updateTransactionStatus = useCallback((transactionId: string, status: "Active" | "Expired" | "Pending") => {
+    setTransactions(prev => 
+      prev.map(t => 
+        t.id === transactionId ? { ...t, status } : t
+      )
+    );
+  }, []);
+
   return (
-    <AccountContext.Provider value={{ balance, setBalance, deductBalance, addBalance, transactions, addTransaction }}>
+    <AccountContext.Provider value={{ balance, setBalance, deductBalance, addBalance, transactions, addTransaction, updateTransactionStatus }}>
       {children}
     </AccountContext.Provider>
   );
