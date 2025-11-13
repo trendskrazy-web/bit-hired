@@ -66,7 +66,7 @@ export function MachineCard({ machine, image }: MachineCardProps) {
       setIsHiring(false);
       toast({
         title: "Machine Hired!",
-        description: `You have successfully hired the ${machine.name} for ${selectedDura_tion.label}. View it on your dashboard.`,
+        description: `You have successfully hired the ${machine.name} for ${selectedDuration.label}. View it on your dashboard.`,
       });
     }, 1500);
   };
