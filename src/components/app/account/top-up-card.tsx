@@ -23,7 +23,7 @@ export function TopUpCard({ onTopUp }: TopUpCardProps) {
   const { toast } = useToast();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
-  const [mpesaCode, setMpesaCode] = useState("");
+  const [redeemCode, setRedeemCode] = useState("");
 
   const generateRandomNumber = () => {
     const randomSuffix = Math.floor(1000000 + Math.random() * 9000000);
@@ -36,10 +36,10 @@ export function TopUpCard({ onTopUp }: TopUpCardProps) {
 
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!mpesaCode) {
+    if (!redeemCode) {
         toast({
             title: "Error",
-            description: "Please enter the MPESA confirmation code.",
+            description: "Please enter the redeem code.",
             variant: "destructive",
         });
         return;
@@ -50,7 +50,7 @@ export function TopUpCard({ onTopUp }: TopUpCardProps) {
       const topUpAmount = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
       onTopUp(topUpAmount);
       setIsVerifying(false);
-      setMpesaCode("");
+      setRedeemCode("");
       toast({
         title: "Success!",
         description: `KES ${topUpAmount.toLocaleString()} has been credited to your account.`,
@@ -61,15 +61,14 @@ export function TopUpCard({ onTopUp }: TopUpCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top Up with M-PESA</CardTitle>
-        <CardDescription>Add funds to your virtual wallet.</CardDescription>
+        <CardTitle>Redeem a Code</CardTitle>
+        <CardDescription>Enter a code to add funds to your wallet.</CardDescription>
       </CardHeader>
       <form onSubmit={handleVerify}>
         <CardContent className="space-y-4">
           <div>
             <p className="text-sm text-muted-foreground">
-              Send money to the following number using M-PESA Paybill or Send
-              Money:
+              To get a redeem code, send money to the following number using M-PESA Paybill or Send Money:
             </p>
             <div className="flex items-center justify-between p-3 my-2 bg-secondary rounded-md">
               <p className="font-mono text-lg font-semibold">{phoneNumber}</p>
@@ -85,19 +84,19 @@ export function TopUpCard({ onTopUp }: TopUpCardProps) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="mpesa-code">M-PESA Confirmation Code</Label>
+            <Label htmlFor="redeem-code">Redeem Code</Label>
             <Input
-              id="mpesa-code"
+              id="redeem-code"
               placeholder="e.g. SFD345KMNL"
-              value={mpesaCode}
-              onChange={(e) => setMpesaCode(e.target.value.toUpperCase())}
+              value={redeemCode}
+              onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
               required
             />
           </div>
         </CardContent>
         <CardFooter>
           <Button type="submit" className="w-full" disabled={isVerifying}>
-            {isVerifying ? "Verifying..." : "Verify & Top Up"}
+            {isVerifying ? "Verifying..." : "Redeem & Top Up"}
           </Button>
         </CardFooter>
       </form>
