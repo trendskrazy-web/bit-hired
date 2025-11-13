@@ -55,7 +55,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (user && firestore) {
-      // User-specific data listeners
+      // --- User-specific data listeners (for all users) ---
       const userDocRef = doc(firestore, 'users', user.uid);
       const unsubscribeUser = onSnapshot(
         userDocRef,
@@ -98,7 +98,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         }
       );
 
-      // Admin-specific data listener
+      // --- Admin-specific data listener ---
       let unsubscribeAllDeposits = () => {};
       if (isAdminPage) {
         const allDepositsQuery = query(collection(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
@@ -111,19 +111,20 @@ export function AccountProvider({ children }: { children: ReactNode }) {
             errorEmitter.emit('permission-error', permissionError);
         });
       } else {
-        // Clear admin data when not on an admin page
+        // Clear admin data when not on an admin page to prevent stale data
         setAllDeposits([]);
         setPendingDeposits([]);
       }
 
+      // Cleanup function
       return () => {
         unsubscribeUser();
         unsubscribeRentals();
         unsubscribeUserDeposits();
-        unsubscribeAllDeposits();
+        unsubscribeAllDeposits(); // This will be an empty function if not on an admin page
       };
     }
-  }, [user, firestore, isAdminPage, pathname]);
+  }, [user, firestore, isAdminPage]); // Re-run effect when user, firestore, or admin page status changes
 
   const updateUserBalance = (amount: number, userId: string = user?.uid || '') => {
       if(userId && firestore) {
@@ -200,27 +201,21 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
     const userId = user.uid;
 
-    // Use a batch to delete all documents atomically.
     const batch = writeBatch(firestore);
 
-    // 1. Delete user's rental documents
     const rentalsRef = collection(firestore, 'users', userId, 'rentals');
     const rentalsSnapshot = await getDocs(rentalsRef);
     rentalsSnapshot.forEach(doc => batch.delete(doc.ref));
 
-    // 2. Delete user's deposit transactions
     const depositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', userId));
     const depositsSnapshot = await getDocs(depositsQuery);
     depositsSnapshot.forEach(doc => batch.delete(doc.ref));
 
-    // 3. Delete the main user document
     const userDocRef = doc(firestore, 'users', userId);
     batch.delete(userDocRef);
     
-    // Commit the batch
     await batch.commit();
 
-    // 4. Finally, delete the user from Firebase Authentication
     await deleteUser(user);
   };
 
