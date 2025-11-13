@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
-import type { Transaction } from "@/lib/data";
+import type { Transaction, Deposit } from "@/lib/data";
 import { getTransactions } from "@/lib/data";
 
 interface AccountContextType {
@@ -12,6 +12,8 @@ interface AccountContextType {
   transactions: Transaction[];
   addTransaction: (transaction: Omit<Transaction, "id">) => void;
   updateTransactionStatus: (transactionId: string, status: "Active" | "Expired" | "Pending") => void;
+  deposits: Deposit[];
+  addDeposit: (deposit: Omit<Deposit, "id">) => void;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -19,6 +21,7 @@ const AccountContext = createContext<AccountContextType | undefined>(undefined);
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(1234.56);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [deposits, setDeposits] = useState<Deposit[]>([]);
 
   useEffect(() => {
     async function fetchTransactions() {
@@ -44,6 +47,15 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     setTransactions((prevTransactions) => [newTransaction, ...prevTransactions]);
   };
 
+  const addDeposit = (deposit: Omit<Deposit, "id">) => {
+    const newDeposit: Deposit = {
+      ...deposit,
+      id: `dep${deposits.length + 1}`,
+    };
+    addBalance(deposit.amount);
+    setDeposits((prevDeposits) => [newDeposit, ...prevDeposits]);
+  };
+
   const updateTransactionStatus = useCallback((transactionId: string, status: "Active" | "Expired" | "Pending") => {
     setTransactions(prev => 
       prev.map(t => 
@@ -53,7 +65,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AccountContext.Provider value={{ balance, setBalance, deductBalance, addBalance, transactions, addTransaction, updateTransactionStatus }}>
+    <AccountContext.Provider value={{ balance, setBalance, deductBalance, addBalance, transactions, addTransaction, updateTransactionStatus, deposits, addDeposit }}>
       {children}
     </AccountContext.Provider>
   );

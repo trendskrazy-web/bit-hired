@@ -12,18 +12,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAccount } from "@/contexts/account-context";
 import { RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface TopUpCardProps {
-  onTopUp: (amount: number) => void;
-}
-
-export function TopUpCard({ onTopUp }: TopUpCardProps) {
+export function TopUpCard() {
   const { toast } = useToast();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [redeemCode, setRedeemCode] = useState("");
+  const { addDeposit } = useAccount();
 
   const generateRandomNumber = () => {
     const randomSuffix = Math.floor(1000000 + Math.random() * 9000000);
@@ -48,7 +46,14 @@ export function TopUpCard({ onTopUp }: TopUpCardProps) {
     setIsVerifying(true);
     setTimeout(() => {
       const topUpAmount = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
-      onTopUp(topUpAmount);
+      
+      addDeposit({
+        amount: topUpAmount,
+        date: new Date().toISOString().split("T")[0],
+        redeemCode: redeemCode,
+        status: "Completed"
+      });
+
       setIsVerifying(false);
       setRedeemCode("");
       toast({

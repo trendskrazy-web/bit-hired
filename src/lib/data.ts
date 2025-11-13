@@ -22,6 +22,14 @@ export interface Transaction {
   status: "Active" | "Expired" | "Pending";
 }
 
+export interface Deposit {
+  id: string;
+  amount: number;
+  date: string;
+  redeemCode: string;
+  status: "Completed";
+}
+
 const machines: Machine[] = [
   {
     id: "antminer-s19",
