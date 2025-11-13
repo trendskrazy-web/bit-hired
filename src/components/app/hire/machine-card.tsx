@@ -20,7 +20,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import type { Machine, DurationOption } from "@/lib/data";
 import type { ImagePlaceholder } from "@/lib/placeholder-images";
-import { Bitcoin, Cpu, Zap, Wallet } from "lucide-react";
+import { Cpu, Zap, Wallet } from "lucide-react";
 import Image from "next/image";
 import { useState, useMemo } from "react";
 
@@ -44,11 +44,18 @@ export function MachineCard({ machine, image }: MachineCardProps) {
       days = 7;
     } else if (selectedDuration.label === "1 Month") {
       days = 30;
+    } else if (selectedDuration.label === "45 Days") {
+      days = 45;
     }
+
+    if (machine.id === "antminer-s19" && selectedDuration.label === "45 Days") {
+      return 1800;
+    }
+
     // Simplified earnings calculation: (hashrate * days * magic_number)
-    const earnings = (machine.miningRate / 100) * days * 0.00001;
-    return earnings.toFixed(8);
-  }, [selectedDuration, machine.miningRate]);
+    const earnings = (machine.miningRate / 100) * days * 0.00001 * 67500 * 130; // BTC to KES
+    return earnings;
+  }, [selectedDuration, machine.miningRate, machine.id]);
 
 
   const handleHire = (e: React.FormEvent) => {
@@ -106,7 +113,7 @@ export function MachineCard({ machine, image }: MachineCardProps) {
             <Wallet className="w-4 h-4" /> Potential Earnings
           </span>
           <span className="font-semibold font-mono flex items-center gap-1">
-             <Bitcoin className="w-3 h-3" /> {potentialEarnings}
+             KES {potentialEarnings.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
       </CardContent>

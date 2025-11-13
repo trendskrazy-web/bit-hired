@@ -1,5 +1,5 @@
 export interface DurationOption {
-  label: "3 Days" | "1 Week" | "1 Month";
+  label: "3 Days" | "1 Week" | "1 Month" | "45 Days";
   cost: number;
 }
 
@@ -30,6 +30,7 @@ const machines: Machine[] = [
     miningRate: 110,
     power: 3250,
     durations: [
+      { label: "45 Days", cost: 1000 },
       { label: "3 Days", cost: 50 },
       { label: "1 Week", cost: 110 },
       { label: "1 Month", cost: 400 },
