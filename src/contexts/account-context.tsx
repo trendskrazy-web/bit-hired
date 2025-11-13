@@ -85,7 +85,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         }
       );
       
-      const userDepositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid), orderBy('createdAt', 'desc'));
+      const userDepositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid));
       const unsubscribeUserDeposits = onSnapshot(
         userDepositsQuery,
         (snapshot) => {
