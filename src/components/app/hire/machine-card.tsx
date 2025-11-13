@@ -20,9 +20,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import type { Machine, DurationOption } from "@/lib/data";
 import type { ImagePlaceholder } from "@/lib/placeholder-images";
-import { Bitcoin, Cpu, Zap } from "lucide-react";
+import { Bitcoin, Cpu, Zap, Wallet } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 interface MachineCardProps {
   machine: Machine;
@@ -35,6 +35,21 @@ export function MachineCard({ machine, image }: MachineCardProps) {
     machine.durations[0]
   );
   const [isHiring, setIsHiring] = useState(false);
+
+  const potentialEarnings = useMemo(() => {
+    let days = 0;
+    if (selectedDuration.label === "3 Days") {
+      days = 3;
+    } else if (selectedDuration.label === "1 Week") {
+      days = 7;
+    } else if (selectedDuration.label === "1 Month") {
+      days = 30;
+    }
+    // Simplified earnings calculation: (hashrate * days * magic_number)
+    const earnings = (machine.miningRate / 100) * days * 0.00001;
+    return earnings.toFixed(8);
+  }, [selectedDuration, machine.miningRate]);
+
 
   const handleHire = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,6 +100,14 @@ export function MachineCard({ machine, image }: MachineCardProps) {
             <Zap className="w-4 h-4" /> Power
           </span>
           <span className="font-semibold">{machine.power} W</span>
+        </div>
+        <div className="flex justify-between items-center text-sm">
+          <span className="flex items-center gap-2 text-muted-foreground">
+            <Wallet className="w-4 h-4" /> Potential Earnings
+          </span>
+          <span className="font-semibold font-mono flex items-center gap-1">
+             <Bitcoin className="w-3 h-3" /> {potentialEarnings}
+          </span>
         </div>
       </CardContent>
       <CardFooter>
