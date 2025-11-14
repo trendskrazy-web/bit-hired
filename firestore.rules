@@ -88,11 +88,13 @@ service cloud.firestore {
      * @path /redeem_codes/{code}
      */
     match /redeem_codes/{code} {
-      // Admins can create, read, and list all codes.
-      allow create, get, list: if isAdmin();
+      // Admins can create and list all codes. Non-admins cannot list all codes.
+      allow create, get: if isAdmin();
+      allow list: if isAdmin();
 
       // Any signed-in user can update a code (to redeem it), but only if it hasn't been used yet.
-      // This prevents a code from being used multiple times.
+      // This prevents a code from being used multiple times. The get rule is for the redeemCode function to check the code first.
+      allow get: if isSignedIn();
       allow update: if isSignedIn()
                     && request.resource.data.used == true
                     && resource.data.used == false
