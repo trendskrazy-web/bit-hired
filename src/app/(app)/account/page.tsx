@@ -7,7 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import { useAccount } from "@/contexts/account-context";
 import { RedeemCodeCard } from "@/components/app/account/redeem-code-card";
 import { useUser } from "@/firebase";
-import { TopUpCard } from "@/components/app/account/top-up-card";
 
 export default function AccountPage() {
   const { balance, mobileNumber, name, email } = useAccount();
@@ -58,7 +57,6 @@ export default function AccountPage() {
           />
         </div>
         <div className="lg:col-span-1 space-y-6">
-          <TopUpCard />
           <RedeemCodeCard />
         </div>
       </div>

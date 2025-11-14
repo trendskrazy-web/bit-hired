@@ -102,17 +102,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     });
     unsubscribers.push(unsubscribeRentals);
     
-    // User-specific deposits listener
-    const depositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid));
-    const unsubscribeDeposits = onSnapshot(depositsQuery, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
-      setDeposits(data);
-    }, (error) => {
-      const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
-      errorEmitter.emit('permission-error', permissionError);
-    });
-    unsubscribers.push(unsubscribeDeposits);
-
     return () => {
       unsubscribers.forEach(unsub => unsub());
     };
