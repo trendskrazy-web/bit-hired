@@ -10,7 +10,7 @@ import {
   useCallback,
 } from 'react';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
-import { collection, doc, onSnapshot, query, where, setDoc, increment, getDocs, orderBy } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, where, setDoc, increment, getDocs, orderBy, CollectionReference, Query } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { useAccount } from './account-context';
@@ -163,7 +163,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       collectionName: string,
       setData: React.Dispatch<React.SetStateAction<T[]>>
     ) => {
-      let q;
+      let q: Query;
       const collectionRef = collection(firestore, collectionName);
       if (isAdmin) {
         q = query(collectionRef, orderBy('createdAt', 'desc')); // Admin gets all, sorted
@@ -174,7 +174,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as T));
         setData(data);
       }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: collectionName, operation: 'list' });
+        const path = (q as any)._query.path.canonicalString();
+        const permissionError = new FirestorePermissionError({ path: path, operation: 'list' });
         errorEmitter.emit('permission-error', permissionError);
       });
       unsubscribers.push(unsubscribe);
