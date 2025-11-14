@@ -31,24 +31,17 @@ interface AccountContextType {
   name: string;
   email: string;
   mobileNumber: string;
-  mpesaNumbers: string[];
-  setMpesaNumbers: (numbers: string[]) => void;
-  notifications: Notification[];
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
 
-const INITIAL_MPESA_NUMBERS = ["0704367623", "0728477718"];
-
-export function AccountProvider({ children, isAdmin }: { children: ReactNode, isAdmin: boolean }) {
+export function AccountProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [deposits, setDeposits] = useState<DepositTransaction[]>([]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
-  const [mpesaNumbers, setMpesaNumbers] = useState<string[]>(INITIAL_MPESA_NUMBERS);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const { user } = useUser();
   const firestore = useFirestore();
@@ -89,27 +82,13 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
        errorEmitter.emit('permission-error', permissionError);
     });
     
-    // Restore notifications subscription for admins
-    let unsubscribeNotifications = () => {};
-    if (isAdmin) {
-        const notificationsQuery = query(collection(firestore, 'notifications'), orderBy('createdAt', 'desc'));
-        unsubscribeNotifications = onSnapshot(notificationsQuery, (snapshot) => {
-            const notificationData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification));
-            setNotifications(notificationData);
-        }, (error) => {
-            const permissionError = new FirestorePermissionError({ path: 'notifications', operation: 'list' });
-            errorEmitter.emit('permission-error', permissionError);
-        });
-    }
-
 
     return () => {
       unsubscribeUser();
       unsubscribeRentals();
       unsubscribeUserDeposits();
-      unsubscribeNotifications();
     };
-  }, [user, firestore, isAdmin]);
+  }, [user, firestore]);
 
   const updateUserBalance = (amount: number, userId: string = user?.uid || '') => {
       if(userId && firestore) {
@@ -185,9 +164,6 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
         name,
         email,
         mobileNumber,
-        mpesaNumbers,
-        setMpesaNumbers,
-        notifications,
       }}
     >
       {children}

@@ -5,24 +5,19 @@ import { AppLayout } from '@/components/app/layout/app-layout';
 import { AccountProvider } from '@/contexts/account-context';
 import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
 import { useUser } from '@/firebase';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 function AuthenticatedLayoutContent({ children }: { children: React.ReactNode }) {
-  const { user, isUserLoading, isAdmin } = useUser();
+  const { user, isUserLoading } = useUser();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/login');
     }
-    // Redirect non-admins away from admin pages
-    if (!isUserLoading && user && !isAdmin && pathname.startsWith('/admin')) {
-      router.push('/dashboard');
-    }
-  }, [isUserLoading, user, router, isAdmin, pathname]);
+  }, [isUserLoading, user, router]);
 
   if (isUserLoading || !user) {
     return (
@@ -33,9 +28,9 @@ function AuthenticatedLayoutContent({ children }: { children: React.ReactNode })
   }
 
   return (
-    <AccountProvider isAdmin={isAdmin}>
+    <AccountProvider>
       <RedeemCodeProvider>
-        <AppLayout isAdmin={isAdmin}>{children}</AppLayout>
+        <AppLayout>{children}</AppLayout>
       </RedeemCodeProvider>
     </AccountProvider>
   );

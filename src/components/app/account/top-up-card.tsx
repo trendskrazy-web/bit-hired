@@ -23,7 +23,9 @@ export function TopUpCard() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState<string | null>(null);
-  const { addDepositRequest, mobileNumber, mpesaNumbers } = useAccount();
+  const { addDepositRequest, mobileNumber } = useAccount();
+
+  const mpesaNumbers = ["0704367623", "0728477718"];
 
   useEffect(() => {
     if (!generatedCode && mpesaNumbers.length > 0) {

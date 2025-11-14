@@ -35,13 +35,13 @@ service cloud.firestore {
      * @path /users/{userId}
      */
     match /users/{userId} {
-      allow get, update: if isOwner(userId) || isAdmin();
+      allow get, update: if isOwner(userId);
       allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId
                     && request.resource.data.name is string
                     && request.resource.data.email is string
                     && request.resource.data.mobileNumber is string
                     && request.resource.data.virtualBalance == 0;
-      allow list: if isAdmin();
+      allow list: if false;
     }
 
     /**
@@ -50,7 +50,7 @@ service cloud.firestore {
      */
     match /mining_machines/{miningMachineId} {
       allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if false;
     }
 
     /**
@@ -66,11 +66,10 @@ service cloud.firestore {
      * @path /deposit_transactions/{depositTransactionId}
      */
     match /deposit_transactions/{depositTransactionId} {
-       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
-       allow list: if isSignedIn(); // Query rules will enforce user-specific reads
+       allow get: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
+       allow list: if isSignedIn() && request.query.where.userAccountId == request.auth.uid;
        allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
-       allow update: if isAdmin();
-       allow delete: if false;
+       allow update, delete: if false;
     }
 
     /**
@@ -78,7 +77,7 @@ service cloud.firestore {
      * @path /notifications/{notificationId}
      */
     match /notifications/{notificationId} {
-      allow get, list, create, update, delete: if isAdmin();
+      allow get, list, create, update, delete: if false;
     }
   }
 
@@ -90,10 +89,5 @@ service cloud.firestore {
   // Helper function to determine if the user is the owner of the document.
   function isOwner(userId) {
     return isSignedIn() && request.auth.uid == userId;
-  }
-
-  // Helper function to check for admin role.
-  function isAdmin() {
-    return isSignedIn() && request.auth.token.admin == true;
   }
 }

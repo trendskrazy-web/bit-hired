@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/sidebar';
 import { AppHeader } from './header';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 
 const userMenuItems = [
   { href: '/account', label: 'Account', icon: User },
@@ -40,13 +40,6 @@ const userMenuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/transactions', label: 'Transactions', icon: History },
   { href: '/about', label: 'About', icon: Info },
-];
-
-const adminMenuItems = [
-  { href: '/admin/deposits', label: 'Deposits', icon: DatabaseZap },
-  { href: '/admin/notifications', label: 'Notifications', icon: Bell },
-  { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 function SidebarFooterContent() {
@@ -79,12 +72,11 @@ function SidebarFooterContent() {
 
 export function AppLayout({
   children,
-  isAdmin,
 }: {
   children: React.ReactNode;
-  isAdmin: boolean;
 }) {
   const pathname = usePathname();
+  const { isAdmin } = useUser();
 
   const renderMenuItems = (items: typeof userMenuItems) => {
     return items.map((item) => (
@@ -124,25 +116,13 @@ export function AppLayout({
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>{renderMenuItems(userMenuItems)}</SidebarMenu>
-          {isAdmin && (
-            <>
-              <SidebarSeparator />
-              <div className="p-2">
-                <div className="px-2 py-1 text-xs font-semibold text-muted-foreground flex items-center gap-2">
-                  <Shield className="w-4 h-4" />
-                  <span>Admin Panel</span>
-                </div>
-              </div>
-              <SidebarMenu>{renderMenuItems(adminMenuItems)}</SidebarMenu>
-            </>
-          )}
         </SidebarContent>
         <SidebarFooter className="group-data-[collapsible=icon]:hidden space-y-2">
           <SidebarFooterContent />
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="bg-background">
-        <AppHeader isAdmin={isAdmin} />
+        <AppHeader />
         <main className="p-4 sm:p-6 lg:p-8 flex-1">{children}</main>
       </SidebarInset>
     </SidebarProvider>
