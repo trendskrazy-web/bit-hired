@@ -10,8 +10,8 @@ import {
   useCallback,
 } from 'react';
 import type { Transaction } from '@/lib/data';
-import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking, useMemoFirebase } from '@/firebase';
-import { collection, doc, onSnapshot, increment, query, where, setDoc } from 'firebase/firestore';
+import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
+import { collection, doc, onSnapshot, increment } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -22,26 +22,6 @@ export interface UserAccount {
   mobileNumber: string;
   virtualBalance: number;
 }
-export interface Deposit {
-  id: string;
-  userAccountId: string;
-  amount: number;
-  transactionCode: string;
-  status: 'pending' | 'completed' | 'cancelled';
-  createdAt: string;
-  mobileNumber: string;
-  depositTo?: string; // The account number the user is depositing to
-}
-
-export interface Withdrawal {
-    id: string;
-    userAccountId: string;
-    amount: number;
-    status: 'pending' | 'completed' | 'cancelled';
-    createdAt: string;
-    mobileNumber: string;
-}
-
 interface AccountContextType {
   balance: number;
   setBalance: React.Dispatch<React.SetStateAction<number>>;
@@ -56,14 +36,7 @@ interface AccountContextType {
   name: string;
   email: string;
   mobileNumber: string;
-  deposits: Deposit[];
-  withdrawals: Withdrawal[];
-  addDepositRequest: (amount: number, transactionCode: string, depositTo: string) => void;
-  addWithdrawalRequest: (amount: number) => void;
   allUsers: UserAccount[];
-  // Admin functions
-  updateDepositStatus: (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
-  updateWithdrawalStatus: (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -74,8 +47,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [allUsers, setAllUsers] = useState<UserAccount[]>([]);
   
   const { user } = useUser();
@@ -140,7 +111,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         unsubscribers.push(unsubscribeAllUsers);
     }
 
-
     return () => {
       unsubscribers.forEach(unsub => unsub());
     };
@@ -179,50 +149,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addDepositRequest = (amount: number, transactionCode: string, depositTo: string) => {
-    if (user && firestore && mobileNumber) {
-      const depositsColRef = collection(firestore, 'deposit_transactions');
-      addDocumentNonBlocking(depositsColRef, {
-        userAccountId: user.uid,
-        amount,
-        transactionCode,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-        mobileNumber: mobileNumber,
-        depositTo: depositTo,
-      });
-
-      const today = new Date().toISOString().split("T")[0];
-      const limitDocId = `${today}_${depositTo}`;
-      const limitDocRef = doc(firestore, 'daily_limits', limitDocId);
-
-      setDoc(limitDocRef, 
-        { totalAmount: increment(amount), date: today }, 
-        { merge: true }
-      ).catch(error => {
-        const permissionError = new FirestorePermissionError({
-            path: limitDocRef.path,
-            operation: 'write',
-            requestResourceData: { totalAmount: `increment(${amount})`, date: today }
-        });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-    }
-  };
-
-   const addWithdrawalRequest = (amount: number) => {
-    if (user && firestore && mobileNumber) {
-      const withdrawalsColRef = collection(firestore, 'withdrawal_transactions');
-      addDocumentNonBlocking(withdrawalsColRef, {
-        userAccountId: user.uid,
-        amount,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-        mobileNumber: mobileNumber,
-      });
-    }
-  };
-
   const updateTransactionStatus = useCallback(
     (transactionId: string, status: 'Active' | 'Expired' | 'Pending') => {
       if(user && firestore) {
@@ -233,38 +159,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [user, firestore]
   );
   
- const updateDepositStatus = useCallback(
-    (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => {
-      if (firestore) {
-        const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
-        if (status === 'completed') {
-            addBalance(amount, userId);
-            logAdminAction(`Approved deposit of ${amount} for user ${userId}.`);
-        } else {
-             logAdminAction(`Cancelled deposit of ${amount} for user ${userId}.`);
-        }
-        updateDocumentNonBlocking(depositDocRef, { status });
-      }
-    },
-    [firestore, addBalance, logAdminAction]
-  );
-
-  const updateWithdrawalStatus = useCallback(
-    (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => {
-        if (firestore) {
-            const withdrawalDocRef = doc(firestore, 'withdrawal_transactions', withdrawalId);
-            if(status === 'cancelled') {
-                addBalance(amount, userId);
-                logAdminAction(`Cancelled withdrawal of ${amount} for user ${userId}.`);
-            } else {
-                 logAdminAction(`Completed withdrawal of ${amount} for user ${userId}.`);
-            }
-            updateDocumentNonBlocking(withdrawalDocRef, { status });
-        }
-    },
-    [firestore, addBalance, logAdminAction]
-  );
-
   const contextValue = {
     balance,
     setBalance,
@@ -276,13 +170,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     name,
     email,
     mobileNumber,
-    deposits,
-    withdrawals,
-    addDepositRequest,
-    addWithdrawalRequest,
     allUsers,
-    updateDepositStatus,
-    updateWithdrawalStatus,
   };
 
 

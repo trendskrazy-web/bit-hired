@@ -4,6 +4,7 @@
 import { AppLayout } from '@/components/app/layout/app-layout';
 import { AccountProvider } from '@/contexts/account-context';
 import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
+import { TransactionProvider } from '@/contexts/transaction-context';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -28,9 +29,11 @@ function AuthenticatedLayoutContent({ children }: { children: React.ReactNode })
 
   return (
     <AccountProvider>
-      <RedeemCodeProvider>
-        <AppLayout>{children}</AppLayout>
-      </RedeemCodeProvider>
+      <TransactionProvider>
+        <RedeemCodeProvider>
+          <AppLayout>{children}</AppLayout>
+        </RedeemCodeProvider>
+      </TransactionProvider>
     </AccountProvider>
   );
 }
