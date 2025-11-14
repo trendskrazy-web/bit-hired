@@ -1,28 +1,28 @@
-GEGZNzOWg6bnU53iwJLzL5LaXwR2
-// This script is used to grant admin privileges to a user by setting a custom claim.
-// It uses the Firebase Admin SDK, which requires a service account key.
+import admin from 'firebase-admin';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
-// Usage: node scripts/set-admin.js <user_uid>
-
-const admin = require('firebase-admin');
-const path = require('path');
+// Recreate __dirname and require for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
 
 // --- Configuration ---
-// The UID of the user you want to make an admin.
-// You can pass this as a command-line argument or set it here.
 const uid = process.argv[2]; 
 
-// Path to your service account key JSON file.
-// The script now looks for the key in the SAME directory as the script itself.
 const serviceAccountPath = path.resolve(__dirname, 'service-account.json');
 
 let serviceAccount;
 try {
   serviceAccount = require(serviceAccountPath);
 } catch (error) {
-  console.error('\x1b[31m%s\x1b[0m', 'Error: Could not find or read service-account.json.');
-  console.error('Please make sure you have created a `service-account.json` file inside the `scripts` directory.');
-  console.error('You need to paste the content of the service account key you downloaded from Firebase into that file.');
+  if (error.code === 'MODULE_NOT_FOUND') {
+    console.error('\x1b[31m%s\x1b[0m', 'Error: Could not find service-account.json.');
+    console.error('Please make sure you have created a `service-account.json` file inside the `scripts` directory and pasted your key into it.');
+  } else {
+    console.error('\x1b[31m%s\x1b[0m', 'Error reading service-account.json:', error.message);
+  }
   process.exit(1);
 }
 
@@ -34,10 +34,13 @@ if (!uid) {
   process.exit(1);
 }
 
-// Initialize the Firebase Admin SDK
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+// Initialize the Firebase Admin SDK if not already initialized
+if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+}
+
 
 // Set the custom claim { admin: true } on the specified user.
 admin.auth().setCustomUserClaims(uid, { admin: true })
