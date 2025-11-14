@@ -1,140 +1,65 @@
 
-/**
- * @file Firebase Security Rules for BitHired Application
- *
- * @core_philosophy This ruleset enforces a strict user-ownership model for private data,
- * ensuring that only authenticated users can access their own information. Public data,
- * such as mining machine details, is readable by all. Admins have elevated privileges.
- *
- * @data_structure
- * - `/users/{userId}`: Stores user account information.
- * - `/mining_machines/{machineId}`: Stores publicly readable mining machine data.
- * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
- * - `/deposit_transactions/{depositId}`: Stores deposit requests.
- * - `/withdrawal_transactions/{withdrawalId}`: Stores withdrawal requests.
- * - `/notifications/{notificationId}`: Stores system notifications for admins.
- * - `/redeem_codes/{code}`: Stores redeemable codes.
- * - `/daily_limits/{limitId}`: Tracks daily transaction totals for payment accounts.
- *
- * @key_security_decisions
- * - Users can only create their own user account and can only read/write their own data.
- * - Admins can read and write all user data.
- * - Mining machine data is publicly readable, but write access is restricted to admins.
- * - Rental transactions are nested under the user, ensuring ownership.
- * - Users can create their own deposit/withdrawal requests and view only their own.
- * - Admins can read all deposits/withdrawals and update their status.
- *
- * @denormalization_for_authorization
- * - Transaction documents contain `userAccountId` for direct ownership checks in rules.
- *
- * @structural_segregation
- * - User-specific data is stored under the `/users/{userId}` path to enforce clear ownership.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Protects the user account document.
-     * @path /users/{userId}
-     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      // This is a hardcoded UID for the super admin.
+      return isSignedIn() && request.auth.uid == 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+    }
+
     match /users/{userId} {
       allow get, update: if isOwner(userId) || isAdmin();
-      allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId
-                    && request.resource.data.name is string
-                    && request.resource.data.email is string
-                    && request.resource.data.mobileNumber is string
-                    && request.resource.data.virtualBalance == 0;
+      allow create: if isSignedIn() && request.auth.uid == userId;
       allow list: if isAdmin();
     }
 
-    /**
-     * @description Allows public read access to mining machine details. Write access is restricted to admins.
-     * @path /mining_machines/{miningMachineId}
-     */
-    match /mining_machines/{miningMachineId} {
-      allow get, list: if true;
+    match /mining_machines/{machineId} {
+      allow get, list: if isSignedIn();
       allow create, update, delete: if isAdmin();
     }
 
-    /**
-     * @description Protects rental transaction documents under a user's account.
-     * @path /users/{userId}/rentals/{rentalId}
-     */
     match /users/{userId}/rentals/{rentalId} {
-      allow get, list, create, update, delete: if isOwner(userId) || isAdmin();
+      allow read, write: if isOwner(userId) || isAdmin();
     }
 
-    /**
-     * @description Manages deposit transactions. Users can create their own and can only
-     * view their own. Admins can read all deposits and update status.
-     * @path /deposit_transactions/{depositTransactionId}
-     */
-    match /deposit_transactions/{depositTransactionId} {
-        allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
-        allow list: if isSignedIn();
-        allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
-        allow update: if isAdmin();
+    match /deposit_transactions/{depositId} {
+      allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
+      allow update: if isAdmin();
     }
     
-    /**
-     * @description Manages withdrawal transactions. Users can create their own and can only
-     * view their own. Admins can read all withdrawals and update status.
-     * @path /withdrawal_transactions/{withdrawalTransactionId}
-     */
-    match /withdrawal_transactions/{withdrawalTransactionId} {
-        allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
-        allow list: if isSignedIn();
-        allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
-        allow update: if isAdmin();
-    }
-
-     /**
-     * @description Manages notifications for admins.
-     * @path /notifications/{notificationId}
-     */
-    match /notifications/{notificationId} {
-      allow read, write: if isAdmin();
+    match /withdrawal_transactions/{withdrawalId} {
+      allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
+      allow update: if isAdmin();
     }
     
-    /**
-     * @description Manages redeem codes.
-     * @path /redeem_codes/{code}
-     */
     match /redeem_codes/{code} {
-      allow read, write: if isAdmin();
-      allow update: if isSignedIn()
-                    && request.resource.data.used == true
-                    && resource.data.used == false
-                    && request.resource.data.usedBy == request.auth.uid;
+      allow get: if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isSignedIn() 
+                    && resource.data.used == false 
+                    && request.resource.data.used == true;
     }
-    
-     /**
-     * @description Manages daily transaction limits for payment accounts.
-     * @path /daily_limits/{limitId}
-     */
+
+    match /redeem_codes/{code} {
+      allow list: if isAdmin();
+    }
+
     match /daily_limits/{limitId} {
-        // Authenticated users can read limits to check them before depositing.
         allow get, list: if isSignedIn();
-        // Writing/updating limits should be a trusted operation.
-        // For now, allow logged-in user to create/update.
-        allow write: if isSignedIn();
+        allow write: if isSignedIn(); // Should be more secure in production
     }
-  }
-
-  // Helper function to determine if the user is signed in.
-  function isSignedIn() {
-    return request.auth != null;
-  }
-
-  // Helper function to determine if the user is the owner of the document.
-  function isOwner(userId) {
-    return isSignedIn() && request.auth.uid == userId;
-  }
-
-  // Helper function to check if the user is an admin.
-  function isAdmin() {
-    // This is a hardcoded UID for the super admin.
-    return isSignedIn() && request.auth.uid == 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
   }
 }
