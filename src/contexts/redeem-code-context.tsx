@@ -37,10 +37,12 @@ export interface RedeemCode {
 
 interface RedeemCodeContextType {
   generateCode: (amount: number) => Promise<string>;
+  generateCodes: (amount: number, count: number) => Promise<string[]>;
   redeemCode: (
     code: string
   ) => Promise<{ success: boolean; message: string; amount: number }>;
   markCodeAsUsed: (code: string) => void;
+  codes: RedeemCode[];
 }
 
 const RedeemCodeContext = createContext<RedeemCodeContextType | undefined>(
@@ -55,6 +57,32 @@ const generateUniqueCode = () => {
 export function RedeemCodeProvider({ children }: { children: ReactNode }) {
   const firestore = useFirestore();
   const { user } = useUser();
+  const [codes, setCodes] = useState<RedeemCode[]>([]);
+
+  // This is a hardcoded UID for the super admin.
+  const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+
+  // Admin: Fetch all redeem codes
+  useEffect(() => {
+    if (user?.uid === SUPER_ADMIN_UID && firestore) {
+      const codesColRef = collection(firestore, 'redeem_codes');
+      const q = query(codesColRef);
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const codesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RedeemCode));
+        setCodes(codesData);
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: codesColRef.path,
+          operation: 'list',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
+      return () => unsubscribe();
+    }
+  }, [user, firestore]);
+
 
   const generateCode = useCallback(async (amount: number) => {
     if (!firestore) throw new Error("Firestore not available");
@@ -71,6 +99,15 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
 
     return newCode;
   }, [firestore]);
+
+  const generateCodes = useCallback(async (amount: number, count: number) => {
+    const generatedCodes: string[] = [];
+    for (let i = 0; i < count; i++) {
+        const code = await generateCode(amount);
+        generatedCodes.push(code);
+    }
+    return generatedCodes;
+  }, [generateCode]);
 
 
   const redeemCode = useCallback(
@@ -142,7 +179,7 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
 
   return (
     <RedeemCodeContext.Provider
-      value={{ generateCode, redeemCode, markCodeAsUsed }}
+      value={{ generateCode, generateCodes, redeemCode, markCodeAsUsed, codes }}
     >
       {children}
     </RedeemCodeContext.Provider>
