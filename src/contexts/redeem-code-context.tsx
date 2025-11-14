@@ -36,7 +36,6 @@ export interface RedeemCode {
 }
 
 interface RedeemCodeContextType {
-  codes: RedeemCode[];
   generateCode: (amount: number) => Promise<string>;
   redeemCode: (
     code: string
@@ -55,10 +54,8 @@ const generateUniqueCode = () => {
 
 
 export function RedeemCodeProvider({ children }: { children: ReactNode }) {
-  const [codes, setCodes] = useState<RedeemCode[]>([]);
   const firestore = useFirestore();
   const { user } = useUser();
-  const isAdmin = user?.uid === 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
   const generateCode = useCallback(async (amount: number) => {
     if (!firestore) throw new Error("Firestore not available");
@@ -66,15 +63,13 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
     const newCode = generateUniqueCode();
     const codeDocRef = doc(firestore, 'redeem_codes', newCode);
     
-    await addDocumentNonBlocking(codeDocRef, {
+    // Not awaiting this is intentional for a non-blocking UI
+    addDocumentNonBlocking(codeDocRef, {
         code: newCode,
         amount,
         used: false,
         createdAt: new Date().toISOString(),
     });
-
-    // Manually add to local state if needed for immediate UI update
-    setCodes(prev => [...prev, { id: newCode, code: newCode, amount, used: false, createdAt: new Date().toISOString() }]);
 
     return newCode;
   }, [firestore]);
@@ -149,7 +144,7 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
 
   return (
     <RedeemCodeContext.Provider
-      value={{ codes, generateCode, redeemCode, markCodeAsUsed }}
+      value={{ generateCode, redeemCode, markCodeAsUsed }}
     >
       {children}
     </RedeemCodeContext.Provider>

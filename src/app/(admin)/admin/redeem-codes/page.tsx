@@ -15,7 +15,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRedeemCodes } from '@/contexts/redeem-code-context';
 import { useToast } from '@/hooks/use-toast';
-import { Separator } from '@/components/ui/separator';
 
 export default function AdminRedeemCodesPage() {
   const [amount, setAmount] = useState('');
