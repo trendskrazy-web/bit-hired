@@ -110,26 +110,37 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       errorEmitter.emit('permission-error', permissionError);
     });
     
-    // Listen to all deposits and withdrawals for admin, and then filter for user
-    const depositsQuery = query(collection(firestore, 'deposit_transactions'));
+    // Set up queries based on user role
+    const depositsColRef = collection(firestore, 'deposit_transactions');
+    const withdrawalsColRef = collection(firestore, 'withdrawal_transactions');
+    
+    const depositsQuery = isAdmin 
+      ? query(depositsColRef)
+      : query(depositsColRef, where("userAccountId", "==", user.uid));
+      
+    const withdrawalsQuery = isAdmin
+      ? query(withdrawalsColRef)
+      : query(withdrawalsColRef, where("userAccountId", "==", user.uid));
+
+    // Listen to deposits
     const unsubscribeDeposits = onSnapshot(depositsQuery, (snapshot) => {
-        const allDepositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Deposit));
+        const depositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Deposit));
         if (isAdmin) {
-          setAllDeposits(allDepositData);
+          setAllDeposits(depositData);
         }
-        setDeposits(allDepositData.filter(d => d.userAccountId === user.uid));
+        setDeposits(depositData);
     }, (error) => {
        const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
        errorEmitter.emit('permission-error', permissionError);
     });
 
-    const withdrawalsQuery = query(collection(firestore, 'withdrawal_transactions'));
+    // Listen to withdrawals
     const unsubscribeWithdrawals = onSnapshot(withdrawalsQuery, (snapshot) => {
-        const allWithdrawalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Withdrawal));
+        const withdrawalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Withdrawal));
         if (isAdmin) {
-          setAllWithdrawals(allWithdrawalData);
+          setAllWithdrawals(withdrawalData);
         }
-        setWithdrawals(allWithdrawalData.filter(w => w.userAccountId === user.uid));
+        setWithdrawals(withdrawalData);
     }, (error) => {
        const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
        errorEmitter.emit('permission-error', permissionError);
@@ -300,3 +311,5 @@ export function useAccount() {
   }
   return context;
 }
+
+    
