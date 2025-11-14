@@ -96,7 +96,6 @@ service cloud.firestore {
 
   // Helper function to check for admin custom claim.
   function isAdmin() {
-    // This now checks for either a custom claim OR a specific hardcoded UID for convenience.
-    return isSignedIn() && (request.auth.token.admin == true || request.auth.uid == 'GEGZNzOWg6bnU53iwJLzL5LaXwR2');
+    return isSignedIn() && request.auth.token.admin == true;
   }
 }
