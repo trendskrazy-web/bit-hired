@@ -12,6 +12,7 @@ import {
   WalletCards,
   Info,
   Settings,
+  LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -29,6 +30,7 @@ import {
 } from '@/components/ui/sidebar';
 import { AppHeader } from './header';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/firebase';
 
 const menuItems = [
   { href: '/account', label: 'Account', icon: User },
@@ -74,8 +76,33 @@ function AdminMenu() {
   );
 }
 
+function SidebarFooterContent() {
+  const auth = useAuth();
+  const handleLogout = () => {
+    auth.signOut();
+  };
+  return (
+    <>
+    <div className="bg-primary/10 p-4 rounded-lg text-center space-y-2">
+      <h4 className="font-semibold">Need Help?</h4>
+      <p className="text-xs text-muted-foreground">
+        Contact our support team for any questions.
+      </p>
+      <Button size="sm" className="w-full">
+        Contact Support
+      </Button>
+    </div>
+     <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+        <LogOut className="mr-2 h-4 w-4" />
+        Log Out
+      </Button>
+    </>
+  )
+}
+
 export function AppLayout({ children, isAdmin }: { children: React.ReactNode, isAdmin: boolean }) {
   const pathname = usePathname();
+  
   return (
     <SidebarProvider>
       <Sidebar className="border-r" side="left" variant="sidebar">
@@ -114,16 +141,8 @@ export function AppLayout({ children, isAdmin }: { children: React.ReactNode, is
           </SidebarMenu>
           {isAdmin && <AdminMenu />}
         </SidebarContent>
-        <SidebarFooter className="group-data-[collapsible=icon]:hidden">
-          <div className="bg-primary/10 p-4 rounded-lg text-center space-y-2">
-            <h4 className="font-semibold">Need Help?</h4>
-            <p className="text-xs text-muted-foreground">
-              Contact our support team for any questions.
-            </p>
-            <Button size="sm" className="w-full">
-              Contact Support
-            </Button>
-          </div>
+        <SidebarFooter className="group-data-[collapsible=icon]:hidden space-y-2">
+         <SidebarFooterContent />
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="bg-background">
