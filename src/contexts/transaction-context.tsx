@@ -19,7 +19,6 @@ export interface Deposit {
   id: string;
   userAccountId: string;
   amount: number;
-  transactionCode: string;
   status: 'pending' | 'completed' | 'cancelled';
   createdAt: string;
   mobileNumber: string;
@@ -38,7 +37,7 @@ export interface Withdrawal {
 interface TransactionContextType {
   deposits: Deposit[];
   withdrawals: Withdrawal[];
-  addDepositRequest: (amount: number, transactionCode: string, depositTo: string) => void;
+  addDepositRequest: (amount: number, depositTo: string) => void;
   addWithdrawalRequest: (amount: number) => void;
   // Admin functions
   updateDepositStatus: (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
@@ -107,13 +106,12 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     };
   }, [user, firestore]);
 
-  const addDepositRequest = (amount: number, transactionCode: string, depositTo: string) => {
+  const addDepositRequest = (amount: number, depositTo: string) => {
     if (user && firestore && mobileNumber) {
       const depositsColRef = collection(firestore, 'deposit_transactions');
       addDocumentNonBlocking(depositsColRef, {
         userAccountId: user.uid,
         amount,
-        transactionCode,
         status: 'pending',
         createdAt: new Date().toISOString(),
         mobileNumber: mobileNumber,

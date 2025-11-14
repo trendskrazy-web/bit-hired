@@ -120,13 +120,13 @@
           "type": "number",
           "description": "The amount the user intends to deposit."
         },
-        "transactionCode": {
-          "type": "string",
-          "description": "The unique code for the user to include in their M-PESA transaction."
-        },
         "status": {
           "type": "string",
-          "enum": ["pending", "completed", "cancelled"],
+          "enum": [
+            "pending",
+            "completed",
+            "cancelled"
+          ],
           "description": "The current status of the deposit."
         },
         "createdAt": {
@@ -135,15 +135,14 @@
           "description": "Timestamp when the deposit was initiated."
         },
         "mobileNumber": {
-            "type": "string",
-            "description": "The user's mobile number, denormalized for admin convenience."
+          "type": "string",
+          "description": "The user's mobile number, denormalized for admin convenience."
         }
       },
       "required": [
         "id",
         "userAccountId",
         "amount",
-        "transactionCode",
         "status",
         "createdAt",
         "mobileNumber"
@@ -169,7 +168,11 @@
         },
         "status": {
           "type": "string",
-          "enum": ["pending", "completed", "cancelled"],
+          "enum": [
+            "pending",
+            "completed",
+            "cancelled"
+          ],
           "description": "The current status of the withdrawal."
         },
         "createdAt": {
@@ -178,8 +181,8 @@
           "description": "Timestamp when the withdrawal was initiated."
         },
         "mobileNumber": {
-            "type": "string",
-            "description": "The user's mobile number for the M-PESA transfer."
+          "type": "string",
+          "description": "The user's mobile number for the M-PESA transfer."
         }
       },
       "required": [
@@ -267,7 +270,7 @@
         "createdAt"
       ]
     },
-     "DailyLimit": {
+    "DailyLimit": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "DailyLimit",
       "type": "object",
@@ -413,7 +416,7 @@
           ]
         }
       },
-       {
+      {
         "path": "/daily_limits/{date}_{accountNumber}",
         "definition": {
           "entityName": "DailyLimit",

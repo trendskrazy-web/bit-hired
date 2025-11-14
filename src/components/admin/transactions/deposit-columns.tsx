@@ -63,10 +63,6 @@ export const columns = (updateDepositStatus: UpdateStatusFn): ColumnDef<Deposit>
       return <div className="text-right font-medium">{formatted}</div>;
     },
   },
-  {
-    accessorKey: 'transactionCode',
-    header: 'M-PESA Code',
-  },
    {
     accessorKey: 'depositTo',
     header: 'Deposit To',

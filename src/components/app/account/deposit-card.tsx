@@ -32,7 +32,6 @@ const DEPOSIT_ACCOUNTS = [
 
 export function DepositCard() {
   const [amount, setAmount] = useState('');
-  const [transactionCode, setTransactionCode] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(DEPOSIT_ACCOUNTS[0].number);
   const { toast } = useToast();
@@ -50,24 +49,15 @@ export function DepositCard() {
       });
       return;
     }
-     if (!transactionCode) {
-      toast({
-        title: 'Invalid Code',
-        description: 'Please enter the M-PESA transaction code.',
-        variant: 'destructive',
-      });
-      return;
-    }
 
     setIsProcessing(true);
     
-    addDepositRequest(depositAmount, transactionCode, selectedAccount);
+    addDepositRequest(depositAmount, selectedAccount);
     
     // Simulate processing time
     setTimeout(() => {
       setIsProcessing(false);
       setAmount('');
-      setTransactionCode('');
       toast({
         title: 'Deposit Request Submitted',
         description: `Your deposit request of KES ${depositAmount.toLocaleString()} has been submitted for verification.`,
@@ -83,7 +73,7 @@ export function DepositCard() {
           Deposit Funds
         </CardTitle>
         <CardDescription>
-          Send money to the provided account and enter the details below.
+          Send money to the provided account and enter the amount below.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleDepositRequest}>
@@ -118,21 +108,8 @@ export function DepositCard() {
               min="1"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="transaction-code">M-PESA Code</Label>
-            <Input
-              id="transaction-code"
-              placeholder="e.g. SF8123ABC"
-              value={transactionCode}
-              onChange={(e) => setTransactionCode(e.target.value.toUpperCase())}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              The code you received from M-PESA after sending.
-            </p>
-          </div>
            <p className="text-xs text-muted-foreground">
-             Deposits are verified and credited within a few minutes.
+             Once you send the money, enter the amount to submit your deposit request for verification. Deposits are credited within a few minutes.
             </p>
         </CardContent>
         <CardFooter>
