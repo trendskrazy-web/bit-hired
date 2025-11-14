@@ -111,36 +111,38 @@ export function TopUpCard() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Complete Your M-PESA Deposit</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4 pt-4">
-              <p>
-                To complete your deposit of{" "}
-                <span className="font-bold text-primary">KES {amount}</span>,
-                please follow these steps:
-              </p>
-              <ol className="list-decimal list-inside space-y-2 text-sm text-foreground">
-                <li>Go to your M-PESA menu.</li>
-                <li>Select "Lipa na M-PESA".</li>
-                <li>Select "Pay Bill".</li>
-                <li>
-                  Enter Business Number:{" "}
-                  <span className="font-bold text-primary">123456</span>
-                </li>
-                <li>
-                  Enter Account Number:{" "}
-                  <span className="font-bold text-primary">
-                    {transactionCode}
-                  </span>
-                </li>
-                <li>
-                  Enter the amount:{" "}
-                  <span className="font-bold text-primary">KES {amount}</span>
-                </li>
-                <li>Enter your M-PESA PIN and confirm.</li>
-              </ol>
-              <p className="font-semibold text-destructive text-xs">
-                Your account will be credited once the transaction is confirmed
-                by an admin.
-              </p>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 pt-4">
+                <p>
+                  To complete your deposit of{" "}
+                  <span className="font-bold text-primary">KES {amount}</span>,
+                  please follow these steps:
+                </p>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-foreground">
+                  <li>Go to your M-PESA menu.</li>
+                  <li>Select "Lipa na M-PESA".</li>
+                  <li>Select "Pay Bill".</li>
+                  <li>
+                    Enter Business Number:{" "}
+                    <span className="font-bold text-primary">123456</span>
+                  </li>
+                  <li>
+                    Enter Account Number:{" "}
+                    <span className="font-bold text-primary">
+                      {transactionCode}
+                    </span>
+                  </li>
+                  <li>
+                    Enter the amount:{" "}
+                    <span className="font-bold text-primary">KES {amount}</span>
+                  </li>
+                  <li>Enter your M-PESA PIN and confirm.</li>
+                </ol>
+                <p className="font-semibold text-destructive text-xs">
+                  Your account will be credited once the transaction is confirmed
+                  by an admin.
+                </p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
