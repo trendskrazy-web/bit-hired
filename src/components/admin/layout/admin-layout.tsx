@@ -14,6 +14,7 @@ import {
   Gift,
   Settings,
   DatabaseZap,
+  Wallet,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -35,6 +36,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 
 const adminMenuItems = [
+  { href: '/admin/deposits', label: 'Deposits', icon: Wallet },
+  { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
   { href: '/admin-maker', label: 'Admin Maker', icon: Shield },
 ];
 
@@ -93,6 +96,26 @@ export function AdminLayout({
       </SidebarMenuItem>
     ));
   };
+  
+    const renderAdminMenuItems = (items: typeof adminMenuItems) => {
+    return items.map((item) => (
+      <SidebarMenuItem key={item.href}>
+        <SidebarMenuButton
+          asChild
+          isActive={pathname.startsWith(item.href)}
+          tooltip={{
+            children: item.label,
+            className: 'bg-sidebar-background text-sidebar-foreground',
+          }}
+        >
+          <Link href={item.href}>
+            <item.icon />
+            <span>{item.label}</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    ));
+  };
 
   return (
     <SidebarProvider>
@@ -111,7 +134,7 @@ export function AdminLayout({
                  <SidebarMenuItem>
                     <div className="px-2 text-xs font-medium text-muted-foreground">Admin</div>
                 </SidebarMenuItem>
-                {renderMenuItems(adminMenuItems)}
+                {renderAdminMenuItems(adminMenuItems)}
             </SidebarMenu>
             <SidebarSeparator />
             <SidebarMenu>
