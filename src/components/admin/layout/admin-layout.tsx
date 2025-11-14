@@ -9,12 +9,7 @@ import {
   User,
   Info,
   LogOut,
-  Bell,
-  Shield,
   Gift,
-  Settings,
-  DatabaseZap,
-  Wallet,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -33,7 +28,7 @@ import {
 } from '@/components/ui/sidebar';
 import { AppHeader } from '@/components/app/layout/header';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 
 const adminMenuItems = [
   { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
@@ -50,8 +45,6 @@ const userMenuItems = [
 function SidebarFooterContent() {
   const auth = useAuth();
   const handleLogout = () => {
-    // Also clear the admin flag from local storage on logout
-    localStorage.removeItem('isAdmin');
     auth.signOut();
   };
   return (

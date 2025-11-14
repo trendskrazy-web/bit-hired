@@ -4,21 +4,23 @@
  *
  * @core_philosophy This ruleset enforces a strict user-ownership model for private data,
  * ensuring that only authenticated users can access their own information. Public data,
- * such as mining machine details, is readable by all.
+ * such as mining machine details, is readable by all. Admins have elevated privileges.
  *
  * @data_structure
  * - `/users/{userId}`: Stores user account information.
  * - `/mining_machines/{machineId}`: Stores publicly readable mining machine data.
  * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
  * - `/deposit_transactions/{depositId}`: Stores deposit requests.
- * - `/notifications/{notificationId}`: Stores system notifications for admins (DEPRECATED).
+ * - `/notifications/{notificationId}`: Stores system notifications for admins.
  * - `/redeem_codes/{code}`: Stores redeemable codes.
  *
  * @key_security_decisions
  * - Users can only create their own user account and can only read/write their own data.
- * - Mining machine data is publicly readable.
+ * - Admins can read and write all user data.
+ * - Mining machine data is publicly readable, but write access is restricted to admins.
  * - Rental transactions are nested under the user, ensuring ownership.
  * - Users can create their own deposit requests and view only their own.
+ * - Admins can read all deposits and update their status.
  *
  * @denormalization_for_authorization
  * - Transaction documents contain `userAccountId` for direct ownership checks in rules.
@@ -35,21 +37,22 @@ service cloud.firestore {
      * @path /users/{userId}
      */
     match /users/{userId} {
-      allow get, update: if isOwner(userId);
+      allow get, update: if isOwner(userId) || isAdmin();
       allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId
                     && request.resource.data.name is string
                     && request.resource.data.email is string
                     && request.resource.data.mobileNumber is string
                     && request.resource.data.virtualBalance == 0;
+      allow list: if isAdmin();
     }
 
     /**
-     * @description Allows public read access to mining machine details.
+     * @description Allows public read access to mining machine details. Write access is restricted to admins.
      * @path /mining_machines/{miningMachineId}
      */
     match /mining_machines/{miningMachineId} {
       allow get, list: if true;
-      allow create, update, delete: if false; // No one can write
+      allow create, update, delete: if isAdmin();
     }
 
     /**
@@ -57,7 +60,7 @@ service cloud.firestore {
      * @path /users/{userId}/rentals/{rentalId}
      */
     match /users/{userId}/rentals/{rentalId} {
-      allow get, list, create, update, delete: if isOwner(userId);
+      allow get, list, create, update, delete: if isOwner(userId) || isAdmin();
     }
 
     /**
@@ -66,10 +69,10 @@ service cloud.firestore {
      * @path /deposit_transactions/{depositTransactionId}
      */
     match /deposit_transactions/{depositTransactionId} {
-        allow get: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
-        allow list: if isSignedIn(); // Broad list allowed, but queries must be filtered on client.
+        allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
+        allow list: if isSignedIn();
         allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
-        allow update: if false; // No one can update for now
+        allow update: if isAdmin();
     }
 
      /**
@@ -77,7 +80,7 @@ service cloud.firestore {
      * @path /notifications/{notificationId}
      */
     match /notifications/{notificationId} {
-      allow read, write: if false; // Deprecated
+      allow read, write: if isAdmin();
     }
 
     /**
@@ -85,9 +88,9 @@ service cloud.firestore {
      * @path /redeem_codes/{code}
      */
     match /redeem_codes/{code} {
-      // Only admins could create, now no one can.
-      allow create: if false;
-      allow list: if false; // No one can list all codes.
+      // Admins can create and list all codes. Non-admins cannot list all codes.
+      allow create: if isAdmin();
+      allow list: if isAdmin();
 
       // Any signed-in user can update a code (to redeem it), but only if it hasn't been used yet.
       // The get rule is for the redeemCode function to check the code first.
@@ -107,5 +110,10 @@ service cloud.firestore {
   // Helper function to determine if the user is the owner of the document.
   function isOwner(userId) {
     return isSignedIn() && request.auth.uid == userId;
+  }
+
+  // Helper function to check if the user is an admin.
+  function isAdmin() {
+    return isSignedIn() && request.auth.uid == 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
   }
 }

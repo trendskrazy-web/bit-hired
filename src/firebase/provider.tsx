@@ -56,6 +56,8 @@ export interface UserHookResult { // Renamed from UserAuthHookResult for consist
 // React Context
 export const FirebaseContext = createContext<FirebaseContextState | undefined>(undefined);
 
+const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+
 /**
  * FirebaseProvider manages and provides Firebase services and user authentication state.
  */
@@ -85,12 +87,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       auth,
       async (firebaseUser) => { // Auth state determined
         if (firebaseUser) {
-            // Dev only: check local storage override
-           const localIsAdmin = localStorage.getItem('isAdmin') === 'true';
-           const idTokenResult: IdTokenResult = await firebaseUser.getIdTokenResult();
-           const hasAdminClaim = !!idTokenResult.claims.admin;
-           const isAdmin = hasAdminClaim || localIsAdmin;
-           setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null, isAdmin: isAdmin });
+           const isSuperAdmin = firebaseUser.uid === SUPER_ADMIN_UID;
+           setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null, isAdmin: isSuperAdmin });
         } else {
           setUserAuthState({ user: null, isUserLoading: false, userError: null, isAdmin: false });
         }
