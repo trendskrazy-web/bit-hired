@@ -8,10 +8,10 @@ import { useAccount } from "@/contexts/account-context";
 import { RedeemCodeCard } from "@/components/app/account/redeem-code-card";
 import { useUser } from "@/firebase";
 import { TopUpCard } from "@/components/app/account/top-up-card";
-import { PendingDepositsList } from "@/components/app/account/pending-deposits-list";
+import { PendingTransactionsList } from "@/components/app/account/pending-transactions-list";
 
 export default function AccountPage() {
-  const { balance, deductBalance, mobileNumber, name, email } = useAccount();
+  const { balance, mobileNumber, name, email } = useAccount();
   const { user } = useUser();
   
   return (
@@ -56,9 +56,8 @@ export default function AccountPage() {
           </Card>
           <WithdrawCard
             accountBalance={balance}
-            onWithdraw={deductBalance}
           />
-          <PendingDepositsList />
+          <PendingTransactionsList />
         </div>
         <div className="lg:col-span-1 space-y-6">
           <TopUpCard />

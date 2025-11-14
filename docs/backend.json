@@ -149,6 +149,48 @@
         "mobileNumber"
       ]
     },
+    "WithdrawalTransaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WithdrawalTransaction",
+      "type": "object",
+      "description": "Represents a withdrawal transaction initiated by a user, awaiting admin confirmation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the withdrawal transaction."
+        },
+        "userAccountId": {
+          "type": "string",
+          "description": "Reference to UserAccount."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount the user intends to withdraw."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "completed", "cancelled"],
+          "description": "The current status of the withdrawal."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the withdrawal was initiated."
+        },
+        "mobileNumber": {
+            "type": "string",
+            "description": "The user's mobile number for the M-PESA transfer."
+        }
+      },
+      "required": [
+        "id",
+        "userAccountId",
+        "amount",
+        "status",
+        "createdAt",
+        "mobileNumber"
+      ]
+    },
     "Notification": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Notification",
@@ -319,6 +361,22 @@
             {
               "name": "depositTransactionId",
               "description": "The unique identifier for the deposit transaction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/withdrawal_transactions/{withdrawalTransactionId}",
+        "definition": {
+          "entityName": "WithdrawalTransaction",
+          "schema": {
+            "$ref": "#/backend/entities/WithdrawalTransaction"
+          },
+          "description": "Stores all withdrawal transactions. Admin needs to read all to confirm. User can read their own.",
+          "params": [
+            {
+              "name": "withdrawalTransactionId",
+              "description": "The unique identifier for the withdrawal transaction."
             }
           ]
         }

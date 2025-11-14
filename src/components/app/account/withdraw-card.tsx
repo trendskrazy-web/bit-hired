@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -17,14 +18,13 @@ import { useState } from "react";
 
 interface WithdrawCardProps {
   accountBalance: number;
-  onWithdraw: (amount: number) => void;
 }
 
-export function WithdrawCard({ accountBalance, onWithdraw }: WithdrawCardProps) {
+export function WithdrawCard({ accountBalance }: WithdrawCardProps) {
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const { mobileNumber } = useAccount();
+  const { mobileNumber, addWithdrawalRequest } = useAccount();
 
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,15 +49,16 @@ export function WithdrawCard({ accountBalance, onWithdraw }: WithdrawCardProps) 
     }
 
     setIsProcessing(true);
+    addWithdrawalRequest(withdrawAmount);
+    
     setTimeout(() => {
       setIsProcessing(false);
       setAmount("");
-      onWithdraw(withdrawAmount);
       toast({
         title: "Withdrawal Request Received",
-        description: `Your request to withdraw KES ${amount} has been received. It will be processed in 2-3 working days.`,
+        description: `Your request to withdraw KES ${withdrawAmount.toLocaleString()} has been logged for processing.`,
       });
-    }, 2000);
+    }, 1500);
   };
 
   return (
