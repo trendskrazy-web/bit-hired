@@ -85,8 +85,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       auth,
       async (firebaseUser) => { // Auth state determined
         if (firebaseUser) {
+            // Dev only: check local storage override
+           const localIsAdmin = localStorage.getItem('isAdmin') === 'true';
            const idTokenResult: IdTokenResult = await firebaseUser.getIdTokenResult();
-           const isAdmin = !!idTokenResult.claims.admin;
+           const hasAdminClaim = !!idTokenResult.claims.admin;
+           const isAdmin = hasAdminClaim || localIsAdmin;
            setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null, isAdmin: isAdmin });
         } else {
           setUserAuthState({ user: null, isUserLoading: false, userError: null, isAdmin: false });

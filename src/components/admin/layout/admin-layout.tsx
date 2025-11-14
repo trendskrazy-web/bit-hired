@@ -37,6 +37,7 @@ import { useAuth } from '@/firebase';
 const adminMenuItems = [
   { href: '/admin/deposits', label: 'Manage Deposits', icon: DatabaseZap },
   { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
+  { href: '/admin-maker', label: 'Admin Maker', icon: Shield },
 ];
 
 const userMenuItems = [
@@ -50,6 +51,8 @@ const userMenuItems = [
 function SidebarFooterContent() {
   const auth = useAuth();
   const handleLogout = () => {
+    // Also clear the admin flag from local storage on logout
+    localStorage.removeItem('isAdmin');
     auth.signOut();
   };
   return (
