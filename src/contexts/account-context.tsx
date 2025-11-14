@@ -29,6 +29,8 @@ interface AccountContextType {
   deposits: DepositTransaction[];
   addDeposit: (deposit: Omit<Deposit, 'id'>) => void;
   addDepositRequest: (amount: number, mobileNumber: string) => Promise<DepositTransaction>;
+  name: string;
+  email: string;
   mobileNumber: string;
   mpesaNumbers: string[];
   setMpesaNumbers: (numbers: string[]) => void;
@@ -42,6 +44,8 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [deposits, setDeposits] = useState<DepositTransaction[]>([]);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [mpesaNumbers, setMpesaNumbers] = useState<string[]>(INITIAL_MPESA_NUMBERS);
 
@@ -58,6 +62,8 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
       if (doc.exists()) {
         const userData = doc.data();
         setBalance(userData.virtualBalance || 0);
+        setName(userData.name || '');
+        setEmail(userData.email || '');
         setMobileNumber(userData.mobileNumber || '');
       }
     }, (error) => {
@@ -175,6 +181,8 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
         deposits,
         addDeposit,
         addDepositRequest,
+        name,
+        email,
         mobileNumber,
         mpesaNumbers,
         setMpesaNumbers,

@@ -26,6 +26,8 @@ export default function RegisterPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -52,7 +54,6 @@ export default function RegisterPage() {
     }
 
     try {
-      const email = `${mobileNumber.replace(/\D/g, '')}@bithired.com`;
       initiateEmailSignUp(auth, email, password);
 
       auth.onAuthStateChanged((user) => {
@@ -62,6 +63,8 @@ export default function RegisterPage() {
             userDocRef,
             {
               id: user.uid,
+              name: name,
+              email: email,
               mobileNumber: mobileNumber,
               virtualBalance: 0,
             },
@@ -100,6 +103,28 @@ export default function RegisterPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
+             <div className="grid gap-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+             <div className="grid gap-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="mobile">Mobile Number</Label>
               <Input

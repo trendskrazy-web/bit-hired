@@ -33,8 +33,13 @@ service cloud.firestore {
      * @path /users/{userId}
      */
     match /users/{userId} {
-      allow get, list, update: if isOwner(userId);
-      allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId;
+      allow get, update: if isOwner(userId);
+      allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId
+                    && request.resource.data.name is string
+                    && request.resource.data.email is string
+                    && request.resource.data.mobileNumber is string
+                    && request.resource.data.virtualBalance == 0;
+      allow list: if false; // Users should not be able to list other user documents
     }
 
     /**
@@ -43,7 +48,7 @@ service cloud.firestore {
      */
     match /mining_machines/{miningMachineId} {
       allow get, list: if true;
-      allow create, update, delete: if false; // Only admins could do this, role removed
+      allow create, update, delete: if false; // No admin role
     }
 
     /**

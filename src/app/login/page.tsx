@@ -35,7 +35,7 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    initiateEmailSignIn(auth, `${email}@bithired.com`, password);
+    initiateEmailSignIn(auth, email, password);
     toast({
       title: 'Signing In',
       description: 'Please wait...',
@@ -54,19 +54,19 @@ export default function LoginPage() {
               Welcome to BitHired
             </CardTitle>
             <CardDescription>
-              Enter your mobile number to sign in to your account
+              Enter your email to sign in to your account
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="mobile">Mobile Number</Label>
+              <Label htmlFor="email">Email Address</Label>
               <Input
-                id="mobile"
-                type="tel"
-                placeholder="+254700000000"
+                id="email"
+                type="email"
+                placeholder="you@example.com"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value.replace(/\D/g, ''))}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="grid gap-2">

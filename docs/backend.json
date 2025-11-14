@@ -10,9 +10,18 @@
           "type": "string",
           "description": "Unique identifier for the user account."
         },
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address, used for login."
+        },
         "mobileNumber": {
           "type": "string",
-          "description": "User's mobile phone number, used for login."
+          "description": "User's mobile phone number."
         },
         "virtualBalance": {
           "type": "number",
@@ -21,6 +30,8 @@
       },
       "required": [
         "id",
+        "name",
+        "email",
         "mobileNumber"
       ]
     },
