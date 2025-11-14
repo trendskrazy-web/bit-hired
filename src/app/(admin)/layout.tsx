@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { AdminLayout } from '@/components/admin/layout/admin-layout';
 import { AccountProvider } from '@/contexts/account-context';
 import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
+import { NotificationProvider } from '@/contexts/notification-context';
 
 // This is a hardcoded UID for the super admin.
 // In a real-world application, you would use a more robust role-based access control system,
@@ -37,7 +38,9 @@ export default function ProtectedAdminLayout({
   return (
     <AccountProvider>
       <RedeemCodeProvider>
-        <AdminLayout>{children}</AdminLayout>
+        <NotificationProvider>
+            <AdminLayout>{children}</AdminLayout>
+        </NotificationProvider>
       </RedeemCodeProvider>
     </AccountProvider>
   );

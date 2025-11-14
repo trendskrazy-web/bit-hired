@@ -83,6 +83,18 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
+  const logAdminAction = useCallback((message: string) => {
+    if (user && firestore && user.uid === SUPER_ADMIN_UID) {
+      const notificationsColRef = collection(firestore, 'notifications');
+      addDocumentNonBlocking(notificationsColRef, {
+        message,
+        adminId: user.uid,
+        createdAt: new Date().toISOString(),
+        read: false,
+      });
+    }
+  }, [user, firestore]);
+
   useEffect(() => {
     if (!firestore) return;
     const unsubscribers: (() => void)[] = [];
@@ -227,11 +239,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
         if (status === 'completed') {
             addBalance(amount, userId);
+            logAdminAction(`Approved deposit of ${amount} for user ${userId}.`);
+        } else {
+             logAdminAction(`Cancelled deposit of ${amount} for user ${userId}.`);
         }
         updateDocumentNonBlocking(depositDocRef, { status });
       }
     },
-    [firestore, addBalance]
+    [firestore, addBalance, logAdminAction]
   );
 
   const updateWithdrawalStatus = useCallback(
@@ -240,11 +255,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
             const withdrawalDocRef = doc(firestore, 'withdrawal_transactions', withdrawalId);
             if(status === 'cancelled') {
                 addBalance(amount, userId);
+                logAdminAction(`Cancelled withdrawal of ${amount} for user ${userId}.`);
+            } else {
+                 logAdminAction(`Completed withdrawal of ${amount} for user ${userId}.`);
             }
             updateDocumentNonBlocking(withdrawalDocRef, { status });
         }
     },
-    [firestore, addBalance]
+    [firestore, addBalance, logAdminAction]
   );
 
   const contextValue = {
