@@ -68,7 +68,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
   
   const { user } = useUser();
   const firestore = useFirestore();
-  const { mobileNumber, addBalance, deductBalance, name } = useAccount();
+  const { mobileNumber, addBalance, name } = useAccount();
 
   const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
@@ -241,8 +241,9 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         if (status === 'completed') {
             addBalance(amount, userId);
             logAdminAction(`Approved deposit of KES ${amount} for user ${userId}.`);
-        } else {
+        } else { // 'cancelled'
              logAdminAction(`Cancelled deposit of KES ${amount} for user ${userId}.`);
+             // NOTE: No balance change needed for cancelling a deposit, as it was never added.
         }
         updateDocumentNonBlocking(depositDocRef, { status });
       }

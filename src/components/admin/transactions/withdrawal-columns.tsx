@@ -29,8 +29,11 @@ const statusVariants: Record<Withdrawal['status'], 'secondary' | 'default' | 'de
 
 type UpdateStatusFn = (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
 
+interface ColumnsProps {
+  onStatusUpdate: UpdateStatusFn;
+}
 
-export const columns = (updateWithdrawalStatus: UpdateStatusFn): ColumnDef<Withdrawal>[] => [
+export const columns = ({ onStatusUpdate }: ColumnsProps): ColumnDef<Withdrawal>[] => [
   {
     accessorKey: 'createdAt',
     header: ({ column }) => (
@@ -107,14 +110,14 @@ export const columns = (updateWithdrawalStatus: UpdateStatusFn): ColumnDef<Withd
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-green-600 focus:bg-green-100 focus:text-green-700"
-              onClick={() => updateWithdrawalStatus(withdrawal.id, 'completed', withdrawal.amount, withdrawal.userAccountId)}
+              onClick={() => onStatusUpdate(withdrawal.id, 'completed', withdrawal.amount, withdrawal.userAccountId)}
             >
                <CheckCircle className="mr-2 h-4 w-4" />
               Approve
             </DropdownMenuItem>
             <DropdownMenuItem
                 className="text-red-600 focus:bg-red-100 focus:text-red-700"
-                onClick={() => updateWithdrawalStatus(withdrawal.id, 'cancelled', withdrawal.amount, withdrawal.userAccountId)}
+                onClick={() => onStatusUpdate(withdrawal.id, 'cancelled', withdrawal.amount, withdrawal.userAccountId)}
             >
                  <XCircle className="mr-2 h-4 w-4" />
                 Decline

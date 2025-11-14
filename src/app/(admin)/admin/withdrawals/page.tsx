@@ -26,7 +26,7 @@ export default function AdminWithdrawalsPage() {
         </CardHeader>
         <CardContent>
            <DataTable
-            columns={columns(updateWithdrawalStatus)}
+            columns={columns({ onStatusUpdate: updateWithdrawalStatus })}
             data={withdrawals}
             filterColumn="mobileNumber"
             filterPlaceholder="Filter by mobile number..."

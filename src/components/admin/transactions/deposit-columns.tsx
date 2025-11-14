@@ -29,8 +29,12 @@ const statusVariants: Record<Deposit['status'], 'secondary' | 'default' | 'destr
 
 type UpdateStatusFn = (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
 
+interface ColumnsProps {
+  onStatusUpdate: UpdateStatusFn;
+}
 
-export const columns = (updateDepositStatus: UpdateStatusFn): ColumnDef<Deposit>[] => [
+
+export const columns = ({ onStatusUpdate }: ColumnsProps): ColumnDef<Deposit>[] => [
   {
     accessorKey: 'createdAt',
     header: ({ column }) => (
@@ -111,14 +115,14 @@ export const columns = (updateDepositStatus: UpdateStatusFn): ColumnDef<Deposit>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-green-600 focus:bg-green-100 focus:text-green-700"
-              onClick={() => updateDepositStatus(deposit.id, 'completed', deposit.amount, deposit.userAccountId)}
+              onClick={() => onStatusUpdate(deposit.id, 'completed', deposit.amount, deposit.userAccountId)}
             >
                <CheckCircle className="mr-2 h-4 w-4" />
               Approve
             </DropdownMenuItem>
             <DropdownMenuItem
                 className="text-red-600 focus:bg-red-100 focus:text-red-700"
-                onClick={() => updateDepositStatus(deposit.id, 'cancelled', deposit.amount, deposit.userAccountId)}
+                onClick={() => onStatusUpdate(deposit.id, 'cancelled', deposit.amount, deposit.userAccountId)}
             >
                  <XCircle className="mr-2 h-4 w-4" />
                 Decline

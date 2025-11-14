@@ -26,7 +26,7 @@ export default function AdminDepositsPage() {
         </CardHeader>
         <CardContent>
            <DataTable
-            columns={columns(updateDepositStatus)}
+            columns={columns({ onStatusUpdate: updateDepositStatus })}
             data={deposits}
             filterColumn="mobileNumber"
             filterPlaceholder="Filter by mobile number..."
