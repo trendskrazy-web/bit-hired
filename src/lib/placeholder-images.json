@@ -3,7 +3,7 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1621919419142-6a6c94a8c2f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "mining rig"
     },
     {
@@ -21,7 +21,7 @@
     {
       "id": "dragonmint-t1",
       "description": "A legacy miner still capable of delivering results. Great for entry-level exploration.",
-      "imageUrl": "https://images.unsplash.com/photo-1621919419142-6a6c94a8c2f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "mining rig"
     },
     {
@@ -39,7 +39,7 @@
     {
       "id": "bitfury-tardis",
       "description": "An enterprise-grade solution offering robust performance and scalability.",
-      "imageUrl": "https://images.unsplash.com/photo-1621919419142-6a6c94a8c2f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "mining rig"
     },
     {
