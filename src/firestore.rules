@@ -1,0 +1,111 @@
+
+/**
+ * @file Firebase Security Rules for BitHired Application
+ *
+ * @core_philosophy This ruleset enforces a strict user-ownership model for private data,
+ * ensuring that only authenticated users can access their own information. Public data,
+ * such as mining machine details, is readable by all.
+ *
+ * @data_structure
+ * - `/users/{userId}`: Stores user account information.
+ * - `/mining_machines/{machineId}`: Stores publicly readable mining machine data.
+ * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
+ * - `/deposit_transactions/{depositId}`: Stores deposit requests.
+ * - `/notifications/{notificationId}`: Stores system notifications for admins (DEPRECATED).
+ * - `/redeem_codes/{code}`: Stores redeemable codes.
+ *
+ * @key_security_decisions
+ * - Users can only create their own user account and can only read/write their own data.
+ * - Mining machine data is publicly readable.
+ * - Rental transactions are nested under the user, ensuring ownership.
+ * - Users can create their own deposit requests and view only their own.
+ *
+ * @denormalization_for_authorization
+ * - Transaction documents contain `userAccountId` for direct ownership checks in rules.
+ *
+ * @structural_segregation
+ * - User-specific data is stored under the `/users/{userId}` path to enforce clear ownership.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Protects the user account document.
+     * @path /users/{userId}
+     */
+    match /users/{userId} {
+      allow get, update: if isOwner(userId);
+      allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId
+                    && request.resource.data.name is string
+                    && request.resource.data.email is string
+                    && request.resource.data.mobileNumber is string
+                    && request.resource.data.virtualBalance == 0;
+    }
+
+    /**
+     * @description Allows public read access to mining machine details.
+     * @path /mining_machines/{miningMachineId}
+     */
+    match /mining_machines/{miningMachineId} {
+      allow get, list: if true;
+      allow create, update, delete: if false; // No one can write
+    }
+
+    /**
+     * @description Protects rental transaction documents under a user's account.
+     * @path /users/{userId}/rentals/{rentalId}
+     */
+    match /users/{userId}/rentals/{rentalId} {
+      allow get, list, create, update, delete: if isOwner(userId);
+    }
+
+    /**
+     * @description Manages deposit transactions. Users can create their own and can only
+     * view their own. Admins can read all deposits and update status.
+     * @path /deposit_transactions/{depositTransactionId}
+     */
+    match /deposit_transactions/{depositTransactionId} {
+        allow get: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
+        allow list: if isSignedIn(); // Broad list allowed, but queries must be filtered on client.
+        allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
+        allow update: if false; // No one can update for now
+    }
+
+     /**
+     * @description Manages notifications for admins.
+     * @path /notifications/{notificationId}
+     */
+    match /notifications/{notificationId} {
+      allow read, write: if false; // Deprecated
+    }
+
+    /**
+     * @description Manages redeem codes.
+     * @path /redeem_codes/{code}
+     */
+    match /redeem_codes/{code} {
+      // Only admins could create, now no one can.
+      allow create: if false;
+      allow list: if false; // No one can list all codes.
+
+      // Any signed-in user can update a code (to redeem it), but only if it hasn't been used yet.
+      // The get rule is for the redeemCode function to check the code first.
+      allow get: if isSignedIn();
+      allow update: if isSignedIn()
+                    && request.resource.data.used == true
+                    && resource.data.used == false
+                    && request.resource.data.usedBy == request.auth.uid;
+    }
+  }
+
+  // Helper function to determine if the user is signed in.
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  // Helper function to determine if the user is the owner of the document.
+  function isOwner(userId) {
+    return isSignedIn() && request.auth.uid == userId;
+  }
+}

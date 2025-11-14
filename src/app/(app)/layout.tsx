@@ -8,10 +8,9 @@ import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { AdminLayout } from '@/components/admin/layout/admin-layout';
 
 function AuthenticatedLayoutContent({ children }: { children: React.ReactNode }) {
-  const { user, isUserLoading, isAdmin } = useUser();
+  const { user, isUserLoading } = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -31,7 +30,7 @@ function AuthenticatedLayoutContent({ children }: { children: React.ReactNode })
   return (
     <AccountProvider>
       <RedeemCodeProvider>
-        {isAdmin ? <AdminLayout>{children}</AdminLayout> : <AppLayout>{children}</AppLayout>}
+        <AppLayout>{children}</AppLayout>
       </RedeemCodeProvider>
     </AccountProvider>
   );

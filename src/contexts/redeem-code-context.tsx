@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -9,17 +10,13 @@ import {
   useEffect,
 } from "react";
 import {
-  addDocumentNonBlocking,
   updateDocumentNonBlocking,
   useFirestore,
   useUser,
 } from "@/firebase";
 import {
-  collection,
   doc,
   getDoc,
-  onSnapshot,
-  query,
 } from "firebase/firestore";
 
 export interface RedeemCode {
@@ -33,8 +30,6 @@ export interface RedeemCode {
 }
 
 interface RedeemCodeContextType {
-  codes: RedeemCode[];
-  generateCodes: (count: number, amount: number) => Promise<RedeemCode[]>;
   redeemCode: (
     code: string
   ) => Promise<{ success: boolean; message: string; amount: number }>;
@@ -46,55 +41,8 @@ const RedeemCodeContext = createContext<RedeemCodeContextType | undefined>(
 );
 
 export function RedeemCodeProvider({ children }: { children: ReactNode }) {
-  const [codes, setCodes] = useState<RedeemCode[]>([]);
   const firestore = useFirestore();
-  const { user, isAdmin } = useUser();
-
-  useEffect(() => {
-    if (!firestore || !isAdmin) {
-      setCodes([]);
-      return;
-    }
-    const codesColRef = collection(firestore, "redeem_codes");
-    const q = query(codesColRef);
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const codesData = snapshot.docs.map(
-        (doc) => ({ id: doc.id, ...doc.data() } as RedeemCode)
-      );
-      setCodes(codesData);
-    });
-    return () => unsubscribe();
-  }, [firestore, isAdmin]);
-
-  const generateCodes = useCallback(
-    async (count: number, amount: number): Promise<RedeemCode[]> => {
-      if (!firestore) return [];
-      const newCodes: RedeemCode[] = [];
-      const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-      const codesColRef = collection(firestore, "redeem_codes");
-
-      for (let i = 0; i < count; i++) {
-        let code = "";
-        for (let j = 0; j < 10; j++) {
-          code += characters.charAt(
-            Math.floor(Math.random() * characters.length)
-          );
-        }
-        const newCode: Omit<RedeemCode, "id"> = {
-          code,
-          amount,
-          used: false,
-          createdAt: new Date().toISOString(),
-        };
-        // Use the code itself as the document ID for easy lookup
-        const docRef = doc(codesColRef, code);
-        addDocumentNonBlocking(docRef, newCode); // This is actually a setDoc operation
-        newCodes.push({ id: code, ...newCode });
-      }
-      return newCodes;
-    },
-    [firestore]
-  );
+  const { user } = useUser();
 
   const redeemCode = useCallback(
     async (
@@ -161,7 +109,7 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
 
   return (
     <RedeemCodeContext.Provider
-      value={{ codes, generateCodes, redeemCode, markCodeAsUsed }}
+      value={{ redeemCode, markCodeAsUsed }}
     >
       {children}
     </RedeemCodeContext.Provider>

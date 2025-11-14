@@ -55,7 +55,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
 
-  const { user, isAdmin } = useUser();
+  const { user } = useUser();
   const firestore = useFirestore();
 
   useEffect(() => {
@@ -158,7 +158,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   
   const updateDepositStatus = useCallback(
     (depositId: string, status: 'completed' | 'cancelled') => {
-      if (firestore && isAdmin) {
+      // This function is now only for admins, but we leave the logic here
+      // in case admin functionality is restored.
+      // A non-admin call will fail due to security rules.
+      if (firestore) {
         const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
         const deposit = deposits.find(d => d.id === depositId);
         
@@ -169,7 +172,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         updateDocumentNonBlocking(depositDocRef, { status });
       }
     },
-    [firestore, isAdmin, deposits, addBalance]
+    [firestore, deposits, addBalance]
   );
 
 
