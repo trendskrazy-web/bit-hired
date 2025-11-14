@@ -9,6 +9,11 @@ import {
   User,
   Info,
   LogOut,
+  Bell,
+  Shield,
+  Gift,
+  Settings,
+  DatabaseZap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -23,12 +28,13 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { AppHeader } from './header';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 
-const menuItems = [
+const userMenuItems = [
   { href: '/account', label: 'Account', icon: User },
   { href: '/hire', label: 'Hire Machines', icon: Cpu },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -36,6 +42,12 @@ const menuItems = [
   { href: '/about', label: 'About', icon: Info },
 ];
 
+const adminMenuItems = [
+  { href: '/admin/deposits', label: 'Deposits', icon: DatabaseZap },
+  { href: '/admin/notifications', label: 'Notifications', icon: Bell },
+  { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
+];
 
 function SidebarFooterContent() {
   const auth = useAuth();
@@ -44,26 +56,60 @@ function SidebarFooterContent() {
   };
   return (
     <>
-    <div className="bg-primary/10 p-4 rounded-lg text-center space-y-2">
-      <h4 className="font-semibold">Need Help?</h4>
-      <p className="text-xs text-muted-foreground">
-        Contact our support team for any questions.
-      </p>
-      <Button size="sm" className="w-full">
-        Contact Support
-      </Button>
-    </div>
-     <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+      <div className="bg-primary/10 p-4 rounded-lg text-center space-y-2">
+        <h4 className="font-semibold">Need Help?</h4>
+        <p className="text-xs text-muted-foreground">
+          Contact our support team for any questions.
+        </p>
+        <Button size="sm" className="w-full">
+          Contact Support
+        </Button>
+      </div>
+      <Button
+        variant="ghost"
+        className="w-full justify-start"
+        onClick={handleLogout}
+      >
         <LogOut className="mr-2 h-4 w-4" />
         Log Out
       </Button>
     </>
-  )
+  );
 }
 
-export function AppLayout({ children, isAdmin }: { children: React.ReactNode, isAdmin: boolean }) {
+export function AppLayout({
+  children,
+  isAdmin,
+}: {
+  children: React.ReactNode;
+  isAdmin: boolean;
+}) {
   const pathname = usePathname();
-  
+
+  const renderMenuItems = (items: typeof userMenuItems) => {
+    return items.map((item) => (
+      <SidebarMenuItem key={item.href}>
+        <SidebarMenuButton
+          asChild
+          isActive={
+            item.href === '/dashboard'
+              ? pathname === item.href
+              : pathname.startsWith(item.href)
+          }
+          tooltip={{
+            children: item.label,
+            className: 'bg-sidebar-background text-sidebar-foreground',
+          }}
+        >
+          <Link href={item.href}>
+            <item.icon />
+            <span>{item.label}</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    ));
+  };
+
   return (
     <SidebarProvider>
       <Sidebar className="border-r" side="left" variant="sidebar">
@@ -77,32 +123,22 @@ export function AppLayout({ children, isAdmin }: { children: React.ReactNode, is
           </Link>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarMenu>
-            {menuItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={
-                    item.href === '/dashboard'
-                      ? pathname === item.href
-                      : pathname.startsWith(item.href)
-                  }
-                  tooltip={{
-                    children: item.label,
-                    className: 'bg-sidebar-background text-sidebar-foreground',
-                  }}
-                >
-                  <Link href={item.href}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+          <SidebarMenu>{renderMenuItems(userMenuItems)}</SidebarMenu>
+          {isAdmin && (
+            <>
+              <SidebarSeparator />
+              <div className="p-2">
+                <div className="px-2 py-1 text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  <span>Admin Panel</span>
+                </div>
+              </div>
+              <SidebarMenu>{renderMenuItems(adminMenuItems)}</SidebarMenu>
+            </>
+          )}
         </SidebarContent>
         <SidebarFooter className="group-data-[collapsible=icon]:hidden space-y-2">
-         <SidebarFooterContent />
+          <SidebarFooterContent />
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="bg-background">

@@ -4,22 +4,24 @@
  *
  * @core_philosophy This ruleset enforces a strict user-ownership model for private data,
  * ensuring that only authenticated users can access their own information. Public data,
- * such as mining machine details, is readable by all.
+ * such as mining machine details, is readable by all. Admin users have elevated privileges.
  *
  * @data_structure
  * - `/users/{userId}`: Stores user account information.
  * - `/mining_machines/{machineId}`: Stores publicly readable mining machine data.
  * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
  * - `/deposit_transactions/{depositId}`: Stores all deposit transactions for user access.
+ * - `/notifications/{notificationId}`: Stores admin notifications.
  *
  * @key_security_decisions
  * - Users can only create their own user account and can only read/write their own data.
  * - Mining machine data is publicly readable, but write access is restricted.
  * - Users can create their own deposit requests and read them, but cannot modify them after creation.
+ * - Admins can read all deposits and update their status.
  *
  * @denormalization_for_authorization
  * - Transaction documents contain `userAccountId` for direct ownership checks in rules.
- * - Deposit documents contain `mobileNumber`.
+ * - Deposit documents contain `mobileNumber` and `userAccountId`.
  *
  * @structural_segregation
  * - User-specific data is stored under the `/users/{userId}` path to enforce clear ownership.
@@ -33,13 +35,13 @@ service cloud.firestore {
      * @path /users/{userId}
      */
     match /users/{userId} {
-      allow get, update: if isOwner(userId);
+      allow get, update: if isOwner(userId) || isAdmin();
       allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId
                     && request.resource.data.name is string
                     && request.resource.data.email is string
                     && request.resource.data.mobileNumber is string
                     && request.resource.data.virtualBalance == 0;
-      allow list: if false; // Users should not be able to list other user documents
+      allow list: if isAdmin();
     }
 
     /**
@@ -48,7 +50,7 @@ service cloud.firestore {
      */
     match /mining_machines/{miningMachineId} {
       allow get, list: if true;
-      allow create, update, delete: if false; // No admin role
+      allow create, update, delete: if isAdmin();
     }
 
     /**
@@ -57,6 +59,26 @@ service cloud.firestore {
      */
     match /users/{userId}/rentals/{rentalId} {
       allow get, list, create, update, delete: if isOwner(userId);
+    }
+    
+    /**
+     * @description Manages access to deposit transactions.
+     * @path /deposit_transactions/{depositTransactionId}
+     */
+    match /deposit_transactions/{depositTransactionId} {
+       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
+       allow list: if isSignedIn(); // Query rules will enforce user-specific reads
+       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
+       allow update: if isAdmin();
+       allow delete: if false;
+    }
+
+    /**
+     * @description Manages access to notifications.
+     * @path /notifications/{notificationId}
+     */
+    match /notifications/{notificationId} {
+      allow get, list, create, update, delete: if isAdmin();
     }
   }
 
@@ -68,5 +90,10 @@ service cloud.firestore {
   // Helper function to determine if the user is the owner of the document.
   function isOwner(userId) {
     return isSignedIn() && request.auth.uid == userId;
+  }
+
+  // Helper function to check for admin role.
+  function isAdmin() {
+    return isSignedIn() && request.auth.token.admin == true;
   }
 }

@@ -9,7 +9,7 @@ import {
   useEffect,
   useCallback,
 } from 'react';
-import type { Transaction, Deposit, DepositTransaction, Notification } from '@/lib/data';
+import type { Transaction, DepositTransaction, Notification } from '@/lib/data';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
 import { collection, doc, onSnapshot, increment, query, where, orderBy } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -27,13 +27,13 @@ interface AccountContextType {
     status: 'Active' | 'Expired' | 'Pending'
   ) => void;
   deposits: DepositTransaction[];
-  addDeposit: (deposit: Omit<Deposit, 'id'>) => void;
   addDepositRequest: (amount: number, mobileNumber: string) => Promise<DepositTransaction>;
   name: string;
   email: string;
   mobileNumber: string;
   mpesaNumbers: string[];
   setMpesaNumbers: (numbers: string[]) => void;
+  notifications: Notification[];
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -48,11 +48,10 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [mpesaNumbers, setMpesaNumbers] = useState<string[]>(INITIAL_MPESA_NUMBERS);
-
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const { user } = useUser();
   const firestore = useFirestore();
-
 
   useEffect(() => {
     if (!user || !firestore) return;
@@ -79,14 +78,38 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
       const permissionError = new FirestorePermissionError({ path: rentalsColRef.path, operation: 'list' });
       errorEmitter.emit('permission-error', permissionError);
     });
+
+    // Restore deposits subscription
+    const depositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid), orderBy('createdAt', 'desc'));
+    const unsubscribeUserDeposits = onSnapshot(depositsQuery, (snapshot) => {
+      const depositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as DepositTransaction));
+      setDeposits(depositData);
+    }, (error) => {
+       const permissionError = new FirestorePermissionError({ path: `deposit_transactions where userAccountId == ${user.uid}`, operation: 'list' });
+       errorEmitter.emit('permission-error', permissionError);
+    });
     
+    // Restore notifications subscription for admins
+    let unsubscribeNotifications = () => {};
+    if (isAdmin) {
+        const notificationsQuery = query(collection(firestore, 'notifications'), orderBy('createdAt', 'desc'));
+        unsubscribeNotifications = onSnapshot(notificationsQuery, (snapshot) => {
+            const notificationData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification));
+            setNotifications(notificationData);
+        }, (error) => {
+            const permissionError = new FirestorePermissionError({ path: 'notifications', operation: 'list' });
+            errorEmitter.emit('permission-error', permissionError);
+        });
+    }
+
 
     return () => {
       unsubscribeUser();
       unsubscribeRentals();
+      unsubscribeUserDeposits();
+      unsubscribeNotifications();
     };
-  }, [user, firestore]);
-
+  }, [user, firestore, isAdmin]);
 
   const updateUserBalance = (amount: number, userId: string = user?.uid || '') => {
       if(userId && firestore) {
@@ -115,21 +138,14 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
         });
     }
   };
-
-  const addDeposit = (deposit: Omit<Deposit, 'id'>) => {
-     // This function is deprecated
-  };
   
   const addDepositRequest = async (amount: number, mobileNumber: string): Promise<DepositTransaction> => {
     if (!user || !firestore) {
       throw new Error("User not authenticated");
     }
     
-    // This function will now just simulate the creation, but not interact with firestore
-    // as admins can't approve it.
     const transactionCode = `BHT${Date.now().toString().slice(-6)}`;
-    const newDeposit: DepositTransaction = {
-      id: `sim-${Date.now()}`,
+    const newDeposit: Omit<DepositTransaction, 'id'> = {
       userAccountId: user.uid,
       amount,
       mobileNumber,
@@ -137,11 +153,10 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
       status: 'pending',
       createdAt: new Date().toISOString(),
     };
-    
-    // Add to local state for UI feedback
-    setDeposits(prev => [newDeposit, ...prev]);
 
-    return newDeposit;
+    const docRef = await addDocumentNonBlocking(collection(firestore, 'deposit_transactions'), newDeposit);
+    
+    return { ...newDeposit, id: docRef.id };
   };
 
   const updateTransactionStatus = useCallback(
@@ -166,13 +181,13 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
         addTransaction,
         updateTransactionStatus,
         deposits,
-        addDeposit,
         addDepositRequest,
         name,
         email,
         mobileNumber,
         mpesaNumbers,
         setMpesaNumbers,
+        notifications,
       }}
     >
       {children}
