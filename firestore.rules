@@ -10,11 +10,13 @@
  * - `/users/{userId}`: Stores user account information.
  * - `/mining_machines/{machineId}`: Stores publicly readable mining machine data.
  * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
+ * - `/deposit_transactions/{depositId}`: Stores deposit requests.
  *
  * @key_security_decisions
  * - Users can only create their own user account and can only read/write their own data.
  * - Mining machine data is publicly readable, but write access is restricted.
  * - Rental transactions are nested under the user, ensuring ownership.
+ * - Users can create their own deposit requests and view only their own.
  *
  * @denormalization_for_authorization
  * - Transaction documents contain `userAccountId` for direct ownership checks in rules.
@@ -55,6 +57,17 @@ service cloud.firestore {
      */
     match /users/{userId}/rentals/{rentalId} {
       allow get, list, create, update, delete: if isOwner(userId);
+    }
+
+    /**
+     * @description Manages deposit transactions. Users can create their own and can only
+     * view their own.
+     * @path /deposit_transactions/{depositTransactionId}
+     */
+    match /deposit_transactions/{depositTransactionId} {
+        allow get: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
+        allow list: if isSignedIn() && request.query.where.userAccountId == request.auth.uid;
+        allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
     }
   }
 
