@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Bitcoin } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState }from 'react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { doc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
@@ -56,8 +56,11 @@ export default function RegisterPage() {
     try {
       initiateEmailSignUp(auth, email, password);
 
-      auth.onAuthStateChanged((user) => {
+      const unsubscribe = auth.onAuthStateChanged((user) => {
         if (user) {
+          // Unsubscribe immediately to prevent this from running multiple times
+          unsubscribe();
+          
           const userDocRef = doc(firestore, 'users', user.uid);
           setDocumentNonBlocking(
             userDocRef,
@@ -72,10 +75,10 @@ export default function RegisterPage() {
           );
 
           toast({
-            title: 'Account Created',
-            description: 'You can now log in.',
+            title: `Welcome, ${name}!`,
+            description: 'Your account has been created successfully.',
           });
-          router.push('/login');
+          router.push('/dashboard');
         }
       });
     } catch (error: any) {
