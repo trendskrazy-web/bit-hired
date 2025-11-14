@@ -54,18 +54,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
-  const logAdminAction = useCallback((message: string) => {
-    if (user && firestore && user.uid === SUPER_ADMIN_UID) {
-      const notificationsColRef = collection(firestore, 'notifications');
-      addDocumentNonBlocking(notificationsColRef, {
-        message,
-        adminId: user.uid,
-        createdAt: new Date().toISOString(),
-        read: false,
-      });
-    }
-  }, [user, firestore]);
-
   useEffect(() => {
     if (!firestore) return;
     const unsubscribers: (() => void)[] = [];

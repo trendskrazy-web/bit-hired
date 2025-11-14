@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAccount } from "@/contexts/account-context";
+import { useTransactions } from "@/contexts/transaction-context";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
@@ -24,7 +25,8 @@ export function WithdrawCard({ accountBalance }: WithdrawCardProps) {
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const { mobileNumber, addWithdrawalRequest, deductBalance } = useAccount();
+  const { mobileNumber, deductBalance } = useAccount();
+  const { addWithdrawalRequest } = useTransactions();
 
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();

@@ -42,9 +42,12 @@ export interface DailyLimit {
 
 interface TransactionContextType {
   deposits: Deposit[];
+  withdrawals: Withdrawal[];
   addDepositRequest: (amount: number, depositTo: string) => void;
+  addWithdrawalRequest: (amount: number) => void;
   // Admin functions
   updateDepositStatus: (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
+  updateWithdrawalStatus: (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
   designatedDepositAccount: string | null;
   depositsEnabled: boolean;
   updateDesignatedAccount: () => Promise<void>;
@@ -59,12 +62,13 @@ const DAILY_LIMIT_PER_ACCOUNT = 500000;
 
 export function TransactionProvider({ children }: { children: ReactNode }) {
   const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [designatedDepositAccount, setDesignatedDepositAccount] = useState<string | null>(null);
   const [depositsEnabled, setDepositsEnabled] = useState(true);
   
   const { user } = useUser();
   const firestore = useFirestore();
-  const { mobileNumber, addBalance, name } = useAccount();
+  const { mobileNumber, addBalance, deductBalance, name } = useAccount();
 
   const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
@@ -176,6 +180,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     };
 
     createSubscription<Deposit>('deposit_transactions', isAdmin, setDeposits);
+    createSubscription<Withdrawal>('withdrawal_transactions', isAdmin, setWithdrawals);
 
     return () => {
       unsubscribers.forEach((unsub) => unsub());
@@ -214,6 +219,20 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       updateDesignatedAccount();
     }
   };
+
+  const addWithdrawalRequest = (amount: number) => {
+    if (user && firestore && mobileNumber) {
+      const withdrawalsColRef = collection(firestore, 'withdrawal_transactions');
+      addDocumentNonBlocking(withdrawalsColRef, {
+        userAccountId: user.uid,
+        amount,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        mobileNumber: mobileNumber,
+        userName: name,
+      });
+    }
+  };
   
   const updateDepositStatus = useCallback(
     (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => {
@@ -231,10 +250,31 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     [firestore, addBalance, logAdminAction]
   );
 
+  const updateWithdrawalStatus = useCallback(
+    (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => {
+      if (firestore) {
+        const withdrawalDocRef = doc(firestore, 'withdrawal_transactions', withdrawalId);
+        if (status === 'completed') {
+            // Balance is already deducted on request. Admin just confirms.
+            logAdminAction(`Completed withdrawal of KES ${amount} for user ${userId}.`);
+        } else if (status === 'cancelled') {
+            // If cancelled, refund the amount to the user's balance.
+            addBalance(amount, userId);
+            logAdminAction(`Cancelled withdrawal of KES ${amount} for user ${userId}. Balance refunded.`);
+        }
+        updateDocumentNonBlocking(withdrawalDocRef, { status });
+      }
+    },
+    [firestore, addBalance, logAdminAction]
+  );
+
   const contextValue = {
     deposits,
+    withdrawals,
     addDepositRequest,
+    addWithdrawalRequest,
     updateDepositStatus,
+    updateWithdrawalStatus,
     designatedDepositAccount,
     depositsEnabled,
     updateDesignatedAccount,
