@@ -37,6 +37,7 @@ interface AccountContextType {
   markNotificationAsRead: (notificationId: string) => void;
   mobileNumber: string;
   mpesaNumbers: string[];
+  setMpesaNumbers: (numbers: string[]) => void;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -272,6 +273,7 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
         markNotificationAsRead,
         mobileNumber,
         mpesaNumbers,
+        setMpesaNumbers,
       }}
     >
       {children}
