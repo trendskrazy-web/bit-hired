@@ -47,6 +47,7 @@ interface TransactionContextType {
   updateDepositStatus: (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
   designatedDepositAccount: string | null;
   depositsEnabled: boolean;
+  updateDesignatedAccount: () => Promise<void>;
 }
 
 const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
@@ -106,7 +107,10 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         let minTotal = Infinity;
         let designatedAccount: string | null = null;
 
-        for (const acc of DEPOSIT_ACCOUNTS) {
+        // Create a shuffled array of accounts to pick from randomly if totals are equal
+        const shuffledAccounts = [...DEPOSIT_ACCOUNTS].sort(() => Math.random() - 0.5);
+
+        for (const acc of shuffledAccounts) {
             if (accountTotals[acc] < DAILY_LIMIT_PER_ACCOUNT) {
                 if (accountTotals[acc] < minTotal) {
                     minTotal = accountTotals[acc];
@@ -115,6 +119,14 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
             }
         }
         
+        // If all available accounts have the same minimum total, pick one
+        if (!designatedAccount) {
+             const availableAccounts = shuffledAccounts.filter(acc => accountTotals[acc] < DAILY_LIMIT_PER_ACCOUNT);
+             if (availableAccounts.length > 0) {
+                 designatedAccount = availableAccounts[0];
+             }
+        }
+
         setDesignatedDepositAccount(designatedAccount);
         setDepositsEnabled(designatedAccount !== null);
 
@@ -128,8 +140,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     updateDesignatedAccount();
-    // Re-check every minute
-    const interval = setInterval(updateDesignatedAccount, 60000);
+    // Re-check every 5 minutes
+    const interval = setInterval(updateDesignatedAccount, 300000);
     return () => clearInterval(interval);
   }, [updateDesignatedAccount]);
 
@@ -225,6 +237,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     updateDepositStatus,
     designatedDepositAccount,
     depositsEnabled,
+    updateDesignatedAccount,
   };
 
 

@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useTransactions } from '@/contexts/transaction-context';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Copy, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 
@@ -23,7 +23,7 @@ export function DepositCard() {
   const [amount, setAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
-  const { addDepositRequest, designatedDepositAccount, depositsEnabled } = useTransactions();
+  const { addDepositRequest, designatedDepositAccount, depositsEnabled, updateDesignatedAccount } = useTransactions();
 
   const handleDepositRequest = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +62,28 @@ export function DepositCard() {
     }, 1500);
   };
 
+  const handleCopy = () => {
+    if (designatedDepositAccount) {
+      navigator.clipboard.writeText(designatedDepositAccount);
+      toast({
+        title: 'Copied to clipboard',
+        description: `Account number ${designatedDepositAccount} copied.`,
+      });
+    }
+  }
+
+  const handleRefresh = async () => {
+    toast({
+      title: 'Refreshing...',
+      description: 'Getting another deposit number.',
+    })
+    await updateDesignatedAccount();
+    toast({
+      title: 'Refreshed!',
+      description: 'The deposit number has been updated.',
+    })
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -78,7 +100,19 @@ export function DepositCard() {
             {depositsEnabled && designatedDepositAccount ? (
              <Alert>
                 <Terminal className="h-4 w-4" />
-                <AlertTitle>Send Deposit To:</AlertTitle>
+                <div className="flex justify-between items-center">
+                    <AlertTitle>Send Deposit To:</AlertTitle>
+                    <div className="flex items-center gap-2">
+                         <Button type="button" variant="ghost" size="icon" onClick={handleRefresh} className="h-6 w-6">
+                            <RefreshCw className="h-4 w-4" />
+                            <span className="sr-only">Refresh Number</span>
+                        </Button>
+                        <Button type="button" variant="ghost" size="icon" onClick={handleCopy} className="h-6 w-6">
+                            <Copy className="h-4 w-4" />
+                            <span className="sr-only">Copy Number</span>
+                        </Button>
+                    </div>
+                </div>
                 <AlertDescription className='font-bold text-lg'>
                   {designatedDepositAccount}
                 </AlertDescription>
