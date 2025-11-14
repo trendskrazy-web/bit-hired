@@ -8,10 +8,17 @@ import { useAccount } from "@/contexts/account-context";
 import { RedeemCodeCard } from "@/components/app/account/redeem-code-card";
 import { useUser } from "@/firebase";
 import { DepositCard } from "@/components/app/account/deposit-card";
+import { RecentTransactionsCard } from "@/components/app/account/recent-transactions-card";
+import { useTransactions } from "@/contexts/transaction-context";
 
 export default function AccountPage() {
   const { balance, mobileNumber, name, email } = useAccount();
   const { user } = useUser();
+  const { deposits, withdrawals } = useTransactions();
+
+  // Get the last 5 transactions for display
+  const recentDeposits = deposits.slice(0, 5);
+  const recentWithdrawals = withdrawals.slice(0, 5);
   
   return (
     <div className="space-y-6">
@@ -53,12 +60,14 @@ export default function AccountPage() {
               </div>
             </CardContent>
           </Card>
-          <WithdrawCard
-            accountBalance={balance}
-          />
+           <RecentTransactionsCard title="Recent Deposits" transactions={recentDeposits} type="deposit" />
+           <RecentTransactionsCard title="Recent Withdrawals" transactions={recentWithdrawals} type="withdrawal" />
         </div>
         <div className="lg:col-span-1 space-y-6">
           <DepositCard />
+          <WithdrawCard
+            accountBalance={balance}
+          />
           <RedeemCodeCard />
         </div>
       </div>
