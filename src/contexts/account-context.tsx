@@ -109,56 +109,37 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       const permissionError = new FirestorePermissionError({ path: rentalsColRef.path, operation: 'list' });
       errorEmitter.emit('permission-error', permissionError);
     });
-
-    const userDepositsQuery = query(collection(firestore, 'deposit_transactions'), where("userAccountId", "==", user.uid));
-    const unsubscribeUserDeposits = onSnapshot(userDepositsQuery, (snapshot) => {
-        const depositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Deposit));
-        setDeposits(depositData);
-    }, (error) => {
-       const permissionError = new FirestorePermissionError({ path: `deposit_transactions where userAccountId == ${user.uid}`, operation: 'list' });
-       errorEmitter.emit('permission-error', permissionError);
-    });
-
-    const userWithdrawalsQuery = query(collection(firestore, 'withdrawal_transactions'), where("userAccountId", "==", user.uid));
-    const unsubscribeUserWithdrawals = onSnapshot(userWithdrawalsQuery, (snapshot) => {
-        const withdrawalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Withdrawal));
-        setWithdrawals(withdrawalData);
-    }, (error) => {
-       const permissionError = new FirestorePermissionError({ path: `withdrawal_transactions where userAccountId == ${user.uid}`, operation: 'list' });
-       errorEmitter.emit('permission-error', permissionError);
-    });
     
-    // Admin listeners
-    let unsubscribeAdminDeposits = () => {};
-    let unsubscribeAdminWithdrawals = () => {};
+    // Listen to all deposits and withdrawals for admin, and then filter for user
+    const depositsQuery = query(collection(firestore, 'deposit_transactions'));
+    const unsubscribeDeposits = onSnapshot(depositsQuery, (snapshot) => {
+        const allDepositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Deposit));
+        if (isAdmin) {
+          setAllDeposits(allDepositData);
+        }
+        setDeposits(allDepositData.filter(d => d.userAccountId === user.uid));
+    }, (error) => {
+       const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+       errorEmitter.emit('permission-error', permissionError);
+    });
 
-    if(isAdmin) {
-        const allDepositsQuery = query(collection(firestore, 'deposit_transactions'));
-        unsubscribeAdminDeposits = onSnapshot(allDepositsQuery, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
-            setAllDeposits(data);
-        }, (error) => {
-            const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
-            errorEmitter.emit('permission-error', permissionError);
-        });
-
-        const allWithdrawalsQuery = query(collection(firestore, 'withdrawal_transactions'));
-        unsubscribeAdminWithdrawals = onSnapshot(allWithdrawalsQuery, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
-            setAllWithdrawals(data);
-        }, (error) => {
-            const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
-            errorEmitter.emit('permission-error', permissionError);
-        });
-    }
+    const withdrawalsQuery = query(collection(firestore, 'withdrawal_transactions'));
+    const unsubscribeWithdrawals = onSnapshot(withdrawalsQuery, (snapshot) => {
+        const allWithdrawalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Withdrawal));
+        if (isAdmin) {
+          setAllWithdrawals(allWithdrawalData);
+        }
+        setWithdrawals(allWithdrawalData.filter(w => w.userAccountId === user.uid));
+    }, (error) => {
+       const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
+       errorEmitter.emit('permission-error', permissionError);
+    });
 
     return () => {
       unsubscribeUser();
       unsubscribeRentals();
-      unsubscribeUserDeposits();
-      unsubscribeUserWithdrawals();
-      unsubscribeAdminDeposits();
-      unsubscribeAdminWithdrawals();
+      unsubscribeDeposits();
+      unsubscribeWithdrawals();
     };
   }, [user, firestore, isAdmin]);
 
