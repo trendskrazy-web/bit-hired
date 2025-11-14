@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 function AuthenticatedLayoutContent({ children }: { children: React.ReactNode }) {
-  const { user, isUserLoading } = useUser();
+  const { user, isUserLoading, isAdmin } = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function AuthenticatedLayoutContent({ children }: { children: React.ReactNode })
   return (
     <AccountProvider>
       <RedeemCodeProvider>
-        <AppLayout>{children}</AppLayout>
+        <AppLayout isAdmin={isAdmin}>{children}</AppLayout>
       </RedeemCodeProvider>
     </AccountProvider>
   );

@@ -15,8 +15,8 @@
  *
  * @key_security_decisions
  * - Users can only create their own user account and can only read/write their own data.
- * - Mining machine data is publicly readable, but write access is restricted.
- * - The `deposit_transactions` collection is readable by admins. Users can create their own deposit requests and read them, but cannot modify them after creation.
+ * - Mining machine data is publicly readable, but write access is restricted to admins.
+ * - The `deposit_transactions` collection is fully accessible by admins. Users can create their own deposit requests and read them, but cannot modify them after creation.
  * - Admins can update the status of any deposit transaction.
  * - The `notifications` collection is only accessible by admins.
  *
@@ -92,10 +92,11 @@ service cloud.firestore {
   }
 
   // Helper function to check for admin role.
-  // TODO: Implement a proper admin role check, e.g., using custom claims.
   function isAdmin() {
-    // For now, allow any signed-in user to be an "admin".
-    // In a production app, this should be a real role check.
-    return isSignedIn();
+    // Check for a custom claim OR a hardcoded admin UID.
+    // In production, you should rely on custom claims set by a trusted server process.
+    // The hardcoded UID is a fallback for initial setup.
+    // IMPORTANT: Replace 'REPLACE_WITH_YOUR_ADMIN_UID' with your actual Firebase Admin User ID.
+    return isSignedIn() && (request.auth.token.admin == true || request.auth.uid == 'REPLACE_WITH_YOUR_ADMIN_UID');
   }
 }

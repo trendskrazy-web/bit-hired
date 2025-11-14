@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
 import {
   SidebarProvider,
@@ -48,16 +47,6 @@ const adminMenuItems = [
 
 function AdminMenu() {
   const pathname = usePathname();
-  const [isAdminRoute, setIsAdminRoute] = useState(false);
-
-  useEffect(() => {
-    // This effect runs only on the client, avoiding hydration errors.
-    setIsAdminRoute(pathname.startsWith('/admin'));
-  }, [pathname]);
-
-  if (!isAdminRoute) {
-    return null;
-  }
 
   return (
     <SidebarMenu className="mt-auto">
@@ -85,7 +74,7 @@ function AdminMenu() {
   );
 }
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout({ children, isAdmin }: { children: React.ReactNode, isAdmin: boolean }) {
   const pathname = usePathname();
   return (
     <SidebarProvider>
@@ -123,7 +112,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
-          <AdminMenu />
+          {isAdmin && <AdminMenu />}
         </SidebarContent>
         <SidebarFooter className="group-data-[collapsible=icon]:hidden">
           <div className="bg-primary/10 p-4 rounded-lg text-center space-y-2">
@@ -138,7 +127,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="bg-background">
-        <AppHeader />
+        <AppHeader isAdmin={isAdmin} />
         <main className="p-4 sm:p-6 lg:p-8 flex-1">{children}</main>
       </SidebarInset>
     </SidebarProvider>
