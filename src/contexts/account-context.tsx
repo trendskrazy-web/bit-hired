@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -49,13 +50,11 @@ interface AccountContextType {
   name: string;
   email: string;
   mobileNumber: string;
-  // Admin specific
-  allDeposits: Deposit[];
-  allWithdrawals: Withdrawal[];
   addDepositRequest: (amount: number, transactionCode: string, depositTo: string) => void;
   addWithdrawalRequest: (amount: number) => void;
-  updateDepositStatus: (depositId: string, status: 'completed' | 'cancelled') => void;
-  updateWithdrawalStatus: (withdrawalId: string, status: 'completed' | 'cancelled') => void;
+  // Admin functions that don't rely on fetching full lists
+  updateDepositStatus: (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
+  updateWithdrawalStatus: (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
 }
 
 const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
@@ -69,17 +68,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
 
-  // Admin-specific transaction states
-  const [allDeposits, setAllDeposits] = useState<Deposit[]>([]);
-  const [allWithdrawals, setAllWithdrawals] = useState<Withdrawal[]>([]);
-
-
   const { user } = useUser();
   const firestore = useFirestore();
 
   useEffect(() => {
     if (!user || !firestore) return;
-    const isAdmin = user.uid === SUPER_ADMIN_UID;
     const unsubscribers: (() => void)[] = [];
 
     const userDocRef = doc(firestore, 'users', user.uid);
@@ -97,7 +90,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     });
     unsubscribers.push(unsubscribeUser);
 
-
     const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
     const unsubscribeRentals = onSnapshot(rentalsColRef, (snapshot) => {
       const rentalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Transaction));
@@ -107,30 +99,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       errorEmitter.emit('permission-error', permissionError);
     });
     unsubscribers.push(unsubscribeRentals);
-
-    if (isAdmin) {
-      const depositsColRef = collection(firestore, 'deposit_transactions');
-      const adminDepositsUnsub = onSnapshot(depositsColRef, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
-        setAllDeposits(data);
-      }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-      unsubscribers.push(adminDepositsUnsub);
-      
-      const withdrawalsColRef = collection(firestore, 'withdrawal_transactions');
-      const adminWithdrawalsUnsub = onSnapshot(withdrawalsColRef, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
-        setAllWithdrawals(data);
-      }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-      unsubscribers.push(adminWithdrawalsUnsub);
-    }
     
-    // Cleanup all subscriptions on unmount
     return () => {
       unsubscribers.forEach(unsub => unsub());
     };
@@ -224,39 +193,30 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   );
   
  const updateDepositStatus = useCallback(
-    (depositId: string, status: 'completed' | 'cancelled') => {
+    (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => {
       if (firestore) {
         const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
-        
         if (status === 'completed') {
-            const deposit = allDeposits.find(d => d.id === depositId);
-            if (deposit) {
-                 addBalance(deposit.amount, deposit.userAccountId);
-            }
+            addBalance(amount, userId);
         }
         updateDocumentNonBlocking(depositDocRef, { status });
       }
     },
-    [firestore, allDeposits, addBalance]
+    [firestore, addBalance]
   );
 
   const updateWithdrawalStatus = useCallback(
-    (withdrawalId: string, status: 'completed' | 'cancelled') => {
+    (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => {
         if (firestore) {
             const withdrawalDocRef = doc(firestore, 'withdrawal_transactions', withdrawalId);
             if(status === 'cancelled') {
-                const withdrawal = allWithdrawals.find(w => w.id === withdrawalId);
-                if(withdrawal) {
-                    // Refund the user if the withdrawal is cancelled
-                    addBalance(withdrawal.amount, withdrawal.userAccountId);
-                }
+                addBalance(amount, userId);
             }
             updateDocumentNonBlocking(withdrawalDocRef, { status });
         }
     },
-    [firestore, allWithdrawals, addBalance]
+    [firestore, addBalance]
   );
-
 
   return (
     <AccountContext.Provider
@@ -271,8 +231,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         name,
         email,
         mobileNumber,
-        allDeposits,
-        allWithdrawals,
         addDepositRequest,
         addWithdrawalRequest,
         updateDepositStatus,
