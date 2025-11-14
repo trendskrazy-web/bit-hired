@@ -35,22 +35,20 @@ service cloud.firestore {
       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
       allow update: if isAdmin();
-      allow list: if false; // List is handled by the collection group match below
     }
-
+    
     match /deposit_transactions/{path=**} {
-        allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
+        allow list: if isAdmin();
     }
 
     match /withdrawal_transactions/{withdrawalId} {
       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
       allow update: if isAdmin();
-      allow list: if false; // List is handled by the collection group match below
     }
 
     match /withdrawal_transactions/{path=**} {
-        allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
+        allow list: if isAdmin();
     }
     
     match /redeem_codes/{code} {
