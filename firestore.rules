@@ -61,7 +61,7 @@ service cloud.firestore {
 
     /**
      * @description Manages deposit transactions. Users can create their own and can only
-     * view their own.
+     * view their own. Admins can read all deposits.
      * @path /deposit_transactions/{depositTransactionId}
      */
     match /deposit_transactions/{depositTransactionId} {
