@@ -270,8 +270,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         name,
         email,
         mobileNumber,
-        // deposits,
-        // withdrawals,
         allDeposits,
         allWithdrawals,
         addDepositRequest,
