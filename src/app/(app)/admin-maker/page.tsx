@@ -3,9 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/firebase";
+import { ShieldAlert } from "lucide-react";
 
 export default function AdminMakerPage() {
     const { toast } = useToast();
+    const { user, isUserLoading } = useUser();
+    
+    // This is the designated "super admin" UID.
+    const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
     const makeAdmin = () => {
         // In a real app, this would be a secure backend call.
@@ -27,6 +33,33 @@ export default function AdminMakerPage() {
         });
         window.location.reload();
     }
+
+    if (isUserLoading) {
+        return (
+             <div className="flex justify-center items-center h-full">
+                <p>Loading...</p>
+            </div>
+        )
+    }
+
+    if (user?.uid !== SUPER_ADMIN_UID) {
+        return (
+             <div className="flex justify-center items-center h-full">
+                <Card className="w-full max-w-md text-center">
+                    <CardHeader>
+                        <CardTitle className="flex items-center justify-center gap-2">
+                            <ShieldAlert className="w-6 h-6 text-destructive" />
+                            Access Denied
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p>You do not have permission to access this page.</p>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
+
 
     return (
         <div className="flex justify-center items-center h-full">
