@@ -22,26 +22,6 @@ export interface Transaction {
   status: "Active" | "Expired" | "Pending";
 }
 
-// Legacy deposit type
-export interface Deposit {
-  id: string;
-  amount: number;
-  date: string;
-  redeemCode: string;
-  status: "Completed";
-}
-
-// New deposit transaction type for admin confirmation flow
-export interface DepositTransaction {
-  id: string;
-  userAccountId: string;
-  mobileNumber: string;
-  amount: number;
-  transactionCode: string;
-  status: "pending" | "completed" | "cancelled";
-  createdAt: string;
-}
-
 export interface Notification {
   id: string;
   message: string;

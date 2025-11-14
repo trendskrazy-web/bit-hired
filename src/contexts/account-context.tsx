@@ -9,9 +9,9 @@ import {
   useEffect,
   useCallback,
 } from 'react';
-import type { Transaction, DepositTransaction } from '@/lib/data';
+import type { Transaction } from '@/lib/data';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
-import { collection, doc, onSnapshot, increment, query, where } from 'firebase/firestore';
+import { collection, doc, onSnapshot, increment } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -29,8 +29,6 @@ interface AccountContextType {
   name: string;
   email: string;
   mobileNumber: string;
-  deposits: DepositTransaction[];
-  addDepositRequest: (amount: number, mobileNumber: string) => Promise<DepositTransaction>;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -38,7 +36,6 @@ const AccountContext = createContext<AccountContextType | undefined>(undefined);
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [deposits, setDeposits] = useState<DepositTransaction[]>([]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
@@ -71,22 +68,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       const permissionError = new FirestorePermissionError({ path: rentalsColRef.path, operation: 'list' });
       errorEmitter.emit('permission-error', permissionError);
     });
-
-    const depositsColRef = collection(firestore, 'deposit_transactions');
-    const depositsQuery = query(depositsColRef, where("userAccountId", "==", user.uid));
-    const unsubscribeUserDeposits = onSnapshot(depositsQuery, (snapshot) => {
-      const depositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as DepositTransaction));
-      setDeposits(depositData);
-    }, (error) => {
-       const permissionError = new FirestorePermissionError({ path: `deposit_transactions where userAccountId == ${user.uid}`, operation: 'list' });
-       errorEmitter.emit('permission-error', permissionError);
-    });
     
 
     return () => {
       unsubscribeUser();
       unsubscribeRentals();
-      unsubscribeUserDeposits();
     };
   }, [user, firestore]);
 
@@ -127,27 +113,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     },
     [user, firestore]
   );
-
-  const addDepositRequest = useCallback(async (amount: number, mobileNumber: string): Promise<DepositTransaction> => {
-    if (!user || !firestore) {
-      throw new Error("User not authenticated or Firestore not available.");
-    }
-    const transactionCode = `BH${Math.random().toString().slice(2, 8)}`;
-    const newDeposit: Omit<DepositTransaction, 'id'> = {
-      userAccountId: user.uid,
-      amount,
-      mobileNumber,
-      transactionCode,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    };
-
-    const docRef = await addDocumentNonBlocking(collection(firestore, 'deposit_transactions'), newDeposit);
-    if (!docRef) {
-      throw new Error("Failed to create deposit request document.");
-    }
-    return { id: docRef.id, ...newDeposit };
-  }, [user, firestore]);
   
 
   return (
@@ -163,8 +128,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         name,
         email,
         mobileNumber,
-        deposits,
-        addDepositRequest,
       }}
     >
       {children}
