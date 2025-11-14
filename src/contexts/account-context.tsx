@@ -37,8 +37,6 @@ interface AccountContextType {
   markNotificationAsRead: (notificationId: string) => void;
   mobileNumber: string;
   mpesaNumbers: string[];
-  addMpesaNumber: (number: string) => void;
-  removeMpesaNumber: (number: string) => void;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -60,15 +58,6 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
 
   const { user } = useUser();
   const firestore = useFirestore();
-
-  const addMpesaNumber = (number: string) => {
-    setMpesaNumbers(prev => [...prev, number]);
-  };
-
-  const removeMpesaNumber = (numberToRemove: string) => {
-    setMpesaNumbers(prev => prev.filter(num => num !== numberToRemove));
-  };
-
 
   const declineDeposit = useCallback((depositId: string, reason: string = 'Declined by admin.') => {
     if (!firestore) return;
@@ -283,8 +272,6 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
         markNotificationAsRead,
         mobileNumber,
         mpesaNumbers,
-        addMpesaNumber,
-        removeMpesaNumber,
       }}
     >
       {children}
