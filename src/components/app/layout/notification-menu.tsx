@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -17,8 +18,12 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 
 export function NotificationMenu() {
-  const { notifications } = useAccount();
+  const { notifications, markNotificationAsRead } = useAccount();
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const handleNotificationClick = (notificationId: string) => {
+    markNotificationAsRead(notificationId);
+  }
 
   return (
     <DropdownMenu>
@@ -41,10 +46,10 @@ export function NotificationMenu() {
         <DropdownMenuGroup>
           {notifications.length > 0 ? (
             notifications.slice(0, 5).map((notification) => (
-              <DropdownMenuItem key={notification.id} asChild>
+              <DropdownMenuItem key={notification.id} asChild onClick={() => handleNotificationClick(notification.id)}>
                 <Link
                   href="/admin/notifications"
-                  className="flex flex-col items-start gap-1 whitespace-normal"
+                  className={`flex flex-col items-start gap-1 whitespace-normal ${!notification.read ? 'font-bold' : ''}`}
                 >
                   <p className="text-sm">{notification.message}</p>
                   <p className="text-xs text-muted-foreground">

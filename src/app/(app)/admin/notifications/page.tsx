@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useAccount } from "@/contexts/account-context";
@@ -6,9 +7,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Bell } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useEffect } from "react";
 
 export default function AdminNotificationsPage() {
-  const { notifications } = useAccount();
+  const { notifications, markNotificationAsRead } = useAccount();
+
+  useEffect(() => {
+    notifications.forEach(notification => {
+      if (!notification.read) {
+        markNotificationAsRead(notification.id);
+      }
+    });
+  }, [notifications, markNotificationAsRead]);
 
   return (
     <div className="space-y-6">
@@ -43,7 +53,7 @@ export default function AdminNotificationsPage() {
             <TableBody>
               {notifications.length > 0 ? (
                 notifications.map((notification) => (
-                  <TableRow key={notification.id}>
+                  <TableRow key={notification.id} data-state={notification.read ? '' : 'selected'}>
                     <TableCell>{new Date(notification.createdAt).toLocaleString()}</TableCell>
                     <TableCell className="font-mono text-xs">{notification.adminId}</TableCell>
                     <TableCell>{notification.message}</TableCell>

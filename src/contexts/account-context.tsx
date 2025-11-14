@@ -35,6 +35,7 @@ interface AccountContextType {
   declineDeposit: (depositId: string, reason?: string) => void;
   allDeposits: DepositTransaction[];
   notifications: Notification[];
+  markNotificationAsRead: (notificationId: string) => void;
   mobileNumber: string;
   mpesaNumbers: string[];
   addMpesaNumber: (number: string) => void;
@@ -257,6 +258,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [user, firestore]
   );
   
+  const markNotificationAsRead = useCallback((notificationId: string) => {
+    if (!firestore) return;
+    const notificationDocRef = doc(firestore, 'notifications', notificationId);
+    updateDocumentNonBlocking(notificationDocRef, { read: true });
+  }, [firestore]);
+
+
   return (
     <AccountContext.Provider
       value={{
@@ -275,6 +283,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         declineDeposit,
         allDeposits,
         notifications,
+        markNotificationAsRead,
         mobileNumber,
         mpesaNumbers,
         addMpesaNumber,
