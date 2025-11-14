@@ -36,7 +36,6 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 
 const adminMenuItems = [
-  { href: '/admin/deposits', label: 'Deposits', icon: Wallet },
   { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
   { href: '/admin-maker', label: 'Admin Maker', icon: Shield },
 ];

@@ -96,24 +96,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
        errorEmitter.emit('permission-error', permissionError);
     });
     
-    let unsubscribeAllDeposits = () => {};
-    if (isAdmin) {
-      const allDepositsQuery = query(depositsColRef);
-      unsubscribeAllDeposits = onSnapshot(allDepositsQuery, (snapshot) => {
-        const allDepositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Deposit));
-        setAllDeposits(allDepositData);
-      }, (error) => {
-         const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
-         errorEmitter.emit('permission-error', permissionError);
-      });
-    }
+    // Admin-specific logic removed from here as it's no longer needed by any component
 
 
     return () => {
       unsubscribeUser();
       unsubscribeRentals();
       unsubscribeUserDeposits();
-      unsubscribeAllDeposits();
     };
   }, [user, firestore, isAdmin]);
 
