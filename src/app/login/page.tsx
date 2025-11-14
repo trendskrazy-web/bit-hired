@@ -36,7 +36,21 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const email = `${mobileNumber}@bithired.com`;
-    initiateEmailSignIn(auth, email, password);
+    initiateEmailSignIn(auth, email, password, (error) => {
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        toast({
+          title: 'Sign In Failed',
+          description: 'Invalid mobile number or password. Please try again.',
+          variant: 'destructive',
+        });
+      } else {
+         toast({
+          title: 'Sign In Error',
+          description: 'An unexpected error occurred. Please try again later.',
+          variant: 'destructive',
+        });
+      }
+    });
     toast({
       title: 'Signing In',
       description: 'Please wait...',
