@@ -79,21 +79,11 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
       const permissionError = new FirestorePermissionError({ path: rentalsColRef.path, operation: 'list' });
       errorEmitter.emit('permission-error', permissionError);
     });
-
-    const userDepositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid));
-    const unsubscribeUserDeposits = onSnapshot(userDepositsQuery, (snapshot) => {
-      const depositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as DepositTransaction));
-      setDeposits(depositData);
-    }, (error) => {
-       const permissionError = new FirestorePermissionError({ path: `deposit_transactions where userAccountId == ${user.uid}`, operation: 'list' });
-       errorEmitter.emit('permission-error', permissionError);
-    });
     
 
     return () => {
       unsubscribeUser();
       unsubscribeRentals();
-      unsubscribeUserDeposits();
     };
   }, [user, firestore]);
 
@@ -147,9 +137,6 @@ export function AccountProvider({ children, isAdmin }: { children: ReactNode, is
       status: 'pending',
       createdAt: new Date().toISOString(),
     };
-
-    // We can't add to firestore as there are no admins to approve
-    // addDocumentNonBlocking(collection(firestore, 'deposit_transactions'), newDeposit);
     
     // Add to local state for UI feedback
     setDeposits(prev => [newDeposit, ...prev]);

@@ -58,21 +58,6 @@ service cloud.firestore {
     match /users/{userId}/rentals/{rentalId} {
       allow get, list, create, update, delete: if isOwner(userId);
     }
-
-    /**
-     * @description Protects deposit transaction documents.
-     * @path /deposit_transactions/{depositId}
-     */
-    match /deposit_transactions/{depositId} {
-      // Users can create their own deposit requests.
-      allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
-
-      // Users can read their own deposit requests.
-      allow get: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
-      
-      // Users can list their own deposit requests, but only if they are querying for their own user ID.
-      allow list: if isSignedIn() && request.query.where.userAccountId == request.auth.uid;
-    }
   }
 
   // Helper function to determine if the user is signed in.
