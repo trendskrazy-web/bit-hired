@@ -7,7 +7,6 @@ import {
   Users,
   KeyRound,
   History,
-  ArrowLeftRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -28,7 +27,6 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 
 const adminMenuItems = [
-  { href: '/admin/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: KeyRound },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/history', label: 'Admin History', icon: History },
