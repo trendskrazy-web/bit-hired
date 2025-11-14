@@ -1,12 +1,10 @@
 
 "use client";
 
-import { TopUpCard } from "@/components/app/account/top-up-card";
 import { WithdrawCard } from "@/components/app/account/withdraw-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useAccount } from "@/contexts/account-context";
-import { PendingDepositsList } from "@/components/app/account/pending-deposits-list";
 import { RedeemCodeCard } from "@/components/app/account/redeem-code-card";
 import { useUser } from "@/firebase";
 
@@ -54,22 +52,12 @@ export default function AccountPage() {
               </div>
             </CardContent>
           </Card>
-           <Card>
-            <CardHeader>
-              <CardTitle>Pending Deposits</CardTitle>
-              <CardDescription>Deposit functionality is for demonstration purposes. Deposits will appear here but will not be processed.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PendingDepositsList />
-            </CardContent>
-          </Card>
           <WithdrawCard
             accountBalance={balance}
             onWithdraw={deductBalance}
           />
         </div>
         <div className="lg:col-span-1 space-y-6">
-          <TopUpCard />
           <RedeemCodeCard />
         </div>
       </div>
