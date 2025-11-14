@@ -96,8 +96,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
        errorEmitter.emit('permission-error', permissionError);
     });
     
-    // Admin-specific logic removed from here as it's no longer needed by any component
-
 
     return () => {
       unsubscribeUser();
