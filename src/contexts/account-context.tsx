@@ -50,6 +50,8 @@ interface AccountContextType {
   name: string;
   email: string;
   mobileNumber: string;
+  deposits: Deposit[];
+  withdrawals: Withdrawal[];
   addDepositRequest: (amount: number, transactionCode: string, depositTo: string) => void;
   addWithdrawalRequest: (amount: number) => void;
   // Admin functions
@@ -65,6 +67,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
+  const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   
   const { user } = useUser();
   const firestore = useFirestore();
@@ -98,6 +102,29 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     });
     unsubscribers.push(unsubscribeRentals);
     
+    // User-specific deposits listener
+    const depositsQuery = query(collection(firestore, 'deposit_transactions'), where('userAccountId', '==', user.uid));
+    const unsubscribeDeposits = onSnapshot(depositsQuery, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
+      setDeposits(data);
+    }, (error) => {
+      const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+      errorEmitter.emit('permission-error', permissionError);
+    });
+    unsubscribers.push(unsubscribeDeposits);
+
+    // User-specific withdrawals listener
+    const withdrawalsQuery = query(collection(firestore, 'withdrawal_transactions'), where('userAccountId', '==', user.uid));
+    const unsubscribeWithdrawals = onSnapshot(withdrawalsQuery, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
+      setWithdrawals(data);
+    }, (error) => {
+      const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
+      errorEmitter.emit('permission-error', permissionError);
+    });
+    unsubscribers.push(unsubscribeWithdrawals);
+
+
     return () => {
       unsubscribers.forEach(unsub => unsub());
     };
@@ -227,6 +254,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     name,
     email,
     mobileNumber,
+    deposits,
+    withdrawals,
     addDepositRequest,
     addWithdrawalRequest,
     updateDepositStatus,

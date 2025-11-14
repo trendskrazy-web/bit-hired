@@ -2,13 +2,15 @@
 "use client";
 
 import { columns as hireColumns } from "@/components/app/transactions/columns";
+import { columns as depositColumns } from "@/components/app/transactions/deposit-columns";
+import { columns as withdrawalColumns } from "@/components/app/transactions/withdrawal-columns";
 import { DataTable } from "@/components/app/transactions/data-table";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAccount } from "@/contexts/account-context";
 
 export default function TransactionsPage() {
-  const { transactions } = useAccount();
+  const { transactions, deposits, withdrawals } = useAccount();
 
   const activeTransactions = transactions.filter((t) => t.status === "Active");
   const expiredTransactions = transactions.filter(
@@ -26,34 +28,34 @@ export default function TransactionsPage() {
         </p>
       </div>
       <Separator />
-      <Tabs defaultValue="all">
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="expired">Expired</TabsTrigger>
+      <Tabs defaultValue="hire-history">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="hire-history">Hire History</TabsTrigger>
+          <TabsTrigger value="deposits">Deposits</TabsTrigger>
+          <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
         </TabsList>
-        <TabsContent value="all">
-          <DataTable
+        <TabsContent value="hire-history">
+           <DataTable
             columns={hireColumns}
             data={transactions}
             filterColumn="machineName"
             filterPlaceholder="Filter by machine..."
           />
         </TabsContent>
-        <TabsContent value="active">
+        <TabsContent value="deposits">
           <DataTable
-            columns={hireColumns}
-            data={activeTransactions}
-            filterColumn="machineName"
-            filterPlaceholder="Filter by machine..."
+            columns={depositColumns}
+            data={deposits}
+            filterColumn="status"
+            filterPlaceholder="Filter by status..."
           />
         </TabsContent>
-        <TabsContent value="expired">
-          <DataTable
-            columns={hireColumns}
-            data={expiredTransactions}
-            filterColumn="machineName"
-            filterPlaceholder="Filter by machine..."
+        <TabsContent value="withdrawals">
+           <DataTable
+            columns={withdrawalColumns}
+            data={withdrawals}
+            filterColumn="status"
+            filterPlaceholder="Filter by status..."
           />
         </TabsContent>
       </Tabs>
