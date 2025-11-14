@@ -50,9 +50,6 @@ interface AccountContextType {
   name: string;
   email: string;
   mobileNumber: string;
-  // User specific
-  deposits: Deposit[];
-  withdrawals: Withdrawal[];
   // Admin specific
   allDeposits: Deposit[];
   allWithdrawals: Withdrawal[];
@@ -70,10 +67,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
-  
-  // User-specific transaction states
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
 
   // Admin-specific transaction states
   const [allDeposits, setAllDeposits] = useState<Deposit[]>([]);
@@ -134,26 +127,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       });
       unsubscribers.push(adminDepositsUnsub, adminWithdrawalsUnsub);
 
-    } else {
-      // Regular User: Fetch only their own deposits and withdrawals
-      const userDepositsQuery = query(collection(firestore, 'deposit_transactions'), where("userAccountId", "==", user.uid));
-      const userDepositsUnsub = onSnapshot(userDepositsQuery, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
-        setDeposits(data);
-      }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: `deposit_transactions where userAccountId == ${user.uid}`, operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-
-      const userWithdrawalsQuery = query(collection(firestore, 'withdrawal_transactions'), where("userAccountId", "==", user.uid));
-      const userWithdrawalsUnsub = onSnapshot(userWithdrawalsQuery, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
-        setWithdrawals(data);
-      }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: `withdrawal_transactions where userAccountId == ${user.uid}`, operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-      unsubscribers.push(userDepositsUnsub, userWithdrawalsUnsub);
     }
     
     // Cleanup all subscriptions on unmount
@@ -297,8 +270,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         name,
         email,
         mobileNumber,
-        deposits,
-        withdrawals,
+        // deposits,
+        // withdrawals,
         allDeposits,
         allWithdrawals,
         addDepositRequest,
@@ -319,5 +292,3 @@ export function useAccount() {
   }
   return context;
 }
-
-    
