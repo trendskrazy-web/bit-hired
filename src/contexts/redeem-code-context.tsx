@@ -14,6 +14,8 @@ import {
   updateDocumentNonBlocking,
   useFirestore,
   useUser,
+  FirestorePermissionError,
+  errorEmitter
 } from "@/firebase";
 import {
   collection,
@@ -80,7 +82,11 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
       );
       setCodes(codesData);
     }, (error) => {
-      console.error("Error fetching redeem codes:", error);
+      const permissionError = new FirestorePermissionError({
+        path: codesColRef.path,
+        operation: 'list',
+      });
+      errorEmitter.emit('permission-error', permissionError);
     });
 
     return () => unsubscribe();
@@ -102,6 +108,7 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
         };
         
         const docRef = doc(firestore, "redeem_codes", code);
+        // Use setDoc for creating a doc with a specific ID
         addDocumentNonBlocking(docRef, newCode);
         newCodes.push({ ...newCode, id: code });
       }
@@ -148,7 +155,11 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
           amount: foundCode.amount,
         };
       } catch (error) {
-        console.error("Error redeeming code:", error);
+        const permissionError = new FirestorePermissionError({
+          path: codeDocRef.path,
+          operation: 'get',
+        });
+        errorEmitter.emit('permission-error', permissionError);
         return {
           success: false,
           message: "An error occurred while redeeming the code.",
