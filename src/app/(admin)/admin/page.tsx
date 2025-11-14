@@ -1,6 +1,1 @@
-
-import { redirect } from 'next/navigation';
-
-export default function AdminPage() {
-  redirect('/admin/redeem-codes');
-}
+// This file is intentionally left blank.

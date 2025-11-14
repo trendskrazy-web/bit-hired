@@ -4,23 +4,21 @@
  *
  * @core_philosophy This ruleset enforces a strict user-ownership model for private data,
  * ensuring that only authenticated users can access their own information. Public data,
- * such as mining machine details, is readable by all. Admins have elevated privileges.
+ * such as mining machine details, is readable by all.
  *
  * @data_structure
  * - `/users/{userId}`: Stores user account information.
  * - `/mining_machines/{machineId}`: Stores publicly readable mining machine data.
  * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
  * - `/deposit_transactions/{depositId}`: Stores deposit requests.
- * - `/notifications/{notificationId}`: Stores system notifications for admins.
  * - `/redeem_codes/{code}`: Stores redeemable codes.
  *
  * @key_security_decisions
  * - Users can only create their own user account and can only read/write their own data.
- * - Admins can read and write all user data.
- * - Mining machine data is publicly readable, but write access is restricted to admins.
+ * - Mining machine data is publicly readable.
  * - Rental transactions are nested under the user, ensuring ownership.
  * - Users can create their own deposit requests and view only their own.
- * - Admins can read all deposits and update their status.
+ * - Deposit status can only be updated by a backend process (or a future admin role).
  *
  * @denormalization_for_authorization
  * - Transaction documents contain `userAccountId` for direct ownership checks in rules.
@@ -37,22 +35,22 @@ service cloud.firestore {
      * @path /users/{userId}
      */
     match /users/{userId} {
-      allow get, update: if isOwner(userId) || isAdmin();
+      allow get, update: if isOwner(userId);
       allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId
                     && request.resource.data.name is string
                     && request.resource.data.email is string
                     && request.resource.data.mobileNumber is string
                     && request.resource.data.virtualBalance == 0;
-      allow list: if isAdmin();
     }
 
     /**
-     * @description Allows public read access to mining machine details. Write access is restricted to admins.
+     * @description Allows public read access to mining machine details.
      * @path /mining_machines/{miningMachineId}
      */
     match /mining_machines/{miningMachineId} {
       allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      // Creation/updates should be done via a trusted backend/admin interface, not by clients.
+      allow create, update, delete: if false;
     }
 
     /**
@@ -60,7 +58,7 @@ service cloud.firestore {
      * @path /users/{userId}/rentals/{rentalId}
      */
     match /users/{userId}/rentals/{rentalId} {
-      allow get, list, create, update, delete: if isOwner(userId) || isAdmin();
+      allow get, list, create, update, delete: if isOwner(userId);
     }
 
     /**
@@ -69,37 +67,26 @@ service cloud.firestore {
      * @path /deposit_transactions/{depositTransactionId}
      */
     match /deposit_transactions/{depositTransactionId} {
-        allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
-        allow list: if isSignedIn();
+        allow get: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
+        allow list: if isSignedIn(); // Users can list their own via queries
         allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
-        allow update: if isAdmin();
-    }
-
-     /**
-     * @description Manages notifications for admins.
-     * @path /notifications/{notificationId}
-     */
-    match /notifications/{notificationId} {
-      allow read, write: if isAdmin();
+        allow update: if false; // Status updates should be done by a trusted backend process.
     }
 
     /**
      * @description Manages redeem codes.
-     * @path /redeem_codes
+     * @path /redeem_codes/{code}
      */
     match /redeem_codes/{code} {
-      allow create: if isAdmin();
-      // Admins can read any code, signed-in users can read a specific code.
-      allow get: if isAdmin() || isSignedIn();
-      // Signed-in users can redeem an unused code.
+      // Any signed-in user can check if a code exists.
+      allow get: if isSignedIn();
+      // Any signed-in user can redeem an unused code.
       allow update: if isSignedIn()
                     && request.resource.data.used == true
                     && resource.data.used == false
                     && request.resource.data.usedBy == request.auth.uid;
-    }
-     // Admins can list all redeem codes.
-    match /redeem_codes {
-        allow list: if isAdmin();
+      // Codes must be created by a trusted backend process.
+      allow create, delete, list: if false;
     }
   }
 
@@ -111,10 +98,5 @@ service cloud.firestore {
   // Helper function to determine if the user is the owner of the document.
   function isOwner(userId) {
     return isSignedIn() && request.auth.uid == userId;
-  }
-
-  // Helper function to check if the user is an admin.
-  function isAdmin() {
-    return isSignedIn() && request.auth.uid == 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
   }
 }

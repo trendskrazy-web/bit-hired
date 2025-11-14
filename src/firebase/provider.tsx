@@ -18,7 +18,6 @@ interface UserAuthState {
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
-  isAdmin: boolean;
 }
 
 // Combined state for the Firebase context
@@ -31,7 +30,6 @@ export interface FirebaseContextState {
   user: User | null;
   isUserLoading: boolean; // True during initial auth check
   userError: Error | null; // Error from auth listener
-  isAdmin: boolean;
 }
 
 // Return type for useFirebase()
@@ -42,7 +40,6 @@ export interface FirebaseServicesAndUser {
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
-  isAdmin: boolean;
 }
 
 // Return type for useUser() - specific to user auth state
@@ -50,13 +47,10 @@ export interface UserHookResult { // Renamed from UserAuthHookResult for consist
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
-  isAdmin: boolean;
 }
 
 // React Context
 export const FirebaseContext = createContext<FirebaseContextState | undefined>(undefined);
-
-const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
 /**
  * FirebaseProvider manages and provides Firebase services and user authentication state.
@@ -71,31 +65,29 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     user: null,
     isUserLoading: true, // Start loading until first auth event
     userError: null,
-    isAdmin: false,
   });
 
   // Effect to subscribe to Firebase auth state changes
   useEffect(() => {
     if (!auth) { // If no Auth service instance, cannot determine user state
-      setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth service not provided."), isAdmin: false });
+      setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth service not provided.") });
       return;
     }
 
-    setUserAuthState({ user: null, isUserLoading: true, userError: null, isAdmin: false }); // Reset on auth instance change
+    setUserAuthState({ user: null, isUserLoading: true, userError: null }); // Reset on auth instance change
 
     const unsubscribe = onAuthStateChanged(
       auth,
       async (firebaseUser) => { // Auth state determined
         if (firebaseUser) {
-           const isSuperAdmin = firebaseUser.uid === SUPER_ADMIN_UID;
-           setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null, isAdmin: isSuperAdmin });
+           setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
         } else {
-          setUserAuthState({ user: null, isUserLoading: false, userError: null, isAdmin: false });
+          setUserAuthState({ user: null, isUserLoading: false, userError: null });
         }
       },
       (error) => { // Auth listener error
         console.error("FirebaseProvider: onAuthStateChanged error:", error);
-        setUserAuthState({ user: null, isUserLoading: false, userError: error, isAdmin: false });
+        setUserAuthState({ user: null, isUserLoading: false, userError: error });
       }
     );
     return () => unsubscribe(); // Cleanup
@@ -112,7 +104,6 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       user: userAuthState.user,
       isUserLoading: userAuthState.isUserLoading,
       userError: userAuthState.userError,
-      isAdmin: userAuthState.isAdmin,
     };
   }, [firebaseApp, firestore, auth, userAuthState]);
 
@@ -146,7 +137,6 @@ export const useFirebase = (): FirebaseServicesAndUser => {
     user: context.user,
     isUserLoading: context.isUserLoading,
     userError: context.userError,
-    isAdmin: context.isAdmin,
   };
 };
 
@@ -185,6 +175,6 @@ export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T | 
  * @returns {UserHookResult} Object with user, isUserLoading, userError.
  */
 export const useUser = (): UserHookResult => { // Renamed from useAuthUser
-  const { user, isUserLoading, userError, isAdmin } = useFirebase(); // Leverages the main hook
-  return { user, isUserLoading, userError, isAdmin };
+  const { user, isUserLoading, userError } = useFirebase(); // Leverages the main hook
+  return { user, isUserLoading, userError };
 };
