@@ -98,25 +98,27 @@ export function DepositCard() {
       <form onSubmit={handleDepositRequest}>
         <CardContent className="space-y-4">
             {depositsEnabled && designatedDepositAccount ? (
-             <Alert>
-                <Terminal className="h-4 w-4" />
-                <div className="flex justify-between items-center">
-                    <AlertTitle>Send Deposit To:</AlertTitle>
-                    <div className="flex items-center gap-2">
-                         <Button type="button" variant="ghost" size="icon" onClick={handleRefresh} className="h-6 w-6">
-                            <RefreshCw className="h-4 w-4" />
-                            <span className="sr-only">Refresh Number</span>
-                        </Button>
-                        <Button type="button" variant="ghost" size="icon" onClick={handleCopy} className="h-6 w-6">
-                            <Copy className="h-4 w-4" />
-                            <span className="sr-only">Copy Number</span>
-                        </Button>
+            <div className="space-y-2">
+                <Label>Send Deposit To:</Label>
+                 <Alert>
+                    <Terminal className="h-4 w-4" />
+                    <div className="flex justify-between items-center">
+                       <AlertDescription className='font-bold text-lg'>
+                        {designatedDepositAccount}
+                        </AlertDescription>
+                        <div className="flex items-center gap-2">
+                            <Button type="button" variant="ghost" size="icon" onClick={handleRefresh} className="h-6 w-6">
+                                <RefreshCw className="h-4 w-4" />
+                                <span className="sr-only">Refresh Number</span>
+                            </Button>
+                            <Button type="button" variant="ghost" size="icon" onClick={handleCopy} className="h-6 w-6">
+                                <Copy className="h-4 w-4" />
+                                <span className="sr-only">Copy Number</span>
+                            </Button>
+                        </div>
                     </div>
-                </div>
-                <AlertDescription className='font-bold text-lg'>
-                  {designatedDepositAccount}
-                </AlertDescription>
-            </Alert>
+                </Alert>
+            </div>
             ) : (
              <Alert variant="destructive">
                 <Terminal className="h-4 w-4" />
