@@ -7,7 +7,6 @@ import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 function AuthenticatedLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
@@ -41,9 +40,6 @@ export default function AuthenticatedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <FirebaseClientProvider>
-      <AuthenticatedLayoutContent>{children}</AuthenticatedLayoutContent>
-    </FirebaseClientProvider>
-  );
+  // No need for FirebaseClientProvider here as it's handled at the root and in the admin layout
+  return <AuthenticatedLayoutContent>{children}</AuthenticatedLayoutContent>;
 }

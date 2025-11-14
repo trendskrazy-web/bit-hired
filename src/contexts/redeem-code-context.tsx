@@ -10,6 +10,7 @@ import {
   useEffect,
 } from "react";
 import {
+  addDocumentNonBlocking,
   updateDocumentNonBlocking,
   useFirestore,
   useUser,
@@ -20,6 +21,8 @@ import {
   collection,
   doc,
   getDoc,
+  onSnapshot,
+  query,
 } from "firebase/firestore";
 
 export interface RedeemCode {
@@ -33,6 +36,8 @@ export interface RedeemCode {
 }
 
 interface RedeemCodeContextType {
+  codes: RedeemCode[];
+  generateCode: (amount: number) => Promise<string>;
   redeemCode: (
     code: string
   ) => Promise<{ success: boolean; message: string; amount: number }>;
@@ -43,10 +48,59 @@ const RedeemCodeContext = createContext<RedeemCodeContextType | undefined>(
   undefined
 );
 
+// In a real app, you might use a more robust library like `uuid`
+const generateUniqueCode = () => {
+    return 'BH' + Math.random().toString(36).substring(2, 10).toUpperCase();
+}
+
 
 export function RedeemCodeProvider({ children }: { children: ReactNode }) {
+  const [codes, setCodes] = useState<RedeemCode[]>([]);
   const firestore = useFirestore();
   const { user } = useUser();
+  const isAdmin = user?.uid === 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+
+  useEffect(() => {
+    if (!firestore || !isAdmin) {
+        setCodes([]);
+        return;
+    };
+
+    const codesColRef = collection(firestore, "redeem_codes");
+    const q = query(codesColRef);
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const codesData = snapshot.docs.map(
+        (doc) => ({ id: doc.id, ...doc.data() } as RedeemCode)
+      );
+      setCodes(codesData);
+    }, (error) => {
+      const permissionError = new FirestorePermissionError({
+        path: codesColRef.path,
+        operation: 'list',
+      });
+      errorEmitter.emit('permission-error', permissionError);
+    });
+
+    return () => unsubscribe();
+  }, [firestore, isAdmin]);
+
+
+  const generateCode = useCallback(async (amount: number) => {
+    if (!firestore) throw new Error("Firestore not available");
+    
+    const newCode = generateUniqueCode();
+    const codeDocRef = doc(firestore, 'redeem_codes', newCode);
+    
+    await addDocumentNonBlocking(codeDocRef, {
+        code: newCode,
+        amount,
+        used: false,
+        createdAt: new Date().toISOString(),
+    });
+
+    return newCode;
+  }, [firestore]);
+
 
   const redeemCode = useCallback(
     async (
@@ -117,7 +171,7 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
 
   return (
     <RedeemCodeContext.Provider
-      value={{ redeemCode, markCodeAsUsed }}
+      value={{ codes, generateCode, redeemCode, markCodeAsUsed }}
     >
       {children}
     </RedeemCodeContext.Provider>

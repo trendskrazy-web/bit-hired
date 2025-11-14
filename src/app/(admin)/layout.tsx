@@ -1,9 +1,36 @@
 
 'use client';
 
+import { useUser } from '@/firebase';
 import { redirect } from 'next/navigation';
+import { AdminLayout } from '@/components/admin/layout/admin-layout';
 
-export default function AdminLayout() {
-  // Redirect all attempts to access admin pages to the user dashboard.
-  redirect('/dashboard');
+// This is a hardcoded UID for the super admin.
+// In a real-world application, you would use a more robust role-based access control system,
+// like Firebase Custom Claims.
+const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+
+export default function ProtectedAdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { user, isUserLoading } = useUser();
+
+  if (isUserLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  // If the user is not logged in or is not the super admin, redirect them.
+  if (!user || user.uid !== SUPER_ADMIN_UID) {
+    redirect('/dashboard');
+    return null; // Return null to prevent rendering children during redirect
+  }
+
+  // If the user is the super admin, render the admin layout.
+  return <AdminLayout>{children}</AdminLayout>;
 }

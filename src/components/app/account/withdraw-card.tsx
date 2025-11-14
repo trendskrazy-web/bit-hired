@@ -24,7 +24,7 @@ export function WithdrawCard({ accountBalance }: WithdrawCardProps) {
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const { mobileNumber, addWithdrawalRequest } = useAccount();
+  const { mobileNumber, addWithdrawalRequest, deductBalance } = useAccount();
 
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +49,12 @@ export function WithdrawCard({ accountBalance }: WithdrawCardProps) {
     }
 
     setIsProcessing(true);
+    // Deduct balance immediately upon request
+    deductBalance(withdrawAmount);
+    // Create the withdrawal request record
     addWithdrawalRequest(withdrawAmount);
     
+    // Simulate processing time
     setTimeout(() => {
       setIsProcessing(false);
       setAmount("");
@@ -95,7 +99,7 @@ export function WithdrawCard({ accountBalance }: WithdrawCardProps) {
             </p>
           </div>
            <p className="text-xs text-muted-foreground">
-              Withdrawals are processed within 2-3 working days.
+              Withdrawals are processed within 2-3 working days. Your balance will be deducted immediately.
             </p>
         </CardContent>
         <CardFooter>
