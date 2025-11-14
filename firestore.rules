@@ -56,5 +56,9 @@ service cloud.firestore {
         allow get, list: if isSignedIn();
         allow write: if isSignedIn(); // Should be more secure in production
     }
+
+    match /notifications/{notificationId} {
+      allow read, write: if isAdmin();
+    }
   }
 }
