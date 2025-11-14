@@ -35,6 +35,7 @@ service cloud.firestore {
       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
       allow update: if isAdmin();
+      // List rule is handled by the collection group match below
     }
     
     match /deposit_transactions/{path=**} {
@@ -45,6 +46,7 @@ service cloud.firestore {
       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
       allow update: if isAdmin();
+       // List rule is handled by the collection group match below
     }
 
     match /withdrawal_transactions/{path=**} {
