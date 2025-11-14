@@ -14,13 +14,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAccount } from '@/contexts/account-context';
 import { useAuth, useUser } from '@/firebase';
-import { CreditCard, LogOut, User } from 'lucide-react';
+import { CreditCard, LogOut, User, Shield } from 'lucide-react';
 import Link from 'next/link';
+
+// This is a hardcoded UID for the super admin.
+const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
 export function UserNav() {
   const { user } = useUser();
   const { name } = useAccount();
   const auth = useAuth();
+  const isAdmin = user?.uid === SUPER_ADMIN_UID;
 
   const handleLogout = () => {
     auth.signOut();
@@ -56,6 +60,14 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {isAdmin && (
+             <DropdownMenuItem asChild>
+              <Link href="/admin">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>Admin Panel</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem asChild>
             <Link href="/account">
               <User className="mr-2 h-4 w-4" />
