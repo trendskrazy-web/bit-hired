@@ -42,7 +42,7 @@ service cloud.firestore {
     }
 
     match /withdrawal_transactions {
-        allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
+      allow list: if isAdmin() || (isSignedIn() && request.query.where[0][2] == request.auth.uid);
     }
 
     match /withdrawal_transactions/{withdrawalId} {
