@@ -33,7 +33,7 @@ service cloud.firestore {
 
     // Rules for deposit_transactions
     match /deposit_transactions {
-       allow list: if isAdmin() || request.query.where.userAccountId == request.auth.uid;
+      allow list: if isAdmin() || request.query.where.userAccountId == request.auth.uid;
     }
     match /deposit_transactions/{depositId} {
       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
@@ -51,16 +51,15 @@ service cloud.firestore {
       allow update: if isAdmin();
     }
     
-    // Rules for redeem_codes
-    match /redeem_codes {
-      allow list: if isAdmin();
-    }
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
       allow create: if isAdmin();
       allow update: if isSignedIn() 
                     && resource.data.used == false 
                     && request.resource.data.used == true;
+    }
+    match /redeem_codes {
+      allow list: if isAdmin();
     }
 
     match /daily_limits/{limitId} {
