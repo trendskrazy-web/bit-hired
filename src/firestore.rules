@@ -85,20 +85,21 @@ service cloud.firestore {
 
     /**
      * @description Manages redeem codes.
-     * @path /redeem_codes/{code}
+     * @path /redeem_codes
      */
     match /redeem_codes/{code} {
       allow create: if isAdmin();
-      // Admins can list and get all codes.
-      allow get, list: if isAdmin();
-      // Any signed-in user can get a code to check it, but not list all of them.
-      allow get: if isSignedIn();
-
-      // Any signed-in user can update a code (to redeem it), but only if it hasn't been used yet.
+      // Admins can read any code, signed-in users can read a specific code.
+      allow get: if isAdmin() || isSignedIn();
+      // Signed-in users can redeem an unused code.
       allow update: if isSignedIn()
                     && request.resource.data.used == true
                     && resource.data.used == false
                     && request.resource.data.usedBy == request.auth.uid;
+    }
+     // Admins can list all redeem codes.
+    match /redeem_codes {
+        allow list: if isAdmin();
     }
   }
 
