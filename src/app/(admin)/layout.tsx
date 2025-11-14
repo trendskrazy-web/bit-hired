@@ -4,7 +4,7 @@
 import { useUser } from '@/firebase';
 import { redirect } from 'next/navigation';
 import { AdminLayout } from '@/components/admin/layout/admin-layout';
-import { AccountProvider } from '@/contexts/account-context';
+import { AdminAccountProvider } from '@/contexts/admin-account-context';
 import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
 import { NotificationProvider } from '@/contexts/notification-context';
 import { TransactionProvider } from '@/contexts/transaction-context';
@@ -37,7 +37,7 @@ export default function ProtectedAdminLayout({
 
   // If the user is the super admin, render the admin layout.
   return (
-    <AccountProvider>
+    <AdminAccountProvider>
         <TransactionProvider>
             <RedeemCodeProvider>
                 <NotificationProvider>
@@ -45,6 +45,6 @@ export default function ProtectedAdminLayout({
                 </NotificationProvider>
             </RedeemCodeProvider>
         </TransactionProvider>
-    </AccountProvider>
+    </AdminAccountProvider>
   );
 }

@@ -36,7 +36,6 @@ interface AccountContextType {
   name: string;
   email: string;
   mobileNumber: string;
-  allUsers: UserAccount[];
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -47,57 +46,41 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
-  const [allUsers, setAllUsers] = useState<UserAccount[]>([]);
   
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
-
   useEffect(() => {
-    if (!firestore) return;
+    if (!user || !firestore) return;
+
     const unsubscribers: (() => void)[] = [];
 
     // Fetch data for the logged-in user
-    if (user) {
-      const userDocRef = doc(firestore, 'users', user.uid);
-      const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
-        if (doc.exists()) {
-          const userData = doc.data();
-          setBalance(userData.virtualBalance || 0);
-          setName(userData.name || '');
-          setEmail(userData.email || '');
-          setMobileNumber(userData.mobileNumber || '');
-        }
-      }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: userDocRef.path, operation: 'get' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-      unsubscribers.push(unsubscribeUser);
+    const userDocRef = doc(firestore, 'users', user.uid);
+    const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
+      if (doc.exists()) {
+        const userData = doc.data();
+        setBalance(userData.virtualBalance || 0);
+        setName(userData.name || '');
+        setEmail(userData.email || '');
+        setMobileNumber(userData.mobileNumber || '');
+      }
+    }, (error) => {
+      const permissionError = new FirestorePermissionError({ path: userDocRef.path, operation: 'get' });
+      errorEmitter.emit('permission-error', permissionError);
+    });
+    unsubscribers.push(unsubscribeUser);
 
-      const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
-      const unsubscribeRentals = onSnapshot(rentalsColRef, (snapshot) => {
-        const rentalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Transaction));
-        setTransactions(rentalData);
-      }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: rentalsColRef.path, operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-      unsubscribers.push(unsubscribeRentals);
-    }
+    const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
+    const unsubscribeRentals = onSnapshot(rentalsColRef, (snapshot) => {
+      const rentalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Transaction));
+      setTransactions(rentalData);
+    }, (error) => {
+      const permissionError = new FirestorePermissionError({ path: rentalsColRef.path, operation: 'list' });
+      errorEmitter.emit('permission-error', permissionError);
+    });
+    unsubscribers.push(unsubscribeRentals);
     
-    // Admin: Fetch all users
-    if (user?.uid === SUPER_ADMIN_UID) {
-        const usersColRef = collection(firestore, 'users');
-        const unsubscribeAllUsers = onSnapshot(usersColRef, (snapshot) => {
-            const usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserAccount));
-            setAllUsers(usersData);
-        }, (error) => {
-            const permissionError = new FirestorePermissionError({ path: 'users', operation: 'list'});
-            errorEmitter.emit('permission-error', permissionError);
-        });
-        unsubscribers.push(unsubscribeAllUsers);
-    }
 
     return () => {
       unsubscribers.forEach(unsub => unsub());
@@ -158,7 +141,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     name,
     email,
     mobileNumber,
-    allUsers,
   };
 
 
