@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const statusIcons: Record<Withdrawal['status'], React.ReactNode> = {
   pending: <Clock className="mr-2 h-4 w-4 text-yellow-500" />,
@@ -95,6 +96,29 @@ export const columns = ({ onStatusUpdate }: ColumnsProps): ColumnDef<Withdrawal>
       if (withdrawal.status !== 'pending') {
         return null;
       }
+      
+      const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
+      const requestDate = new Date(withdrawal.createdAt).getTime();
+      const now = new Date().getTime();
+      const isActionable = now - requestDate > twoDaysInMs;
+
+      const ActionMenuItem = ({ children, disabled, tooltip }: { children: React.ReactNode, disabled: boolean, tooltip: string }) => {
+        if (!disabled) {
+          return <>{children}</>;
+        }
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="w-full">{children}</div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{tooltip}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
+      };
 
       return (
         <DropdownMenu>
@@ -112,20 +136,26 @@ export const columns = ({ onStatusUpdate }: ColumnsProps): ColumnDef<Withdrawal>
               Copy transaction ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-green-600 focus:bg-green-100 focus:text-green-700"
-              onClick={() => onStatusUpdate(withdrawal.id, 'completed', withdrawal.amount, withdrawal.userAccountId)}
-            >
-               <CheckCircle className="mr-2 h-4 w-4" />
-              Approve
-            </DropdownMenuItem>
-            <DropdownMenuItem
-                className="text-red-600 focus:bg-red-100 focus:text-red-700"
-                onClick={() => onStatusUpdate(withdrawal.id, 'cancelled', withdrawal.amount, withdrawal.userAccountId)}
-            >
-                 <XCircle className="mr-2 h-4 w-4" />
-                Decline
-            </DropdownMenuItem>
+            <ActionMenuItem disabled={!isActionable} tooltip="Approval available after 2 days">
+               <DropdownMenuItem
+                className="text-green-600 focus:bg-green-100 focus:text-green-700"
+                onClick={() => onStatusUpdate(withdrawal.id, 'completed', withdrawal.amount, withdrawal.userAccountId)}
+                disabled={!isActionable}
+              >
+                 <CheckCircle className="mr-2 h-4 w-4" />
+                Approve
+              </DropdownMenuItem>
+            </ActionMenuItem>
+             <ActionMenuItem disabled={!isActionable} tooltip="Decline available after 2 days">
+              <DropdownMenuItem
+                  className="text-red-600 focus:bg-red-100 focus:text-red-700"
+                  onClick={() => onStatusUpdate(withdrawal.id, 'cancelled', withdrawal.amount, withdrawal.userAccountId)}
+                  disabled={!isActionable}
+              >
+                   <XCircle className="mr-2 h-4 w-4" />
+                  Decline
+              </DropdownMenuItem>
+            </ActionMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
