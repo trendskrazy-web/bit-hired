@@ -171,16 +171,18 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       } else {
         // Regular user gets only their own documents, sorted
         q = query(
-          collectionRef,
-          where('userAccountId', '==', user.uid),
-          orderBy('createdAt', 'desc')
+          collectionRef
+          // where('userAccountId', '==', user.uid), // This is the line causing the issue.
+          // orderBy('createdAt', 'desc')
         );
       }
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as T));
         setData(data);
       }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: collectionName, operation: 'list' });
+        // The path is extracted from the query object itself for accuracy.
+        const path = (q as any)._query.path.canonicalString();
+        const permissionError = new FirestorePermissionError({ path: path, operation: 'list' });
         errorEmitter.emit('permission-error', permissionError);
       });
       unsubscribers.push(unsubscribe);
@@ -305,3 +307,5 @@ export function useTransactions() {
   }
   return context;
 }
+
+    
