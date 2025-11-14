@@ -3,8 +3,8 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx0ZWNobm9sb2d5fGVufDB8fHx8MTc2Mzk5NTM5NHww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "technology abstract"
+      "imageUrl": "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjb21wdXRlciUyMGhhcmR3YXJlfGVufDB8fHx8MTc2NDAwNDU4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "computer hardware"
     },
     {
       "id": "whatsminer-m30s",
@@ -20,7 +20,7 @@
     },
     {
       "id": "dragonmint-t1",
-      "description": "A classic miner known for its performance.",
+      "description": "A legacy miner still capable of delivering results. Great for entry-level exploration.",
       "imageUrl": "https://images.unsplash.com/flagged/photo-1554386690-8627e1041100?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjcnlwdG8lMjBtaW5lcnxlbnwwfHx8fDE3NjMwMzY1NTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "crypto miner"
     },
