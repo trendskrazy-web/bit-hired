@@ -10,7 +10,7 @@ import {
   useCallback,
 } from 'react';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
-import { collection, doc, onSnapshot, query, where, setDoc, increment, getDocs } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, where, setDoc, increment, getDocs, orderBy } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { useAccount } from './account-context';
@@ -23,6 +23,7 @@ export interface Deposit {
   createdAt: string;
   mobileNumber: string;
   depositTo?: string; // The account number the user is depositing to
+  userName?: string;
 }
 
 export interface Withdrawal {
@@ -32,6 +33,7 @@ export interface Withdrawal {
     status: 'pending' | 'completed' | 'cancelled';
     createdAt: string;
     mobileNumber: string;
+    userName?: string;
 }
 
 export interface DailyLimit {
@@ -165,9 +167,9 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       let q;
       const collectionRef = collection(firestore, collectionName);
       if (isAdmin) {
-        q = query(collectionRef); // Admin gets all
+        q = query(collectionRef, orderBy('createdAt', 'desc')); // Admin gets all, sorted
       } else {
-        q = query(collectionRef, where('userAccountId', '==', user.uid)); // User gets their own
+        q = query(collectionRef, where('userAccountId', '==', user.uid), orderBy('createdAt', 'desc')); // User gets their own
       }
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as T));

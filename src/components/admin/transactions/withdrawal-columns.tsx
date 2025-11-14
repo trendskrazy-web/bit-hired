@@ -51,6 +51,10 @@ export const columns = ({ onStatusUpdate }: ColumnsProps): ColumnDef<Withdrawal>
     },
   },
   {
+    accessorKey: 'userName',
+    header: 'User Name',
+  },
+  {
     accessorKey: 'mobileNumber',
     header: 'User Mobile',
   },
