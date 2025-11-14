@@ -175,7 +175,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as T));
         setData(data);
       }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: q.toString(), operation: 'list' });
+        const permissionError = new FirestorePermissionError({ path: collectionName, operation: 'list' });
         errorEmitter.emit('permission-error', permissionError);
       });
       unsubscribers.push(unsubscribe);
