@@ -51,9 +51,6 @@ service cloud.firestore {
       allow update: if isSignedIn() 
                     && resource.data.used == false 
                     && request.resource.data.used == true;
-    }
-
-    match /redeem_codes/{code} {
       allow list: if isAdmin();
     }
 
