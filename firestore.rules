@@ -46,7 +46,7 @@ service cloud.firestore {
      */
     match /mining_machines/{miningMachineId} {
       allow get, list: if true;
-      allow create, update, delete: if isSignedIn(); // Simplified for development
+      allow create, update, delete: if isAdmin();
     }
 
     /**
@@ -63,7 +63,7 @@ service cloud.firestore {
      */
     match /deposit_transactions/{depositId} {
       // Admins can perform any action on any deposit.
-      allow read, write: if isSignedIn(); // Simplified for development
+      allow read, write: if isAdmin();
       
       // Users can create their own deposit requests.
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
@@ -80,7 +80,7 @@ service cloud.firestore {
      * @path /notifications/{notificationId}
      */
     match /notifications/{notificationId} {
-      allow read, list, create, update, delete: if isSignedIn(); // Simplified for development
+      allow read, list, create, update, delete: if isAdmin();
     }
   }
 
@@ -92,5 +92,10 @@ service cloud.firestore {
   // Helper function to determine if the user is the owner of the document.
   function isOwner(userId) {
     return isSignedIn() && request.auth.uid == userId;
+  }
+
+  // Helper function to check for admin custom claim.
+  function isAdmin() {
+    return isSignedIn() && request.auth.token.admin == true;
   }
 }
