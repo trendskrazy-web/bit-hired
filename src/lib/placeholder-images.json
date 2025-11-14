@@ -3,50 +3,50 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "motherboard technology"
+      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ASIC Miner"
     },
     {
       "id": "whatsminer-m30s",
       "description": "An efficient and powerful mining rig.",
-      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "motherboard technology"
+      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ASIC Miner"
     },
     {
       "id": "avalonminer-1246",
       "description": "A reliable choice for steady mining operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "motherboard technology"
+      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ASIC Miner"
     },
     {
       "id": "dragonmint-t1",
       "description": "A legacy miner still capable of delivering results. Great for entry-level exploration.",
-      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "motherboard technology"
+      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ASIC Miner"
     },
     {
       "id": "innosilicon-t3",
       "description": "A powerful and efficient miner with a strong hash rate.",
-      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "motherboard technology"
+      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ASIC Miner"
     },
     {
       "id": "ebang-ebit-e12",
       "description": "High-performance mining with a focus on energy efficiency.",
-      "imageUrl": "https://storage.googleapis.com/maker-studio-project-images-prod/1f20d00f-411a-4272-9c47-3855a914717f/images/94553258-290f-42e7-9d7a-a43b2f56b3a7.png",
+      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "ASIC hardware"
     },
     {
       "id": "bitfury-tardis",
       "description": "An enterprise-grade solution offering robust performance and scalability.",
-      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "motherboard technology"
+      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ASIC Miner"
     },
     {
       "id": "halong-dragonmint-t2",
       "description": "An efficient miner designed for long-term, stable operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "motherboard technology"
+      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ASIC Miner"
     }
   ]
 }
