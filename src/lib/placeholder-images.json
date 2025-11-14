@@ -3,8 +3,8 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1621919420874-a74f40a1215b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzE4NzQ0OTQ5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "motherboard technology"
     },
     {
       "id": "whatsminer-m30s",
@@ -15,20 +15,20 @@
     {
       "id": "avalonminer-1246",
       "description": "A reliable choice for steady mining operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3MTg3NDUwMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "motherboard technology"
     },
     {
       "id": "dragonmint-t1",
       "description": "A legacy miner still capable of delivering results. Great for entry-level exploration.",
-      "imageUrl": "https://images.unsplash.com/photo-1550745165-9bc0b252726a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXRybyUyMHRlY2h8ZW58MHx8fHwxNzE4NzQ1MDEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "retro tech"
+      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "motherboard technology"
     },
     {
       "id": "innosilicon-t3",
       "description": "A powerful and efficient miner with a strong hash rate.",
-      "imageUrl": "https://images.unsplash.com/photo-1591799264318-7e6e74e3dce9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxDUFUlMjBoZWF0c2lua3xlbnwwfHx8fDE3MTg3NDUwNTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "CPU heatsink"
+      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "motherboard technology"
     },
     {
       "id": "ebang-ebit-e12",
@@ -39,14 +39,14 @@
     {
       "id": "bitfury-tardis",
       "description": "An enterprise-grade solution offering robust performance and scalability.",
-      "imageUrl": "https://images.unsplash.com/photo-1526544026379-34676a4a3943?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkYXRhJTIwY2VudGVyfGVufDB8fHx8MTcxODc0NTI2N3ww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "data center"
+      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "motherboard technology"
     },
     {
       "id": "halong-dragonmint-t2",
       "description": "An efficient miner designed for long-term, stable operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1614926121181-852653315883?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx2ZW50aWxhdGlvbiUyMGZhbnxlbnwwfHx8fDE3MTg3NDUzNDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ventilation fan"
+      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "motherboard technology"
     }
   ]
 }
