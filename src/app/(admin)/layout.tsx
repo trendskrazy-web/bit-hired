@@ -4,6 +4,8 @@
 import { useUser } from '@/firebase';
 import { redirect } from 'next/navigation';
 import { AdminLayout } from '@/components/admin/layout/admin-layout';
+import { AccountProvider } from '@/contexts/account-context';
+import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
 
 // This is a hardcoded UID for the super admin.
 // In a real-world application, you would use a more robust role-based access control system,
@@ -32,5 +34,11 @@ export default function ProtectedAdminLayout({
   }
 
   // If the user is the super admin, render the admin layout.
-  return <AdminLayout>{children}</AdminLayout>;
+  return (
+    <AccountProvider>
+      <RedeemCodeProvider>
+        <AdminLayout>{children}</AdminLayout>
+      </RedeemCodeProvider>
+    </AccountProvider>
+  );
 }
