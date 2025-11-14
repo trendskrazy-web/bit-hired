@@ -3,32 +3,32 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://i.ibb.co/hK7STb0/motherboard.jpg",
-      "imageHint": "server hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1621919420874-a74f40a1215b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzE4NzQ0OTQ5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     },
     {
       "id": "whatsminer-m30s",
       "description": "An efficient and powerful mining rig.",
-      "imageUrl": "https://i.ibb.co/Xz9J10H/bithired-hero.png",
-      "imageHint": "bitcoin mining"
+      "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3MTg3NDQ4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "motherboard technology"
     },
     {
       "id": "avalonminer-1246",
       "description": "A reliable choice for steady mining operations.",
-      "imageUrl": "https://i.ibb.co/qj5b1z1/computer-chip.jpg",
-      "imageHint": "computer chip"
+      "imageUrl": "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3MTg3NDUwMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining hardware"
     },
     {
       "id": "dragonmint-t1",
       "description": "A legacy miner still capable of delivering results. Great for entry-level exploration.",
-      "imageUrl": "https://i.ibb.co/yQy8r2N/mining-rig.jpg",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1550745165-9bc0b252726a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXRybyUyMHRlY2h8ZW58MHx8fHwxNzE4NzQ1MDEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "retro tech"
     },
     {
       "id": "innosilicon-t3",
       "description": "A powerful and efficient miner with a strong hash rate.",
-      "imageUrl": "https://i.ibb.co/YhvR9rS/CPU-heatsink.jpg",
-      "imageHint": "motherboard"
+      "imageUrl": "https://images.unsplash.com/photo-1591799264318-7e6e74e3dce9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxDUFUlMjBoZWF0c2lua3xlbnwwfHx8fDE3MTg3NDUwNTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "CPU heatsink"
     },
     {
       "id": "ebang-ebit-e12",
@@ -39,14 +39,14 @@
     {
       "id": "bitfury-tardis",
       "description": "An enterprise-grade solution offering robust performance and scalability.",
-      "imageUrl": "https://i.ibb.co/31p7s2f/data-center.jpg",
-      "imageHint": "CPU heatsink"
+      "imageUrl": "https://images.unsplash.com/photo-1526544026379-34676a4a3943?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkYXRhJTIwY2VudGVyfGVufDB8fHx8MTcxODc0NTI2N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "data center"
     },
     {
       "id": "halong-dragonmint-t2",
       "description": "An efficient miner designed for long-term, stable operations.",
-      "imageUrl": "https://storage.googleapis.com/maker-studio-project-images-prod/1f20d00f-411a-4272-9c47-3855a914717f/images/2e8ac858-a832-4e47-a8a2-d9f783141f1f.jpeg",
-      "imageHint": "data center"
+      "imageUrl": "https://images.unsplash.com/photo-1614926121181-852653315883?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx2ZW50aWxhdGlvbiUyMGZhbnxlbnwwfHx8fDE3MTg3NDUzNDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ventilation fan"
     }
   ]
 }
