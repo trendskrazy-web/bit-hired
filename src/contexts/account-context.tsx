@@ -75,7 +75,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   const { user } = useUser();
   const firestore = useFirestore();
-  const isAdmin = user?.uid === 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
   useEffect(() => {
     if (!user || !firestore) return;
@@ -105,35 +104,12 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
     // Set up unsubscribers array
     const unsubscribers: (() => void)[] = [unsubscribeUser, unsubscribeRentals];
-
-    if (isAdmin) {
-      // Admin: Fetch all deposits and withdrawals
-      const depositsQuery = query(collection(firestore, 'deposit_transactions'));
-      const adminDepositsUnsub = onSnapshot(depositsQuery, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
-        setAllDeposits(data);
-      }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-
-      const withdrawalsQuery = query(collection(firestore, 'withdrawal_transactions'));
-      const adminWithdrawalsUnsub = onSnapshot(withdrawalsQuery, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
-        setAllWithdrawals(data);
-      }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-      unsubscribers.push(adminDepositsUnsub, adminWithdrawalsUnsub);
-
-    }
     
     // Cleanup all subscriptions on unmount
     return () => {
       unsubscribers.forEach(unsub => unsub());
     };
-  }, [user, firestore, isAdmin]);
+  }, [user, firestore]);
 
   const updateUserBalance = (amount: number, userIdToUpdate: string) => {
       if(userIdToUpdate && firestore) {
