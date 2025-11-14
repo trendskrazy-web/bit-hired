@@ -11,7 +11,7 @@ import {
 } from 'react';
 import type { Transaction } from '@/lib/data';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
-import { collection, doc, onSnapshot, increment, query, where } from 'firebase/firestore';
+import { collection, doc, onSnapshot, increment, query, where, setDoc } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -24,6 +24,7 @@ export interface Deposit {
   status: 'pending' | 'completed' | 'cancelled';
   createdAt: string;
   mobileNumber: string;
+  depositTo?: string; // The account number the user is depositing to
 }
 
 interface AccountContextType {
@@ -41,7 +42,7 @@ interface AccountContextType {
   email: string;
   mobileNumber: string;
   deposits: Deposit[];
-  addDepositRequest: (amount: number, transactionCode: string) => void;
+  addDepositRequest: (amount: number, transactionCode: string, depositTo: string) => void;
   updateDepositStatus: (depositId: string, status: 'completed' | 'cancelled') => void;
 }
 
@@ -132,8 +133,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addDepositRequest = (amount: number, transactionCode: string) => {
+  const addDepositRequest = (amount: number, transactionCode: string, depositTo: string) => {
     if (user && firestore && mobileNumber) {
+      // 1. Add to deposit_transactions collection
       const depositsColRef = collection(firestore, 'deposit_transactions');
       addDocumentNonBlocking(depositsColRef, {
         userAccountId: user.uid,
@@ -142,6 +144,28 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         status: 'pending',
         createdAt: new Date().toISOString(),
         mobileNumber: mobileNumber,
+        depositTo: depositTo,
+      });
+
+      // 2. Update the daily limit
+      const today = new Date().toISOString().split("T")[0];
+      const limitDocId = `${today}_${depositTo}`;
+      const limitDocRef = doc(firestore, 'daily_limits', limitDocId);
+
+      // Use set with merge to create or update the document
+      setDoc(limitDocRef, 
+        { 
+          totalAmount: increment(amount),
+          date: today 
+        }, 
+        { merge: true }
+      ).catch(error => {
+        const permissionError = new FirestorePermissionError({
+            path: limitDocRef.path,
+            operation: 'write',
+            requestResourceData: { totalAmount: `increment(${amount})`, date: today }
+        });
+        errorEmitter.emit('permission-error', permissionError);
       });
     }
   };
@@ -158,9 +182,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   
   const updateDepositStatus = useCallback(
     (depositId: string, status: 'completed' | 'cancelled') => {
-      // This function is now only for admins, but we leave the logic here
-      // in case admin functionality is restored.
-      // A non-admin call will fail due to security rules.
       if (firestore) {
         const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
         const deposit = deposits.find(d => d.id === depositId);

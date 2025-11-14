@@ -13,6 +13,7 @@
  * - `/deposit_transactions/{depositId}`: Stores deposit requests.
  * - `/notifications/{notificationId}`: Stores system notifications for admins.
  * - `/redeem_codes/{code}`: Stores redeemable codes.
+ * - `/daily_limits/{limitId}`: Tracks daily transaction totals for payment accounts.
  *
  * @key_security_decisions
  * - Users can only create their own user account and can only read/write their own data.
@@ -82,23 +83,29 @@ service cloud.firestore {
     match /notifications/{notificationId} {
       allow read, write: if isAdmin();
     }
-
+    
     /**
      * @description Manages redeem codes.
      * @path /redeem_codes/{code}
      */
     match /redeem_codes/{code} {
-      // Admins can create and list all codes. Non-admins cannot list all codes.
-      allow create: if isAdmin();
-      allow list: if isAdmin();
-
-      // Any signed-in user can update a code (to redeem it), but only if it hasn't been used yet.
-      // The get rule is for the redeemCode function to check the code first.
-      allow get: if isSignedIn();
+      allow read, write: if isAdmin();
       allow update: if isSignedIn()
                     && request.resource.data.used == true
                     && resource.data.used == false
                     && request.resource.data.usedBy == request.auth.uid;
+    }
+    
+     /**
+     * @description Manages daily transaction limits for payment accounts.
+     * @path /daily_limits/{limitId}
+     */
+    match /daily_limits/{limitId} {
+        // Authenticated users can read limits to check them before depositing.
+        allow get, list: if isSignedIn();
+        // Writing/updating limits should be a trusted operation.
+        // For now, allow logged-in user to create/update.
+        allow write: if isSignedIn();
     }
   }
 
@@ -114,6 +121,7 @@ service cloud.firestore {
 
   // Helper function to check if the user is an admin.
   function isAdmin() {
-    return isSignedIn() && request.auth.token.admin == true;
+    // This is a hardcoded UID for the super admin.
+    return isSignedIn() && request.auth.uid == 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
   }
 }
