@@ -52,9 +52,11 @@ interface AccountContextType {
   mobileNumber: string;
   addDepositRequest: (amount: number, transactionCode: string, depositTo: string) => void;
   addWithdrawalRequest: (amount: number) => void;
-  // Admin functions that don't rely on fetching full lists
+  // Admin functions
   updateDepositStatus: (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
   updateWithdrawalStatus: (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
+  allDeposits: Deposit[];
+  allWithdrawals: Withdrawal[];
 }
 
 const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
@@ -67,6 +69,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
+  
+  // Admin-specific state
+  const [allDeposits, setAllDeposits] = useState<Deposit[]>([]);
+  const [allWithdrawals, setAllWithdrawals] = useState<Withdrawal[]>([]);
+
 
   const { user } = useUser();
   const firestore = useFirestore();
@@ -99,6 +106,29 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       errorEmitter.emit('permission-error', permissionError);
     });
     unsubscribers.push(unsubscribeRentals);
+
+     // Admin-specific listeners
+    if (user.uid === SUPER_ADMIN_UID) {
+      const depositsColRef = collection(firestore, 'deposit_transactions');
+      const adminDepositsUnsub = onSnapshot(depositsColRef, (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Deposit));
+        setAllDeposits(data);
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+      unsubscribers.push(adminDepositsUnsub);
+
+      const withdrawalsColRef = collection(firestore, 'withdrawal_transactions');
+      const adminWithdrawalsUnsub = onSnapshot(withdrawalsColRef, (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Withdrawal));
+        setAllWithdrawals(data);
+      }, (error) => {
+         const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+      unsubscribers.push(adminWithdrawalsUnsub);
+    }
     
     return () => {
       unsubscribers.forEach(unsub => unsub());
@@ -235,6 +265,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         addWithdrawalRequest,
         updateDepositStatus,
         updateWithdrawalStatus,
+        allDeposits,
+        allWithdrawals
       }}
     >
       {children}
