@@ -11,7 +11,7 @@ import {
 } from 'react';
 import type { Transaction } from '@/lib/data';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
-import { collection, doc, onSnapshot, increment, query, where } from 'firebase/firestore';
+import { collection, doc, onSnapshot, increment, query, where, getDocs } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -30,7 +30,7 @@ interface AccountContextType {
   balance: number;
   setBalance: React.Dispatch<React.SetStateAction<number>>;
   deductBalance: (amount: number) => void;
-  addBalance: (amount: number) => void;
+  addBalance: (amount: number, userId?: string) => void;
   transactions: Transaction[];
   addTransaction: (transaction: Omit<Transaction, 'id' | 'status'> & { status?: 'Active' | 'Expired' | 'Pending' }) => void;
   updateTransactionStatus: (
@@ -41,7 +41,9 @@ interface AccountContextType {
   email: string;
   mobileNumber: string;
   deposits: Deposit[];
+  allDeposits: Deposit[];
   addDepositRequest: (amount: number, transactionCode: string) => void;
+  updateDepositStatus: (depositId: string, status: 'completed' | 'cancelled') => void;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -50,11 +52,12 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [allDeposits, setAllDeposits] = useState<Deposit[]>([]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
 
-  const { user } = useUser();
+  const { user, isAdmin } = useUser();
   const firestore = useFirestore();
 
   useEffect(() => {
@@ -93,15 +96,28 @@ export function AccountProvider({ children }: { children: ReactNode }) {
        errorEmitter.emit('permission-error', permissionError);
     });
     
+    let unsubscribeAllDeposits = () => {};
+    if (isAdmin) {
+      const allDepositsQuery = query(depositsColRef);
+      unsubscribeAllDeposits = onSnapshot(allDepositsQuery, (snapshot) => {
+        const allDepositData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Deposit));
+        setAllDeposits(allDepositData);
+      }, (error) => {
+         const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+         errorEmitter.emit('permission-error', permissionError);
+      });
+    }
+
 
     return () => {
       unsubscribeUser();
       unsubscribeRentals();
       unsubscribeUserDeposits();
+      unsubscribeAllDeposits();
     };
-  }, [user, firestore]);
+  }, [user, firestore, isAdmin]);
 
-  const updateUserBalance = (amount: number, userId: string = user?.uid || '') => {
+  const updateUserBalance = (amount: number, userId: string) => {
       if(userId && firestore) {
           const userDocRef = doc(firestore, 'users', userId);
           updateDocumentNonBlocking(userDocRef, {
@@ -111,11 +127,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }
 
   const deductBalance = (amount: number) => {
-    updateUserBalance(-amount);
+    if(user?.uid) {
+        updateUserBalance(-amount, user.uid);
+    }
   };
 
-  const addBalance = (amount: number) => {
-    updateUserBalance(amount);
+  const addBalance = (amount: number, userId: string = user?.uid || '') => {
+    updateUserBalance(amount, userId);
   };
 
   const addTransaction = (transaction: Omit<Transaction, 'id' | 'status'> & { status?: 'Active' | 'Expired' | 'Pending' }) => {
@@ -153,6 +171,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [user, firestore]
   );
   
+  const updateDepositStatus = useCallback(
+    (depositId: string, status: 'completed' | 'cancelled') => {
+      if (firestore && isAdmin) {
+        const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
+        updateDocumentNonBlocking(depositDocRef, { status });
+      }
+    },
+    [firestore, isAdmin]
+  );
+
 
   return (
     <AccountContext.Provider
@@ -168,7 +196,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         email,
         mobileNumber,
         deposits,
+        allDeposits,
         addDepositRequest,
+        updateDepositStatus,
       }}
     >
       {children}

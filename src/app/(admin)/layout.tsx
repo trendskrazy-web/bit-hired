@@ -1,26 +1,33 @@
 
 'use client';
 
-import { AppLayout } from '@/components/app/layout/app-layout';
-import { AccountProvider } from '@/contexts/account-context';
-import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { AdminLayout } from '@/components/admin/layout/admin-layout';
+import { AccountProvider } from '@/contexts/account-context';
+import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
 
-function AuthenticatedLayoutContent({ children }: { children: React.ReactNode }) {
+function AdminAuthenticatedLayoutContent({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user, isUserLoading, isAdmin } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/login');
+    if (!isUserLoading) {
+      if (!user) {
+        router.push('/login');
+      } else if (!isAdmin) {
+        router.push('/dashboard');
+      }
     }
-  }, [isUserLoading, user, router]);
+  }, [isUserLoading, user, isAdmin, router]);
 
-  if (isUserLoading || !user) {
+  if (isUserLoading || !user || !isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div>Loading...</div>
@@ -29,22 +36,23 @@ function AuthenticatedLayoutContent({ children }: { children: React.ReactNode })
   }
 
   return (
-    <AccountProvider>
+     <AccountProvider>
       <RedeemCodeProvider>
-        {isAdmin ? <AdminLayout>{children}</AdminLayout> : <AppLayout>{children}</AppLayout>}
+        <AdminLayout>{children}</AdminLayout>
       </RedeemCodeProvider>
     </AccountProvider>
   );
 }
 
-export default function AuthenticatedLayout({
+
+export default function AdminAuthenticatedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <FirebaseClientProvider>
-      <AuthenticatedLayoutContent>{children}</AuthenticatedLayoutContent>
+      <AdminAuthenticatedLayoutContent>{children}</AdminAuthenticatedLayoutContent>
     </FirebaseClientProvider>
   );
 }

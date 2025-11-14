@@ -15,6 +15,7 @@ import { Hourglass } from "lucide-react";
 
 export function PendingDepositsList() {
   const { deposits } = useAccount();
+  const pendingDeposits = deposits.filter(d => d.status === 'pending');
 
   return (
     <Card>
@@ -30,7 +31,7 @@ export function PendingDepositsList() {
       <CardContent>
         <DataTable
           columns={depositColumns}
-          data={deposits}
+          data={pendingDeposits}
           filterColumn="status"
           filterPlaceholder="Filter by status..."
         />

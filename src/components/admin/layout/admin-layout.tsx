@@ -9,6 +9,11 @@ import {
   User,
   Info,
   LogOut,
+  Bell,
+  Shield,
+  Gift,
+  Settings,
+  DatabaseZap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -23,10 +28,16 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
-import { AppHeader } from './header';
+import { AppHeader } from '@/components/app/layout/header';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
+
+const adminMenuItems = [
+  { href: '/admin/deposits', label: 'Manage Deposits', icon: DatabaseZap },
+  { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
+];
 
 const userMenuItems = [
   { href: '/account', label: 'Account', icon: User },
@@ -43,15 +54,6 @@ function SidebarFooterContent() {
   };
   return (
     <>
-      <div className="bg-primary/10 p-4 rounded-lg text-center space-y-2">
-        <h4 className="font-semibold">Need Help?</h4>
-        <p className="text-xs text-muted-foreground">
-          Contact our support team for any questions.
-        </p>
-        <Button size="sm" className="w-full">
-          Contact Support
-        </Button>
-      </div>
       <Button
         variant="ghost"
         className="w-full justify-start"
@@ -64,7 +66,7 @@ function SidebarFooterContent() {
   );
 }
 
-export function AppLayout({
+export function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -76,11 +78,7 @@ export function AppLayout({
       <SidebarMenuItem key={item.href}>
         <SidebarMenuButton
           asChild
-          isActive={
-            item.href === '/dashboard'
-              ? pathname === item.href
-              : pathname.startsWith(item.href)
-          }
+          isActive={pathname.startsWith(item.href)}
           tooltip={{
             children: item.label,
             className: 'bg-sidebar-background text-sidebar-foreground',
@@ -108,7 +106,19 @@ export function AppLayout({
           </Link>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarMenu>{renderMenuItems(userMenuItems)}</SidebarMenu>
+            <SidebarMenu>
+                 <SidebarMenuItem>
+                    <div className="px-2 text-xs font-medium text-muted-foreground">Admin</div>
+                </SidebarMenuItem>
+                {renderMenuItems(adminMenuItems)}
+            </SidebarMenu>
+            <SidebarSeparator />
+            <SidebarMenu>
+                 <SidebarMenuItem>
+                    <div className="px-2 text-xs font-medium text-muted-foreground">User</div>
+                </SidebarMenuItem>
+                {renderMenuItems(userMenuItems)}
+            </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="group-data-[collapsible=icon]:hidden space-y-2">
           <SidebarFooterContent />
