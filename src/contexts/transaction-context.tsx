@@ -161,7 +161,6 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     // Common query logic
     const createSubscription = <T,>(
       collectionName: string,
-      isAdmin: boolean,
       setData: React.Dispatch<React.SetStateAction<T[]>>
     ) => {
       let q;
@@ -181,8 +180,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       unsubscribers.push(unsubscribe);
     };
 
-    createSubscription<Deposit>('deposit_transactions', isAdmin, setDeposits);
-    createSubscription<Withdrawal>('withdrawal_transactions', isAdmin, setWithdrawals);
+    createSubscription<Deposit>('deposit_transactions', setDeposits);
+    createSubscription<Withdrawal>('withdrawal_transactions', setWithdrawals);
 
     return () => {
       unsubscribers.forEach((unsub) => unsub());
