@@ -4,25 +4,22 @@
  *
  * @core_philosophy This ruleset enforces a strict user-ownership model for private data,
  * ensuring that only authenticated users can access their own information. Public data,
- * such as mining machine details, is readable by all. Admin-level access is provided for specific collections like deposits.
+ * such as mining machine details, is readable by all.
  *
  * @data_structure
  * - `/users/{userId}`: Stores user account information.
  * - `/mining_machines/{machineId}`: Stores publicly readable mining machine data.
  * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
- * - `/deposit_transactions/{depositId}`: Stores all deposit transactions for admin review and user access.
- * - `/notifications/{notificationId}`: Stores admin action notifications.
+ * - `/deposit_transactions/{depositId}`: Stores all deposit transactions for user access.
  *
  * @key_security_decisions
  * - Users can only create their own user account and can only read/write their own data.
- * - Mining machine data is publicly readable, but write access is restricted to admins.
- * - The `deposit_transactions` collection is fully accessible by admins. Users can create their own deposit requests and read them, but cannot modify them after creation.
- * - Admins can update the status of any deposit transaction.
- * - The `notifications` collection is only accessible by admins.
+ * - Mining machine data is publicly readable, but write access is restricted.
+ * - Users can create their own deposit requests and read them, but cannot modify them after creation.
  *
  * @denormalization_for_authorization
  * - Transaction documents contain `userAccountId` for direct ownership checks in rules.
- * - Deposit documents contain `mobileNumber` for admin convenience.
+ * - Deposit documents contain `mobileNumber`.
  *
  * @structural_segregation
  * - User-specific data is stored under the `/users/{userId}` path to enforce clear ownership.
@@ -46,7 +43,7 @@ service cloud.firestore {
      */
     match /mining_machines/{miningMachineId} {
       allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if false; // Only admins could do this, role removed
     }
 
     /**
@@ -62,9 +59,6 @@ service cloud.firestore {
      * @path /deposit_transactions/{depositId}
      */
     match /deposit_transactions/{depositId} {
-      // Admins can perform any action on any deposit.
-      allow read, write: if isAdmin();
-      
       // Users can create their own deposit requests.
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
 
@@ -73,14 +67,6 @@ service cloud.firestore {
       
       // Users can list their own deposit requests, but only their own.
       allow list: if isSignedIn() && request.query.where[0] == ["userAccountId", "==", request.auth.uid];
-    }
-
-    /**
-     * @description Protects notification documents. Only accessible by admins.
-     * @path /notifications/{notificationId}
-     */
-    match /notifications/{notificationId} {
-      allow read, list, create, update, delete: if isAdmin();
     }
   }
 
@@ -92,10 +78,5 @@ service cloud.firestore {
   // Helper function to determine if the user is the owner of the document.
   function isOwner(userId) {
     return isSignedIn() && request.auth.uid == userId;
-  }
-
-  // Helper function to check for admin custom claim.
-  function isAdmin() {
-    return isSignedIn() && request.auth.token.admin == true;
   }
 }

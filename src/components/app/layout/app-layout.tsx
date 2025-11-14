@@ -6,12 +6,8 @@ import {
   Cpu,
   History,
   LayoutDashboard,
-  Bell,
   User,
-  Gift,
-  WalletCards,
   Info,
-  Settings,
   LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -40,41 +36,6 @@ const menuItems = [
   { href: '/about', label: 'About', icon: Info },
 ];
 
-const adminMenuItems = [
-  { href: '/admin/deposits', label: 'Deposits', icon: WalletCards },
-  { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
-  { href: '/admin/notifications', label: 'Notifications', icon: Bell },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
-];
-
-function AdminMenu() {
-  const pathname = usePathname();
-
-  return (
-    <SidebarMenu className="mt-auto">
-      <SidebarMenuItem>
-        <span className="text-xs text-muted-foreground px-2">Admin</span>
-      </SidebarMenuItem>
-      {adminMenuItems.map((item) => (
-        <SidebarMenuItem key={item.href}>
-          <SidebarMenuButton
-            asChild
-            isActive={pathname.startsWith(item.href)}
-            tooltip={{
-              children: item.label,
-              className: 'bg-sidebar-background text-sidebar-foreground',
-            }}
-          >
-            <Link href={item.href}>
-              <item.icon />
-              <span>{item.label}</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
-    </SidebarMenu>
-  );
-}
 
 function SidebarFooterContent() {
   const auth = useAuth();
@@ -139,7 +100,6 @@ export function AppLayout({ children, isAdmin }: { children: React.ReactNode, is
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
-          {isAdmin && <AdminMenu />}
         </SidebarContent>
         <SidebarFooter className="group-data-[collapsible=icon]:hidden space-y-2">
          <SidebarFooterContent />

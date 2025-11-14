@@ -47,6 +47,7 @@ export default function AccountPage() {
            <Card>
             <CardHeader>
               <CardTitle>Pending Deposits</CardTitle>
+              <CardDescription>Deposit functionality is for demonstration purposes. Deposits will appear here but will not be processed.</CardDescription>
             </CardHeader>
             <CardContent>
               <PendingDepositsList />

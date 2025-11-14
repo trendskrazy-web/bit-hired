@@ -40,7 +40,7 @@ export function TopUpCard() {
     if (mpesaNumbers.length === 0) {
       toast({
         title: "Deposits Unavailable",
-        description: "No M-PESA numbers are configured for deposits. Please contact support.",
+        description: "No M-PESA numbers are configured for deposits. This is a demo feature.",
         variant: "destructive",
       });
       return;
@@ -60,8 +60,8 @@ export function TopUpCard() {
       const newDeposit = await addDepositRequest(depositAmount, mobileNumber);
       setGeneratedCode(newDeposit.transactionCode);
       toast({
-        title: "Deposit Request Created",
-        description: `Use the transaction code ${newDeposit.transactionCode} to complete your M-PESA payment.`,
+        title: "Deposit Request Created (Demonstration)",
+        description: `Use the transaction code ${newDeposit.transactionCode} to complete your M-PESA payment. This is for demo purposes only.`,
       });
       setAmount("");
     } catch (error) {
@@ -93,9 +93,9 @@ export function TopUpCard() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Complete Your Deposit</CardTitle>
+          <CardTitle>Complete Your Deposit (Demo)</CardTitle>
           <CardDescription>
-            Use the details below to complete your M-PESA payment.
+            Use the details below to complete your M-PESA payment. This is for demonstration only and will not be processed.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
@@ -126,13 +126,13 @@ export function TopUpCard() {
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">This code helps us identify your deposit. The admin will use it to confirm your payment.</p>
+            <p className="text-xs text-muted-foreground">This code helps us identify your deposit. In a real app, an admin would confirm your payment.</p>
           </div>
           <div className="pt-2">
-             <p className="text-muted-foreground">Your account will be credited once an admin confirms your payment. You can track the status on this page.</p>
+             <p className="text-muted-foreground">Your account will not be credited as this is a demo. You can track the pending status on this page.</p>
           </div>
           <Button onClick={resetForm} className="w-full">
-            Make Another Deposit
+            Make Another Deposit Request
           </Button>
         </CardContent>
       </Card>

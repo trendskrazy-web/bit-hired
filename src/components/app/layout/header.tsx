@@ -2,7 +2,6 @@
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { UserNav } from './user-nav';
-import { NotificationMenu } from './notification-menu';
 
 export function AppHeader({ isAdmin }: { isAdmin: boolean }) {
 
@@ -12,7 +11,6 @@ export function AppHeader({ isAdmin }: { isAdmin: boolean }) {
       <div className="flex-1">
         {/* Can add a global search bar here if needed */}
       </div>
-      {isAdmin && <NotificationMenu />}
       <UserNav />
     </header>
   );
