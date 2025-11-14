@@ -64,8 +64,7 @@ service cloud.firestore {
     match /deposit_transactions/{depositTransactionId} {
         allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
         allow get: if isSignedIn() && get(/databases/$(database)/documents/deposit_transactions/$(depositTransactionId)).data.userAccountId == request.auth.uid;
-        // This rule allows a user to query for their own deposits.
-        allow list: if isSignedIn() && request.query.where.size() == 1 && request.query.where[0].field == "userAccountId" && request.query.where[0].op == "==" && request.query.where[0].value == request.auth.uid;
+        allow list: if isSignedIn() && request.query.get("where").get("userAccountId")[2] == request.auth.uid;
         allow update, delete: if false; // Only admins should be able to update status
     }
   }
