@@ -54,7 +54,8 @@ export default function RegisterPage() {
     }
 
     try {
-      initiateEmailSignUp(auth, email, password);
+      const authEmail = `${mobileNumber}@bithired.com`;
+      initiateEmailSignUp(auth, authEmail, password);
 
       const unsubscribe = auth.onAuthStateChanged((user) => {
         if (user) {
@@ -67,7 +68,7 @@ export default function RegisterPage() {
             {
               id: user.uid,
               name: name,
-              email: email,
+              email: email, // The real email
               mobileNumber: mobileNumber,
               virtualBalance: 0,
             },

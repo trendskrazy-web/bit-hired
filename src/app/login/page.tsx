@@ -22,7 +22,7 @@ import { useEffect, useState } from 'react';
 export default function LoginPage() {
   const auth = useAuth();
   const { toast } = useToast();
-  const [email, setEmail] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
   const { user, isUserLoading } = useUser();
@@ -35,6 +35,7 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    const email = `${mobileNumber}@bithired.com`;
     initiateEmailSignIn(auth, email, password);
     toast({
       title: 'Signing In',
@@ -54,19 +55,19 @@ export default function LoginPage() {
               Welcome to BitHired
             </CardTitle>
             <CardDescription>
-              Enter your email to sign in to your account
+              Enter your mobile number to sign in to your account
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="mobile">Mobile Number</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
+                id="mobile"
+                type="tel"
+                placeholder="+254700000000"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
