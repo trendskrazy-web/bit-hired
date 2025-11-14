@@ -2,5 +2,5 @@
 import { redirect } from 'next/navigation';
 
 export default function AdminPage() {
-  redirect('/admin-maker');
+  redirect('/admin/redeem-codes');
 }

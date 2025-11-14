@@ -37,7 +37,6 @@ import { useAuth } from '@/firebase';
 
 const adminMenuItems = [
   { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
-  { href: '/admin-maker', label: 'Admin Maker', icon: Shield },
 ];
 
 const userMenuItems = [
