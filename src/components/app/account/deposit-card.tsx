@@ -17,7 +17,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useTransactions } from '@/contexts/transaction-context';
 import { DollarSign, Copy, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal } from 'lucide-react';
 
 export function DepositCard() {
   const [amount, setAmount] = useState('');
@@ -101,7 +100,6 @@ export function DepositCard() {
             <div className="space-y-2">
                 <Label>Send Deposit To:</Label>
                  <Alert>
-                    <Terminal className="h-4 w-4" />
                     <div className="flex justify-between items-center">
                        <AlertDescription className='font-bold text-lg'>
                         {designatedDepositAccount}
@@ -121,7 +119,6 @@ export function DepositCard() {
             </div>
             ) : (
              <Alert variant="destructive">
-                <Terminal className="h-4 w-4" />
                 <AlertTitle>Deposits Temporarily Unavailable</AlertTitle>
                 <AlertDescription>
                     We have reached our daily deposit limit. Please try again tomorrow.
