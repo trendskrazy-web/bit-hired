@@ -3,8 +3,8 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1555774698-0b77e0abfe7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb21wdXRlciUyMGNoaXB8ZW58MHx8fHwxNzYzMDM2MzU0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "computer chip"
     },
     {
       "id": "whatsminer-m30s",
@@ -15,20 +15,20 @@
     {
       "id": "avalonminer-1246",
       "description": "A reliable choice for steady mining operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1614624532983-4ce035b9d7b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjb21wdXRlciUyMG5ldHdvcmslMjBzZXJ2ZXJ8ZW58MHx8fHwxNzYzMDM2NDUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "server hardware"
     },
     {
       "id": "dragonmint-t1",
       "description": "A legacy miner still capable of delivering results. Great for entry-level exploration.",
-      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1593640495253-2319d26d320e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3RoZXJib2FyZHxlbnwwfHx8fDE3NjMwMzY0ODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "motherboard"
     },
     {
       "id": "innosilicon-t3",
       "description": "A powerful and efficient miner with a strong hash rate.",
-      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1542628670-b9a86311df24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjb21wdXRlciUyMGNwdXxlbnwwfHx8fDE3NjMwMzY1MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "computer cpu"
     },
     {
       "id": "ebang-ebit-e12",
@@ -39,14 +39,14 @@
     {
       "id": "bitfury-tardis",
       "description": "An enterprise-grade solution offering robust performance and scalability.",
-      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1653387137422-90287e53b0f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxxdWFudHVtJTIwY29tcHV0ZXJ8ZW58MHx8fHwxNzYzMDM2NTgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "quantum computer"
     },
     {
       "id": "halong-dragonmint-t2",
       "description": "An efficient miner designed for long-term, stable operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1698622109273-39d424345260?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmdXR1cmlzdGljJTIwaGFyZHdhcmV8ZW58MHx8fHwxNzYzMDM2NjEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "futuristic hardware"
     }
   ]
 }
