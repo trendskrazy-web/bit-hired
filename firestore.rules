@@ -71,8 +71,8 @@ service cloud.firestore {
       // Users can read their own deposit requests.
       allow get: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
       
-      // Users can list their own deposit requests.
-      allow list: if isSignedIn() && request.query.get('where.userAccountId') == request.auth.uid;
+      // Users can list their own deposit requests, but only their own.
+      allow list: if isSignedIn() && request.query.get("where")[0][1] == "userAccountId" && request.query.get("where")[0][2] == request.auth.uid;
     }
 
     /**
