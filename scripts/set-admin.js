@@ -1,4 +1,4 @@
-
+GEGZNzOWg6bnU53iwJLzL5LaXwR2
 // This script is used to grant admin privileges to a user by setting a custom claim.
 // It uses the Firebase Admin SDK, which requires a service account key.
 
