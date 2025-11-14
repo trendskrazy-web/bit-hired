@@ -28,8 +28,8 @@ export default function AdminDepositsPage() {
            <DataTable
             columns={columns(updateDepositStatus)}
             data={deposits}
-            filterColumn="status"
-            filterPlaceholder="Filter by status..."
+            filterColumn="mobileNumber"
+            filterPlaceholder="Filter by mobile number..."
           />
         </CardContent>
       </Card>

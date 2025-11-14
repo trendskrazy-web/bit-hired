@@ -53,8 +53,8 @@ export const columns: ColumnDef<Deposit>[] = [
     },
   },
   {
-    accessorKey: "transactionCode",
-    header: "M-PESA Code",
+    accessorKey: "depositTo",
+    header: "Paid To",
   },
   {
     accessorKey: "status",

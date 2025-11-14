@@ -16,30 +16,27 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useTransactions } from '@/contexts/transaction-context';
 import { DollarSign } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-// These would typically come from a remote config or database
-const DEPOSIT_ACCOUNTS = [
-    { name: "M-PESA Paybill 1", number: "123456" },
-    { name: "M-PESA Paybill 2", number: "789012" },
-]
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Terminal } from 'lucide-react';
 
 export function DepositCard() {
   const [amount, setAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState(DEPOSIT_ACCOUNTS[0].number);
   const { toast } = useToast();
-  const { addDepositRequest } = useTransactions();
+  const { addDepositRequest, designatedDepositAccount, depositsEnabled } = useTransactions();
 
   const handleDepositRequest = (e: React.FormEvent) => {
     e.preventDefault();
     const depositAmount = parseFloat(amount);
+
+    if (!depositsEnabled || !designatedDepositAccount) {
+      toast({
+        title: 'Deposits Unavailable',
+        description: 'Deposits are temporarily unavailable. Please try again later.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     if (!amount || depositAmount <= 0) {
       toast({
@@ -52,7 +49,7 @@ export function DepositCard() {
 
     setIsProcessing(true);
     
-    addDepositRequest(depositAmount, selectedAccount);
+    addDepositRequest(depositAmount, designatedDepositAccount);
     
     // Simulate processing time
     setTimeout(() => {
@@ -73,29 +70,29 @@ export function DepositCard() {
           Deposit Funds
         </CardTitle>
         <CardDescription>
-          Send money to the provided account and enter the amount below.
+          Send money to the provided account and enter the amount below to confirm.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleDepositRequest}>
         <CardContent className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor="deposit-to">Send To</Label>
-                <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                    <SelectTrigger id="deposit-to">
-                        <SelectValue placeholder="Select Account" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {DEPOSIT_ACCOUNTS.map(acc => (
-                            <SelectItem key={acc.number} value={acc.number}>
-                                {acc.name} - {acc.number}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                 <p className="text-xs text-muted-foreground">
-                    Send your deposit to this account number.
-                </p>
-            </div>
+            {depositsEnabled && designatedDepositAccount ? (
+             <Alert>
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Send Deposit To:</AlertTitle>
+                <AlertDescription className='font-bold text-lg'>
+                  {designatedDepositAccount}
+                </AlertDescription>
+            </Alert>
+            ) : (
+             <Alert variant="destructive">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Deposits Temporarily Unavailable</AlertTitle>
+                <AlertDescription>
+                    We have reached our daily deposit limit. Please try again tomorrow.
+                </AlertDescription>
+            </Alert>
+            )}
+
           <div className="space-y-2">
             <Label htmlFor="deposit-amount">Amount (KES)</Label>
             <Input
@@ -106,6 +103,7 @@ export function DepositCard() {
               onChange={(e) => setAmount(e.target.value)}
               required
               min="1"
+              disabled={!depositsEnabled}
             />
           </div>
            <p className="text-xs text-muted-foreground">
@@ -113,7 +111,7 @@ export function DepositCard() {
             </p>
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="w-full" disabled={isProcessing}>
+          <Button type="submit" className="w-full" disabled={isProcessing || !depositsEnabled}>
             {isProcessing ? "Submitting..." : "Submit Deposit Request"}
           </Button>
         </CardFooter>

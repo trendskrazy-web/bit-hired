@@ -9,8 +9,8 @@ import {
   useEffect,
   useCallback,
 } from 'react';
-import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking, useMemoFirebase } from '@/firebase';
-import { collection, doc, onSnapshot, query, where, setDoc, increment } from 'firebase/firestore';
+import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
+import { collection, doc, onSnapshot, query, where, setDoc, increment, getDocs } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { useAccount } from './account-context';
@@ -34,25 +34,36 @@ export interface Withdrawal {
     mobileNumber: string;
 }
 
+export interface DailyLimit {
+    id: string; // Composite key: YYYY-MM-DD_accountNumber
+    totalAmount: number;
+    date: string;
+}
+
 interface TransactionContextType {
   deposits: Deposit[];
-  withdrawals: Withdrawal[];
   addDepositRequest: (amount: number, depositTo: string) => void;
-  addWithdrawalRequest: (amount: number) => void;
   // Admin functions
   updateDepositStatus: (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
-  updateWithdrawalStatus: (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
+  designatedDepositAccount: string | null;
+  depositsEnabled: boolean;
 }
 
 const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
 
+// These would typically come from a remote config or database
+const DEPOSIT_ACCOUNTS = ["0704356623", "0758669258"];
+const DAILY_LIMIT_PER_ACCOUNT = 500000;
+
+
 export function TransactionProvider({ children }: { children: ReactNode }) {
   const [deposits, setDeposits] = useState<Deposit[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
+  const [designatedDepositAccount, setDesignatedDepositAccount] = useState<string | null>(null);
+  const [depositsEnabled, setDepositsEnabled] = useState(true);
   
   const { user } = useUser();
   const firestore = useFirestore();
-  const { mobileNumber, addBalance, deductBalance, name } = useAccount();
+  const { mobileNumber, addBalance, name } = useAccount();
 
   const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
@@ -67,6 +78,61 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       });
     }
   }, [user, firestore]);
+
+  const updateDesignatedAccount = useCallback(async () => {
+    if (!firestore) return;
+
+    const today = new Date().toISOString().split("T")[0];
+    const dailyLimitsRef = collection(firestore, 'daily_limits');
+    
+    const accountTotals: Record<string, number> = {};
+    for (const acc of DEPOSIT_ACCOUNTS) {
+        accountTotals[acc] = 0;
+    }
+
+    const q = query(dailyLimitsRef, where('date', '==', today));
+    
+    try {
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const accountId = doc.id.split('_')[1];
+            if(accountId && accountTotals.hasOwnProperty(accountId)) {
+                accountTotals[accountId] = data.totalAmount;
+            }
+        });
+
+        // Find the account with the minimum total
+        let minTotal = Infinity;
+        let designatedAccount: string | null = null;
+
+        for (const acc of DEPOSIT_ACCOUNTS) {
+            if (accountTotals[acc] < DAILY_LIMIT_PER_ACCOUNT) {
+                if (accountTotals[acc] < minTotal) {
+                    minTotal = accountTotals[acc];
+                    designatedAccount = acc;
+                }
+            }
+        }
+        
+        setDesignatedDepositAccount(designatedAccount);
+        setDepositsEnabled(designatedAccount !== null);
+
+    } catch (error) {
+        console.error("Error fetching daily limits:", error);
+        const permissionError = new FirestorePermissionError({ path: 'daily_limits', operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+        setDepositsEnabled(false);
+    }
+}, [firestore]);
+
+  useEffect(() => {
+    updateDesignatedAccount();
+    // Re-check every minute
+    const interval = setInterval(updateDesignatedAccount, 60000);
+    return () => clearInterval(interval);
+  }, [updateDesignatedAccount]);
+
 
   useEffect(() => {
     if (!firestore || !user) return;
@@ -97,9 +163,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       unsubscribers.push(unsubscribe);
     };
 
-    // Create subscriptions for deposits and withdrawals
     createSubscription<Deposit>('deposit_transactions', isAdmin, setDeposits);
-    createSubscription<Withdrawal>('withdrawal_transactions', isAdmin, setWithdrawals);
 
     return () => {
       unsubscribers.forEach((unsub) => unsub());
@@ -124,7 +188,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       const limitDocRef = doc(firestore, 'daily_limits', limitDocId);
 
       setDoc(limitDocRef, 
-        { totalAmount: increment(amount), date: today }, 
+        { totalAmount: increment(amount), date: today, account: depositTo }, 
         { merge: true }
       ).catch(error => {
         const permissionError = new FirestorePermissionError({
@@ -134,21 +198,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         });
         errorEmitter.emit('permission-error', permissionError);
       });
-    }
-  };
-
-   const addWithdrawalRequest = (amount: number) => {
-    if (user && firestore && mobileNumber) {
-      deductBalance(amount);
-      const withdrawalsColRef = collection(firestore, 'withdrawal_transactions');
-      addDocumentNonBlocking(withdrawalsColRef, {
-        userAccountId: user.uid,
-        amount,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-        mobileNumber: mobileNumber,
-        userName: name,
-      });
+      // Immediately update the state to reflect the new designated account
+      updateDesignatedAccount();
     }
   };
   
@@ -168,30 +219,12 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     [firestore, addBalance, logAdminAction]
   );
 
-  const updateWithdrawalStatus = useCallback(
-    (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => {
-        if (firestore) {
-            const withdrawalDocRef = doc(firestore, 'withdrawal_transactions', withdrawalId);
-            if(status === 'cancelled') {
-                // Refund the user if withdrawal is cancelled
-                addBalance(amount, userId);
-                logAdminAction(`Cancelled withdrawal of KES ${amount} for user ${userId}. Balance refunded.`);
-            } else {
-                 logAdminAction(`Completed withdrawal of KES ${amount} for user ${userId}.`);
-            }
-            updateDocumentNonBlocking(withdrawalDocRef, { status });
-        }
-    },
-    [firestore, addBalance, logAdminAction]
-  );
-
   const contextValue = {
     deposits,
-    withdrawals,
     addDepositRequest,
-    addWithdrawalRequest,
     updateDepositStatus,
-    updateWithdrawalStatus,
+    designatedDepositAccount,
+    depositsEnabled,
   };
 
 

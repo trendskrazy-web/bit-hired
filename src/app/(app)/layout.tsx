@@ -43,6 +43,5 @@ export default function AuthenticatedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // No need for FirebaseClientProvider here as it's handled at the root and in the admin layout
   return <AuthenticatedLayoutContent>{children}</AuthenticatedLayoutContent>;
 }
