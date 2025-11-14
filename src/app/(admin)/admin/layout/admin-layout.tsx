@@ -9,6 +9,7 @@ import {
   History,
   ArrowDownToDot,
   ArrowUpFromDot,
+  CheckSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -23,14 +24,25 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
 } from '@/components/ui/sidebar';
 import { AppHeader } from '@/components/app/layout/header';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 
 const adminMenuItems = [
-  { href: '/admin/deposits', label: 'Deposits', icon: ArrowDownToDot },
-  { href: '/admin/withdrawals', label: 'Withdrawals', icon: ArrowUpFromDot },
+    {
+        label: 'Approvals',
+        icon: CheckSquare,
+        subItems: [
+            { href: '/admin/deposits', label: 'Deposits', icon: ArrowDownToDot },
+            { href: '/admin/withdrawals', label: 'Withdrawals', icon: ArrowUpFromDot },
+        ]
+    },
   { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: KeyRound },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/history', label: 'Admin History', icon: History },
@@ -62,25 +74,9 @@ export function AdminLayout({
 }) {
   const pathname = usePathname();
 
-  const renderMenuItems = (items: typeof adminMenuItems) => {
-    return items.map((item) => (
-      <SidebarMenuItem key={item.href}>
-        <SidebarMenuButton
-          asChild
-          isActive={pathname.startsWith(item.href)}
-          tooltip={{
-            children: item.label,
-            className: 'bg-sidebar-background text-sidebar-foreground',
-          }}
-        >
-          <Link href={item.href}>
-            <item.icon />
-            <span>{item.label}</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    ));
-  };
+  const isSubItemActive = (subItems: { href: string }[]) => {
+    return subItems.some(item => pathname.startsWith(item.href));
+  }
 
   return (
     <SidebarProvider>
@@ -95,7 +91,57 @@ export function AdminLayout({
           </Link>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarMenu>{renderMenuItems(adminMenuItems)}</SidebarMenu>
+          <SidebarMenu>
+            {adminMenuItems.map((item, index) => (
+              <SidebarMenuItem key={index}>
+                {item.subItems ? (
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                       <SidebarMenuButton
+                        className="w-full"
+                        isActive={isSubItemActive(item.subItems)}
+                        tooltip={{
+                            children: item.label,
+                            className: 'bg-sidebar-background text-sidebar-foreground',
+                        }}
+                       >
+                         <item.icon />
+                        <span>{item.label}</span>
+                       </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <SidebarMenuSub>
+                            {item.subItems.map(subItem => (
+                                <SidebarMenuItem key={subItem.href}>
+                                    <SidebarMenuSubButton asChild isActive={pathname.startsWith(subItem.href)}>
+                                        <Link href={subItem.href}>
+                                             <subItem.icon />
+                                            <span>{subItem.label}</span>
+                                        </Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ) : (
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith(item.href!)}
+                     tooltip={{
+                        children: item.label,
+                        className: 'bg-sidebar-background text-sidebar-foreground',
+                    }}
+                  >
+                    <Link href={item.href!}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                )}
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="group-data-[collapsible=icon]:hidden space-y-2">
           <SidebarFooterContent />
