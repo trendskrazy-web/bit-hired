@@ -60,31 +60,6 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
   const { user } = useUser();
   const isAdmin = user?.uid === 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
-  useEffect(() => {
-    if (!firestore || !isAdmin) {
-        setCodes([]);
-        return;
-    };
-
-    const codesColRef = collection(firestore, "redeem_codes");
-    const q = query(codesColRef);
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const codesData = snapshot.docs.map(
-        (doc) => ({ id: doc.id, ...doc.data() } as RedeemCode)
-      );
-      setCodes(codesData);
-    }, (error) => {
-      const permissionError = new FirestorePermissionError({
-        path: codesColRef.path,
-        operation: 'list',
-      });
-      errorEmitter.emit('permission-error', permissionError);
-    });
-
-    return () => unsubscribe();
-  }, [firestore, isAdmin]);
-
-
   const generateCode = useCallback(async (amount: number) => {
     if (!firestore) throw new Error("Firestore not available");
     
@@ -97,6 +72,9 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
         used: false,
         createdAt: new Date().toISOString(),
     });
+
+    // Manually add to local state if needed for immediate UI update
+    setCodes(prev => [...prev, { id: newCode, code: newCode, amount, used: false, createdAt: new Date().toISOString() }]);
 
     return newCode;
   }, [firestore]);
