@@ -23,6 +23,7 @@ import {
   ConfirmationResult,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  createUserWithEmailAndPassword,
 } from 'firebase/auth';
 
 export default function RegisterPage() {
@@ -49,10 +50,10 @@ export default function RegisterPage() {
   const setupRecaptcha = () => {
     if (!auth) return;
     // Cleanup any existing verifier
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
+    if ((window as any).recaptchaVerifier) {
+      (window as any).recaptchaVerifier.clear();
     }
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+    (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
       size: 'invisible',
       callback: () => {
         // reCAPTCHA solved, allow signInWithPhoneNumber.
@@ -71,7 +72,7 @@ export default function RegisterPage() {
     
     try {
       setupRecaptcha();
-      const appVerifier = window.recaptchaVerifier;
+      const appVerifier = (window as any).recaptchaVerifier;
       const result = await signInWithPhoneNumber(auth, mobileNumber, appVerifier);
       setConfirmationResult(result);
       setOtpSent(true);
@@ -110,21 +111,18 @@ export default function RegisterPage() {
     setIsVerifying(true);
 
     try {
-      // First, confirm the OTP
-      const credential = await confirmationResult.confirm(otp);
-      const user = credential.user;
-
-      // OTP is correct, user is signed in. Now, update their profile and set password.
-      // Since Firebase Phone Auth doesn't have a password, we will use a workaround.
-      // We'll create an email/password user with the verified phone number.
-      // This is a complex flow. A simpler approach for this app is to just create the user doc.
-      // The user is now authenticated via phone. We will store their details.
+      // First, confirm the OTP to prove ownership of the number
+      await confirmationResult.confirm(otp);
       
-      // Let's create the user with email and password as the app is structured that way
-       await auth.signOut(); // Sign out the phone user to sign up with email
+      // Since phone auth is temporary for verification, sign out the temp user.
+      // This allows us to create a new, permanent account with email/password,
+      // which is how the rest of the app is structured.
+      if (auth.currentUser) {
+        await auth.signOut();
+      }
        
        const authEmail = `${mobileNumber}@bithired.com`;
-       const userCredential = await auth.createUserWithEmailAndPassword(authEmail, password);
+       const userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
        const newUser = userCredential.user;
 
       // Now create the user document in Firestore
@@ -216,20 +214,6 @@ export default function RegisterPage() {
                   />
                    <p className="text-xs text-muted-foreground">Include country code (e.g., +254).</p>
                 </div>
-              </>
-            ) : (
-              <>
-                <div className="grid gap-2">
-                  <Label htmlFor="otp">Verification Code (OTP)</Label>
-                  <Input
-                    id="otp"
-                    type="text"
-                    placeholder="Enter the 6-digit code"
-                    required
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                  />
-                </div>
                 <div className="grid gap-2">
                     <Label htmlFor="password">Password</Label>
                     <Input
@@ -251,6 +235,20 @@ export default function RegisterPage() {
                     />
                 </div>
               </>
+            ) : (
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="otp">Verification Code (OTP)</Label>
+                  <Input
+                    id="otp"
+                    type="text"
+                    placeholder="Enter the 6-digit code"
+                    required
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                  />
+                </div>
+              </>
             )}
              <div className="grid gap-2">
               <Label htmlFor="invitation-code">Invitation Code (Optional)</Label>
@@ -261,7 +259,7 @@ export default function RegisterPage() {
             <Button className="w-full" type="submit" disabled={isSendingOtp || isVerifying}>
               {otpSent
                 ? isVerifying ? 'Verifying & Registering...' : 'Verify & Register'
-                : isSendingOtp ? 'Sending OTP...' : 'Send OTP'}
+                : isSendingOtp ? 'Sending OTP...' : 'Send OTP & Register'}
             </Button>
             <div className="text-center text-sm">
               Already have an account?{' '}
