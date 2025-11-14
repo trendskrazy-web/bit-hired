@@ -36,6 +36,7 @@ export interface RedeemCode {
 }
 
 interface RedeemCodeContextType {
+  codes: RedeemCode[];
   generateCode: (amount: number) => Promise<string>;
   redeemCode: (
     code: string
@@ -52,10 +53,34 @@ const generateUniqueCode = () => {
     return 'BH' + Math.random().toString(36).substring(2, 10).toUpperCase();
 }
 
+const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
 
 export function RedeemCodeProvider({ children }: { children: ReactNode }) {
+  const [codes, setCodes] = useState<RedeemCode[]>([]);
   const firestore = useFirestore();
   const { user } = useUser();
+
+  useEffect(() => {
+    if (!firestore || !user || user.uid !== SUPER_ADMIN_UID) {
+        setCodes([]);
+        return;
+    };
+
+    const codesColRef = collection(firestore, 'redeem_codes');
+    const q = query(codesColRef);
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const codesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RedeemCode));
+      setCodes(codesData);
+    }, (error) => {
+      const permissionError = new FirestorePermissionError({
+        path: codesColRef.path,
+        operation: 'list',
+      });
+      errorEmitter.emit('permission-error', permissionError);
+    });
+
+    return () => unsubscribe();
+  }, [firestore, user]);
 
   const generateCode = useCallback(async (amount: number) => {
     if (!firestore) throw new Error("Firestore not available");
@@ -144,7 +169,7 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
 
   return (
     <RedeemCodeContext.Provider
-      value={{ generateCode, redeemCode, markCodeAsUsed }}
+      value={{ codes, generateCode, redeemCode, markCodeAsUsed }}
     >
       {children}
     </RedeemCodeContext.Provider>

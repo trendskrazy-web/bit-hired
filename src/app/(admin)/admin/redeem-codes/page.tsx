@@ -15,11 +15,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRedeemCodes } from '@/contexts/redeem-code-context';
 import { useToast } from '@/hooks/use-toast';
+import { DataTable } from '@/components/app/transactions/data-table';
+import { columns } from '@/components/admin/redeem-codes/columns';
 
 export default function AdminRedeemCodesPage() {
   const [amount, setAmount] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const { generateCode } = useRedeemCodes();
+  const { generateCode, codes } = useRedeemCodes();
   const { toast } = useToast();
 
   const handleGenerateCode = async (e: React.FormEvent) => {
@@ -82,6 +84,23 @@ export default function AdminRedeemCodesPage() {
             </Button>
           </CardFooter>
         </form>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>All Redeem Codes</CardTitle>
+          <CardDescription>
+            A list of all generated redeem codes.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={columns}
+            data={codes}
+            filterColumn="code"
+            filterPlaceholder="Filter by code..."
+          />
+        </CardContent>
       </Card>
     </div>
   );

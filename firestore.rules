@@ -31,34 +31,24 @@ service cloud.firestore {
       allow read, write: if isOwner(userId) || isAdmin();
     }
 
-    // Rules for deposit_transactions
-    match /deposit_transactions {
-      allow list: if isAdmin() || (isSignedIn() && request.query.where.userAccountId == request.auth.uid);
-    }
     match /deposit_transactions/{depositId} {
       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
       allow update: if isAdmin();
+      allow list: if isAdmin();
     }
 
-    // Rules for withdrawal_transactions
-    match /withdrawal_transactions {
-      allow list: if isAdmin() || (isSignedIn() && request.query.where.userAccountId == request.auth.uid);
-    }
     match /withdrawal_transactions/{withdrawalId} {
       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
       allow update: if isAdmin();
+      allow list: if isAdmin();
     }
     
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
       allow create: if isAdmin();
-      allow update: if isSignedIn() 
-                    && resource.data.used == false 
-                    && request.resource.data.used == true;
-    }
-    match /redeem_codes {
+      allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true;
       allow list: if isAdmin();
     }
 
@@ -68,5 +58,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
