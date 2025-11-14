@@ -27,7 +27,7 @@ function AuthenticatedLayoutContent({ children }: { children: React.ReactNode })
   }
 
   return (
-    <AccountProvider>
+    <AccountProvider isAdmin={isAdmin}>
       <RedeemCodeProvider>
         <AppLayout isAdmin={isAdmin}>{children}</AppLayout>
       </RedeemCodeProvider>

@@ -14,7 +14,6 @@ import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlockin
 import { collection, doc, onSnapshot, increment, query, where, orderBy } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { usePathname } from 'next/navigation';
 
 interface AccountContextType {
   balance: number;
@@ -48,7 +47,7 @@ const AUTO_DECLINE_MINUTES = 20;
 
 const INITIAL_MPESA_NUMBERS = ["0704367623", "0728477718"];
 
-export function AccountProvider({ children }: { children: ReactNode }) {
+export function AccountProvider({ children, isAdmin }: { children: ReactNode, isAdmin: boolean }) {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [deposits, setDeposits] = useState<DepositTransaction[]>([]);
@@ -61,8 +60,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   const { user } = useUser();
   const firestore = useFirestore();
-  const pathname = usePathname();
-  const isAdminPage = pathname.startsWith('/admin');
 
   const addMpesaNumber = (number: string) => {
     setMpesaNumbers(prev => [...prev, number]);
@@ -129,7 +126,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     let unsubAllDeposits = () => {};
     let unsubNotifications = () => {};
 
-    if (isAdminPage) {
+    if (isAdmin) {
       const allDepositsQuery = query(collection(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
       unsubAllDeposits = onSnapshot(allDepositsQuery, (snapshot) => {
         const allDepositData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DepositTransaction));
@@ -175,7 +172,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       unsubAllDeposits();
       unsubNotifications();
     };
-  }, [user, firestore, isAdminPage, declineDeposit]);
+  }, [user, firestore, isAdmin, declineDeposit]);
 
   const createNotification = (message: string) => {
     if (!firestore || !user) return;
