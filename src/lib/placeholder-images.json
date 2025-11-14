@@ -3,50 +3,50 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ASIC Miner"
+      "imageUrl": "https://images.unsplash.com/photo-1631603090989-93f9ef6f9d8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjcnlwdG8lMjBtaW5pbmd8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "crypto mining"
     },
     {
       "id": "whatsminer-m30s",
       "description": "An efficient and powerful mining rig.",
-      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ASIC Miner"
+      "imageUrl": "https://images.unsplash.com/photo-1631603055239-9b6343513327?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjcnlwdG8lMjBtaW5pbmd8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     },
     {
       "id": "avalonminer-1246",
       "description": "A reliable choice for steady mining operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ASIC Miner"
+      "imageUrl": "https://images.unsplash.com/photo-1631603011363-2f634585c5aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjcnlwdG8lMjBtaW5pbmd8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "hardware farm"
     },
     {
       "id": "dragonmint-t1",
       "description": "A legacy miner still capable of delivering results. Great for entry-level exploration.",
-      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ASIC Miner"
+      "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjUFUlMjBmYW58ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "computer fan"
     },
     {
       "id": "innosilicon-t3",
       "description": "A powerful and efficient miner with a strong hash rate.",
-      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ASIC Miner"
+      "imageUrl": "https://images.unsplash.com/photo-1631603022518-a6113941445b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjcnlwdG8lMjBtaW5pbmd8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "server farm"
     },
     {
       "id": "ebang-ebit-e12",
       "description": "High-performance mining with a focus on energy efficiency.",
-      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ASIC hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1631603090989-93f9ef6f9d8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjcnlwdG8lMjBtaW5pbmd8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining hardware"
     },
     {
       "id": "bitfury-tardis",
       "description": "An enterprise-grade solution offering robust performance and scalability.",
-      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ASIC Miner"
+      "imageUrl": "https://images.unsplash.com/photo-1580828343064-fde4fc206bc6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzZXJ2ZXIlMjByYWNrfGVufDB8fHx8MTcxODc0MzYyMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "server rack"
     },
     {
       "id": "halong-dragonmint-t2",
       "description": "An efficient miner designed for long-term, stable operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1621926236499-3414f6b1e6a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxBc2ljJTIwTWluZXJ8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ASIC Miner"
+      "imageUrl": "https://images.unsplash.com/photo-1631603011363-2f634585c5aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjcnlwdG8lMjBtaW5pbmd8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining hardware"
     }
   ]
 }
