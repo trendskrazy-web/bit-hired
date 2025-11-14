@@ -96,6 +96,10 @@ const redeemCodeColumns: ColumnDef<RedeemCode>[] = [
       );
     },
   },
+   {
+    accessorKey: 'usedBy',
+    header: 'Used By',
+  },
 ];
 
 export default function AdminRedeemCodesPage() {
@@ -105,7 +109,7 @@ export default function AdminRedeemCodesPage() {
   const [amount, setAmount] = useState('100');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleGenerate = (e: React.FormEvent) => {
+  const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     const numCount = parseInt(count);
     const numAmount = parseInt(amount);
@@ -129,14 +133,21 @@ export default function AdminRedeemCodesPage() {
     }
 
     setIsGenerating(true);
-    setTimeout(() => {
-      const newCodes = generateCodes(numCount, numAmount);
+    try {
+      const newCodes = await generateCodes(numCount, numAmount);
       toast({
         title: 'Codes Generated!',
         description: `${newCodes.length} new redeem codes have been created.`,
       });
-      setIsGenerating(false);
-    }, 1000);
+    } catch (error) {
+       toast({
+        title: 'Error Generating Codes',
+        description: 'An unexpected error occurred.',
+        variant: 'destructive',
+      });
+    } finally {
+        setIsGenerating(false);
+    }
   };
 
   return (

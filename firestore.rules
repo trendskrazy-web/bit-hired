@@ -12,6 +12,7 @@
  * - `/users/{userId}/rentals/{rentalId}`: Stores rental transactions associated with a specific user.
  * - `/deposit_transactions/{depositId}`: Stores deposit requests.
  * - `/notifications/{notificationId}`: Stores system notifications for admins.
+ * - `/redeem_codes/{code}`: Stores redeemable codes.
  *
  * @key_security_decisions
  * - Users can only create their own user account and can only read/write their own data.
@@ -69,7 +70,7 @@ service cloud.firestore {
      */
     match /deposit_transactions/{depositTransactionId} {
         allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
-        allow list: if isSignedIn() || isAdmin();
+        allow list: if isSignedIn();
         allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
         allow update: if isAdmin();
     }
@@ -80,6 +81,22 @@ service cloud.firestore {
      */
     match /notifications/{notificationId} {
       allow read, write: if isAdmin();
+    }
+
+    /**
+     * @description Manages redeem codes.
+     * @path /redeem_codes/{code}
+     */
+    match /redeem_codes/{code} {
+      // Admins can create, read, and list all codes.
+      allow create, get, list: if isAdmin();
+
+      // Any signed-in user can update a code (to redeem it), but only if it hasn't been used yet.
+      // This prevents a code from being used multiple times.
+      allow update: if isSignedIn()
+                    && request.resource.data.used == true
+                    && resource.data.used == false
+                    && request.resource.data.usedBy == request.auth.uid;
     }
   }
 

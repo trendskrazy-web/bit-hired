@@ -25,7 +25,7 @@ export function RedeemCodeCard() {
   const { redeemCode, markCodeAsUsed } = useRedeemCodes();
   const { addBalance } = useAccount();
 
-  const handleRedeem = (e: React.FormEvent) => {
+  const handleRedeem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code) {
       toast({
@@ -38,27 +38,24 @@ export function RedeemCodeCard() {
 
     setIsProcessing(true);
 
-    // Simulate network delay
-    setTimeout(() => {
-      const result = redeemCode(code);
+    const result = await redeemCode(code);
 
-      if (result.success) {
-        addBalance(result.amount);
-        markCodeAsUsed(code);
-        toast({
-          title: "Success!",
-          description: `KES ${result.amount.toLocaleString()} has been added to your account.`,
-        });
-        setCode("");
-      } else {
-        toast({
-          title: "Redemption Failed",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-      setIsProcessing(false);
-    }, 1000);
+    if (result.success) {
+      addBalance(result.amount);
+      markCodeAsUsed(code);
+      toast({
+        title: "Success!",
+        description: `KES ${result.amount.toLocaleString()} has been added to your account.`,
+      });
+      setCode("");
+    } else {
+      toast({
+        title: "Redemption Failed",
+        description: result.message,
+        variant: "destructive",
+      });
+    }
+    setIsProcessing(false);
   };
 
   return (
