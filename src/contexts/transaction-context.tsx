@@ -166,15 +166,21 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       let q: Query;
       const collectionRef = collection(firestore, collectionName);
       if (isAdmin) {
-        q = query(collectionRef, orderBy('createdAt', 'desc')); // Admin gets all, sorted
+        // Admin gets all documents, sorted by creation date
+        q = query(collectionRef, orderBy('createdAt', 'desc'));
       } else {
-        q = query(collectionRef, where('userAccountId', '==', user.uid), orderBy('createdAt', 'desc')); // User gets their own
+        // Regular user gets only their own documents, sorted
+        q = query(
+          collectionRef,
+          where('userAccountId', '==', user.uid),
+          orderBy('createdAt', 'desc')
+        );
       }
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as T));
         setData(data);
       }, (error) => {
-        const path = (q as any)._query.path.canonicalString();
+        const path = collectionName;
         const permissionError = new FirestorePermissionError({ path: path, operation: 'list' });
         errorEmitter.emit('permission-error', permissionError);
       });
