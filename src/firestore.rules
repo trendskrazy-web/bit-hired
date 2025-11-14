@@ -3,54 +3,60 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
     function isAdmin() {
       // This is a hardcoded UID for the super admin.
-      return request.auth.uid == 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+      return isSignedIn() && request.auth.uid == 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
     }
 
     match /users/{userId} {
-      allow get, update: if request.auth.uid == userId || isAdmin();
-      allow create: if request.auth.uid == userId;
+      allow get, update: if isOwner(userId) || isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == userId;
       allow list: if isAdmin();
     }
 
     match /mining_machines/{machineId} {
-      allow get: if request.auth != null;
-      allow list: if request.auth != null;
+      allow get, list: if isSignedIn();
       allow create, update, delete: if isAdmin();
     }
 
     match /users/{userId}/rentals/{rentalId} {
-      allow read, write: if request.auth.uid == userId || isAdmin();
+      allow read, write: if isOwner(userId) || isAdmin();
     }
 
     match /deposit_transactions/{depositId} {
-      allow get: if request.auth.uid == resource.data.userAccountId || isAdmin();
-      allow list: if isAdmin();
-      allow create: if request.auth.uid == request.resource.data.userAccountId;
+      allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
+      allow list: if isAdmin() || (isSignedIn() && request.query.where.userAccountId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
       allow update: if isAdmin();
     }
     
     match /withdrawal_transactions/{withdrawalId} {
-      allow get: if request.auth.uid == resource.data.userAccountId || isAdmin();
-      allow list: if isAdmin();
-      allow create: if request.auth.uid == request.resource.data.userAccountId;
+      allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
+      allow list: if isAdmin() || (isSignedIn() && request.query.where.userAccountId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
       allow update: if isAdmin();
     }
     
     match /redeem_codes/{code} {
-      allow get: if request.auth != null;
+      allow get: if isSignedIn();
       allow create: if isAdmin();
-      allow update: if request.auth != null && resource.data.used == false && request.resource.data.used == true;
-    }
-
-    match /redeem_codes/{code} {
-        allow list: if isAdmin();
+      allow update: if isSignedIn() 
+                    && resource.data.used == false 
+                    && request.resource.data.used == true;
+      allow list: if isAdmin();
     }
 
     match /daily_limits/{limitId} {
-        allow get, list: if request.auth != null;
-        allow write: if request.auth != null; // Should be more secure in production
+        allow get, list: if isSignedIn();
+        allow write: if isSignedIn(); // Should be more secure in production
     }
   }
 }
