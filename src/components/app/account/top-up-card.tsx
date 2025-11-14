@@ -97,12 +97,12 @@ export function TopUpCard() {
         <CardHeader>
           <CardTitle>Complete Your Deposit (Demo)</CardTitle>
           <CardDescription>
-            Use the details below to complete your M-PESA payment. This is for demonstration only and will not be processed.
+            To deposit funds, send the exact amount to the M-PESA number below. Use the provided transaction code as the reference in your M-PESA transaction. An admin will confirm your payment.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div>
-            <Label>Send Money To</Label>
+            <Label>Send Money To (Paybill)</Label>
             <div className="flex items-center gap-2">
               <p className="font-bold text-lg">{selectedPhoneNumber}</p>
               <Button
@@ -116,7 +116,7 @@ export function TopUpCard() {
             </div>
           </div>
           <div>
-            <Label>Transaction Reference</Label>
+            <Label>Account Number (Transaction Reference)</Label>
             <div className="flex items-center gap-2">
               <p className="font-bold text-lg text-primary">{generatedCode}</p>
                <Button
@@ -128,10 +128,10 @@ export function TopUpCard() {
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">This code helps us identify your deposit. In a real app, an admin would confirm your payment.</p>
+            <p className="text-xs text-muted-foreground">This code helps us identify your deposit.</p>
           </div>
           <div className="pt-2">
-             <p className="text-muted-foreground">Your account will not be credited as this is a demo. You can track the pending status on this page.</p>
+             <p className="text-muted-foreground">Your account balance will be updated once an admin confirms the transaction. You can track its status under "Pending Deposits".</p>
           </div>
           <Button onClick={resetForm} className="w-full">
             Make Another Deposit Request
@@ -144,9 +144,9 @@ export function TopUpCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top Up Wallet</CardTitle>
+        <CardTitle>Top Up Wallet via M-PESA</CardTitle>
         <CardDescription>
-          Enter the amount you wish to add to your wallet.
+          Enter the amount you wish to deposit to your wallet.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleDepositRequest}>
