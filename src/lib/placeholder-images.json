@@ -3,32 +3,32 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1591489237701-57358ac6d20d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3NjMwMzUwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1621919419142-6a6c94a8c2f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     },
     {
       "id": "whatsminer-m30s",
       "description": "An efficient and powerful mining rig.",
-      "imageUrl": "https://images.unsplash.com/photo-1591489237701-57358ac6d20d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3NjMwMzUwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     },
     {
       "id": "avalonminer-1246",
       "description": "A reliable choice for steady mining operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1591489237701-57358ac6d20d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3NjMwMzUwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     },
     {
       "id": "dragonmint-t1",
       "description": "A legacy miner still capable of delivering results. Great for entry-level exploration.",
-      "imageUrl": "https://images.unsplash.com/photo-1591489237701-57358ac6d20d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3NjMwMzUwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1621919419142-6a6c94a8c2f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     },
     {
       "id": "innosilicon-t3",
       "description": "A powerful and efficient miner with a strong hash rate.",
-      "imageUrl": "https://images.unsplash.com/photo-1591489237701-57358ac6d20d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3NjMwMzUwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     },
     {
       "id": "ebang-ebit-e12",
@@ -39,14 +39,14 @@
     {
       "id": "bitfury-tardis",
       "description": "An enterprise-grade solution offering robust performance and scalability.",
-      "imageUrl": "https://images.unsplash.com/photo-1591489237701-57358ac6d20d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3NjMwMzUwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1621919419142-6a6c94a8c2f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     },
     {
       "id": "halong-dragonmint-t2",
       "description": "An efficient miner designed for long-term, stable operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1591489237701-57358ac6d20d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtaW5pbmclMjBoYXJkd2FyZXxlbnwwfHx8fDE3NjMwMzUwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining hardware"
+      "imageUrl": "https://images.unsplash.com/photo-1622543923368-f918a2444365?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzOTk3OTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     }
   ]
 }
