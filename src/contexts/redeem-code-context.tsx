@@ -22,7 +22,16 @@ import {
   onSnapshot,
   serverTimestamp,
 } from "firebase/firestore";
-import { v4 as uuidv4 } from 'uuid'; // Assuming uuid is available, if not, a simpler generator will be used.
+
+// A simple client-side UUID generator
+const uuidv4 = () => {
+  return "xxxx-xxxx-4xxx-yxxx-xxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  }).toUpperCase();
+};
+
 
 export interface RedeemCode {
   id: string; // Document ID is the code itself
@@ -47,9 +56,9 @@ const RedeemCodeContext = createContext<RedeemCodeContextType | undefined>(
   undefined
 );
 
-// Function to generate a simple random code
-const generateSimpleCode = (length = 8) => {
-  return Math.random().toString(36).substring(2, 2 + length).toUpperCase();
+// Function to generate a unique code
+const generateUniqueCode = (length = 8) => {
+  return uuidv4().substring(0, length);
 };
 
 
@@ -84,7 +93,7 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
 
       const newCodes: RedeemCode[] = [];
       for (let i = 0; i < count; i++) {
-        const code = generateSimpleCode();
+        const code = generateUniqueCode();
         const newCode: Omit<RedeemCode, 'id'> = {
           code: code,
           amount: amount,
