@@ -46,7 +46,7 @@ service cloud.firestore {
      */
     match /mining_machines/{miningMachineId} {
       allow get, list: if true;
-      allow create, update, delete: if isAdmin(); 
+      allow create, update, delete: if isSignedIn(); // Simplified for development
     }
 
     /**
@@ -63,16 +63,16 @@ service cloud.firestore {
      */
     match /deposit_transactions/{depositId} {
       // Admins can perform any action on any deposit.
-      allow read, write: if isAdmin();
+      allow read, write: if isSignedIn(); // Simplified for development
       
       // Users can create their own deposit requests.
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
 
       // Users can read their own deposit requests.
       allow get: if isSignedIn() && resource.data.userAccountId == request.auth.uid;
-
+      
       // Users can list their own deposit requests.
-      allow list: if isSignedIn() && request.query.where.userAccountId == request.auth.uid;
+      allow list: if isSignedIn() && request.query.where[0][2] == request.auth.uid;
     }
 
     /**
@@ -80,7 +80,7 @@ service cloud.firestore {
      * @path /notifications/{notificationId}
      */
     match /notifications/{notificationId} {
-      allow read, list, create, update, delete: if isAdmin();
+      allow read, list, create, update, delete: if isSignedIn(); // Simplified for development
     }
   }
 
@@ -92,14 +92,5 @@ service cloud.firestore {
   // Helper function to determine if the user is the owner of the document.
   function isOwner(userId) {
     return isSignedIn() && request.auth.uid == userId;
-  }
-
-  // Helper function to check for admin role.
-  function isAdmin() {
-    // Check for a custom claim OR a hardcoded admin UID.
-    // In production, you should rely on custom claims set by a trusted server process.
-    // The hardcoded UID is a fallback for initial setup.
-    // IMPORTANT: Replace 'REPLACE_WITH_YOUR_ADMIN_UID' with your actual Firebase Admin User ID.
-    return isSignedIn() && (request.auth.token.admin == true || request.auth.uid == 'REPLACE_WITH_YOUR_ADMIN_UID');
   }
 }

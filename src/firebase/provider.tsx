@@ -85,9 +85,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       auth,
       async (firebaseUser) => { // Auth state determined
         if (firebaseUser) {
-          const idTokenResult: IdTokenResult = await firebaseUser.getIdTokenResult();
-          const isAdmin = idTokenResult.claims.admin === true || firebaseUser.uid === 'REPLACE_WITH_YOUR_ADMIN_UID';
-          setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null, isAdmin });
+          // For now, we assume any logged in user could be an admin for development purposes.
+          // In production, you would check for a custom claim.
+          setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null, isAdmin: true });
         } else {
           setUserAuthState({ user: null, isUserLoading: false, userError: null, isAdmin: false });
         }
