@@ -36,11 +36,16 @@ interface AccountContextType {
   allDeposits: DepositTransaction[];
   notifications: Notification[];
   mobileNumber: string;
+  mpesaNumbers: string[];
+  addMpesaNumber: (number: string) => void;
+  removeMpesaNumber: (number: string) => void;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
 
 const AUTO_DECLINE_MINUTES = 20;
+
+const INITIAL_MPESA_NUMBERS = ["0704367623", "0728477718"];
 
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(0);
@@ -50,11 +55,22 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [allDeposits, setAllDeposits] = useState<DepositTransaction[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [mobileNumber, setMobileNumber] = useState('');
+  const [mpesaNumbers, setMpesaNumbers] = useState<string[]>(INITIAL_MPESA_NUMBERS);
+
 
   const { user } = useUser();
   const firestore = useFirestore();
   const pathname = usePathname();
   const isAdminPage = pathname.startsWith('/admin');
+
+  const addMpesaNumber = (number: string) => {
+    setMpesaNumbers(prev => [...prev, number]);
+  };
+
+  const removeMpesaNumber = (numberToRemove: string) => {
+    setMpesaNumbers(prev => prev.filter(num => num !== numberToRemove));
+  };
+
 
   const declineDeposit = useCallback((depositId: string, reason: string = 'Declined by admin.') => {
     if (!firestore) return;
@@ -260,6 +276,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         allDeposits,
         notifications,
         mobileNumber,
+        mpesaNumbers,
+        addMpesaNumber,
+        removeMpesaNumber,
       }}
     >
       {children}

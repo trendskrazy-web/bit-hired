@@ -16,7 +16,6 @@ import { useAccount } from "@/contexts/account-context";
 import { useState, useEffect } from "react";
 import { Copy } from "lucide-react";
 
-const MERCHANT_PHONE_NUMBERS = ["0704367623", "0728477718"];
 
 export function TopUpCard() {
   const { toast } = useToast();
@@ -24,19 +23,28 @@ export function TopUpCard() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState<string | null>(null);
-  const { addDepositRequest, mobileNumber } = useAccount();
+  const { addDepositRequest, mobileNumber, mpesaNumbers } = useAccount();
 
   useEffect(() => {
-    if (!generatedCode) {
+    if (!generatedCode && mpesaNumbers.length > 0) {
       // Pick a random number when the component loads or resets
-      const randomIndex = Math.floor(Math.random() * MERCHANT_PHONE_NUMBERS.length);
-      setSelectedPhoneNumber(MERCHANT_PHONE_NUMBERS[randomIndex]);
+      const randomIndex = Math.floor(Math.random() * mpesaNumbers.length);
+      setSelectedPhoneNumber(mpesaNumbers[randomIndex]);
     }
-  }, [generatedCode]);
+  }, [generatedCode, mpesaNumbers]);
 
   const handleDepositRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     const depositAmount = parseFloat(amount);
+
+    if (mpesaNumbers.length === 0) {
+      toast({
+        title: "Deposits Unavailable",
+        description: "No M-PESA numbers are configured for deposits. Please contact support.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (!depositAmount || depositAmount <= 0) {
       toast({
@@ -155,7 +163,7 @@ export function TopUpCard() {
           </div>
         </CardContent>
         <CardContent>
-          <Button type="submit" className="w-full" disabled={isProcessing}>
+          <Button type="submit" className="w-full" disabled={isProcessing || mpesaNumbers.length === 0}>
             {isProcessing ? "Generating Code..." : "Get Transaction Code"}
           </Button>
         </CardContent>

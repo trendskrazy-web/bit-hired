@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -10,6 +11,7 @@ import {
   Gift,
   WalletCards,
   Info,
+  Settings,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -41,6 +43,7 @@ const adminMenuItems = [
   { href: '/admin/deposits', label: 'Deposits', icon: WalletCards },
   { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: Gift },
   { href: '/admin/notifications', label: 'Notifications', icon: Bell },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 function AdminMenu() {
