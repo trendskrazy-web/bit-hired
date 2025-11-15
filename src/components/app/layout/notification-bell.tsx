@@ -15,7 +15,7 @@ import { useNotifications } from '@/contexts/notification-context';
 import Link from 'next/link';
 
 export function NotificationBell() {
-  const { notifications } = useNotifications();
+  const { notifications, markNotificationsAsRead } = useNotifications();
   const unreadCount = notifications.filter((n) => !n.read).length;
   const recentNotifications = notifications.slice(0, 5);
 
@@ -37,9 +37,18 @@ export function NotificationBell() {
     return Math.floor(seconds) + "s ago";
   }
 
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen && unreadCount > 0) {
+      const unreadIds = recentNotifications.filter(n => !n.read).map(n => n.id);
+      if (unreadIds.length > 0) {
+        markNotificationsAsRead(unreadIds);
+      }
+    }
+  };
+
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
@@ -57,13 +66,13 @@ export function NotificationBell() {
         {recentNotifications.length > 0 ? (
           recentNotifications.map((notification) => (
             <DropdownMenuItem key={notification.id} asChild>
-                <Link href="/admin/history" className="flex items-start gap-3">
+                <Link href="/admin/history" className={`flex items-start gap-3 ${!notification.read ? 'font-bold' : ''}`}>
                     <div className='pt-1'>
                         <Check className="h-4 w-4 text-green-500" />
                     </div>
                     <div className="flex flex-col">
                         <p className="text-sm leading-tight whitespace-normal">{notification.message}</p>
-                        <p className="text-xs text-muted-foreground">{formatTimeAgo(notification.createdAt)}</p>
+                        <p className={`text-xs ${!notification.read ? 'text-blue-400' : 'text-muted-foreground'}`}>{formatTimeAgo(notification.createdAt)}</p>
                     </div>
                 </Link>
             </DropdownMenuItem>

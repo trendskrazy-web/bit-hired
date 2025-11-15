@@ -7,18 +7,21 @@ import {
   useState,
   ReactNode,
   useEffect,
+  useCallback,
 } from "react";
 import {
   useFirestore,
   useUser,
   FirestorePermissionError,
-  errorEmitter
+  errorEmitter,
+  updateDocumentNonBlocking,
 } from "@/firebase";
 import {
   collection,
   onSnapshot,
   query,
   orderBy,
+  doc,
 } from "firebase/firestore";
 
 export interface Notification {
@@ -31,6 +34,7 @@ export interface Notification {
 
 interface NotificationContextType {
   notifications: Notification[];
+  markNotificationsAsRead: (notificationIds: string[]) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -63,9 +67,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       return () => unsubscribe();
     }
   }, [user, firestore]);
+  
+  const markNotificationsAsRead = useCallback((notificationIds: string[]) => {
+      if (!firestore || notificationIds.length === 0) return;
+
+      notificationIds.forEach(id => {
+          const notifDocRef = doc(firestore, 'notifications', id);
+          updateDocumentNonBlocking(notifDocRef, { read: true });
+      });
+  }, [firestore]);
+
 
   return (
-    <NotificationContext.Provider value={{ notifications }}>
+    <NotificationContext.Provider value={{ notifications, markNotificationsAsRead }}>
       {children}
     </NotificationContext.Provider>
   );
