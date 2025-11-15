@@ -86,22 +86,24 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   }, [transaction.id, transaction.status, updateTransactionStatus]);
   
   const canCashOut = useMemo(() => {
-      const available = earnings - cashedOutAmount;
-      if (available <= 0 || timeRemaining <= 0) {
-          return false;
-      }
-      
-      const now = new Date();
-      if (!lastCashOutDate) {
-          // If never cashed out, can cash out if at least 24 hours have passed since purchase
-          const oneDayAfterPurchase = new Date(purchaseDate.getTime() + 24 * 60 * 60 * 1000);
-          return now >= oneDayAfterPurchase;
-      }
+    const available = earnings - cashedOutAmount;
+    if (available <= 0 || timeRemaining <= 0) {
+      return false;
+    }
 
-      // Can cash out if it has been more than 24 hours since the last cash-out
-      const oneDayAfterLastCashOut = new Date(lastCashOutDate.getTime() + 24 * 60 * 60 * 1000);
-      return now >= oneDayAfterLastCashOut;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
+    if (!lastCashOutDate) {
+      // If never cashed out, check if at least one full day has passed since purchase.
+      const oneDayInMs = 24 * 60 * 60 * 1000;
+      return now.getTime() - purchaseDate.getTime() >= oneDayInMs;
+    }
+    
+    const lastCashOutDay = new Date(lastCashOutDate.getFullYear(), lastCashOutDate.getMonth(), lastCashOutDate.getDate());
+
+    // Can cash out if the current day is after the last cash-out day.
+    return today > lastCashOutDay;
   }, [earnings, cashedOutAmount, lastCashOutDate, purchaseDate, timeRemaining]);
 
 
@@ -120,7 +122,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     } else {
          toast({
             title: "Cash Out Unavailable",
-            description: "You can cash out your accumulated earnings once every 24 hours. Please wait for the next cycle.",
+            description: "You can cash out your accumulated earnings once per day after 12:00 AM.",
             variant: "destructive",
         });
     }
