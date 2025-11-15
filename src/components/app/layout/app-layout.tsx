@@ -41,6 +41,10 @@ function SidebarFooterContent() {
   const handleLogout = () => {
     auth.signOut();
   };
+
+  const supportNumber = '254706541646';
+  const whatsappUrl = `https://wa.me/${supportNumber}`;
+
   return (
     <>
       <div className="bg-primary/10 p-4 rounded-lg text-center space-y-2">
@@ -48,8 +52,10 @@ function SidebarFooterContent() {
         <p className="text-xs text-muted-foreground">
           Contact our support team for any questions.
         </p>
-        <Button size="sm" className="w-full">
-          Contact Support
+        <Button size="sm" className="w-full" asChild>
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+            Contact Support
+          </a>
         </Button>
       </div>
       <Button
