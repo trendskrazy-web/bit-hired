@@ -158,38 +158,37 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     const unsubscribers: (() => void)[] = [];
     const isAdmin = user.uid === SUPER_ADMIN_UID;
 
-    // Common query logic
-    const createSubscription = <T,>(
-      collectionName: string,
-      setData: React.Dispatch<React.SetStateAction<T[]>>
+    const createSubscription = <T extends { id: string }>(
+        baseCollectionPath: string,
+        setData: React.Dispatch<React.SetStateAction<T[]>>
     ) => {
-      let q: Query;
-      const collectionRef = collection(firestore, collectionName);
-      if (isAdmin) {
-        // Admin gets all documents, sorted by creation date
-        q = query(collectionRef, orderBy('createdAt', 'desc'));
-      } else {
-        // Regular user gets only their own documents, sorted
-        q = query(
-          collectionRef,
-          where('userAccountId', '==', user.uid),
-          orderBy('createdAt', 'desc')
-        );
-      }
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as T));
-        setData(data);
-      }, (error) => {
-        // The path is extracted from the query object itself for accuracy.
-        const path = (q as any)._query.path.canonicalString();
-        const permissionError = new FirestorePermissionError({ path: path, operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-      unsubscribers.push(unsubscribe);
+        let queryRef: Query;
+        if (isAdmin) {
+            // Admin queries the root collection
+            queryRef = query(collection(firestore, baseCollectionPath), orderBy('createdAt', 'desc'));
+        } else {
+            // User queries their own sub-collection
+            const userSubCollectionPath = `users/${user.uid}/${baseCollectionPath}`;
+            queryRef = query(collection(firestore, userSubCollectionPath), orderBy('createdAt', 'desc'));
+        }
+        
+        const unsubscribe = onSnapshot(queryRef, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+            setData(data);
+        }, (error) => {
+            const permissionError = new FirestorePermissionError({
+                path: (queryRef as any)._query.path.canonicalString(),
+                operation: 'list',
+            });
+            errorEmitter.emit('permission-error', permissionError);
+        });
+
+        unsubscribers.push(unsubscribe);
     };
 
     createSubscription<Deposit>('deposit_transactions', setDeposits);
     createSubscription<Withdrawal>('withdrawal_transactions', setWithdrawals);
+
 
     return () => {
       unsubscribers.forEach((unsub) => unsub());
@@ -198,17 +197,41 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
 
   const addDepositRequest = (amount: number, depositTo: string) => {
     if (user && firestore && mobileNumber) {
+      // 1. Add to the global collection for admin approval
       const depositsColRef = collection(firestore, 'deposit_transactions');
-      addDocumentNonBlocking(depositsColRef, {
+      const newDocRef = doc(depositsColRef); // Create a new doc reference with an auto-generated ID
+      const newDepositData = {
+        id: newDocRef.id,
         userAccountId: user.uid,
         amount,
-        status: 'pending',
+        status: 'pending' as const,
         createdAt: new Date().toISOString(),
         mobileNumber: mobileNumber,
         depositTo: depositTo,
         userName: name,
+      };
+      setDoc(newDocRef, newDepositData).catch(error => {
+        const permissionError = new FirestorePermissionError({
+            path: newDocRef.path,
+            operation: 'create',
+            requestResourceData: newDepositData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+      
+      // 2. Denormalize: Add a copy to the user's sub-collection
+      const userDepositDocRef = doc(firestore, `users/${user.uid}/deposit_transactions`, newDocRef.id);
+      setDoc(userDepositDocRef, newDepositData).catch(error => {
+         const permissionError = new FirestorePermissionError({
+            path: userDepositDocRef.path,
+            operation: 'create',
+            requestResourceData: newDepositData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
       });
 
+
+      // 3. Update daily limit
       const today = new Date().toISOString().split("T")[0];
       const limitDocId = `${today}_${depositTo}`;
       const limitDocRef = doc(firestore, 'daily_limits', limitDocId);
@@ -231,14 +254,36 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
 
   const addWithdrawalRequest = (amount: number) => {
     if (user && firestore && mobileNumber) {
+       // 1. Add to the global collection for admin approval
       const withdrawalsColRef = collection(firestore, 'withdrawal_transactions');
-      addDocumentNonBlocking(withdrawalsColRef, {
-        userAccountId: user.uid,
-        amount,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-        mobileNumber: mobileNumber,
-        userName: name,
+      const newDocRef = doc(withdrawalsColRef); // Create a new doc reference with an auto-generated ID
+      const newWithdrawalData = {
+          id: newDocRef.id,
+          userAccountId: user.uid,
+          amount,
+          status: 'pending' as const,
+          createdAt: new Date().toISOString(),
+          mobileNumber: mobileNumber,
+          userName: name,
+      };
+      setDoc(newDocRef, newWithdrawalData).catch(error => {
+          const permissionError = new FirestorePermissionError({
+              path: newDocRef.path,
+              operation: 'create',
+              requestResourceData: newWithdrawalData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+      });
+
+      // 2. Denormalize: Add a copy to the user's sub-collection
+      const userWithdrawalDocRef = doc(firestore, `users/${user.uid}/withdrawal_transactions`, newDocRef.id);
+      setDoc(userWithdrawalDocRef, newWithdrawalData).catch(error => {
+          const permissionError = new FirestorePermissionError({
+              path: userWithdrawalDocRef.path,
+              operation: 'create',
+              requestResourceData: newWithdrawalData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
       });
     }
   };
@@ -246,15 +291,20 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
   const updateDepositStatus = useCallback(
     (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => {
       if (firestore) {
+        // Update the master record
         const depositDocRef = doc(firestore, 'deposit_transactions', depositId);
+        updateDocumentNonBlocking(depositDocRef, { status });
+
+        // Update the denormalized user record
+        const userDepositDocRef = doc(firestore, `users/${userId}/deposit_transactions`, depositId);
+        updateDocumentNonBlocking(userDepositDocRef, { status });
+
         if (status === 'completed') {
             addBalance(amount, userId);
             logAdminAction(`Approved deposit of KES ${amount} for user ${userId}.`);
         } else { // 'cancelled'
              logAdminAction(`Cancelled deposit of KES ${amount} for user ${userId}.`);
-             // NOTE: No balance change needed for cancelling a deposit, as it was never added.
         }
-        updateDocumentNonBlocking(depositDocRef, { status });
       }
     },
     [firestore, addBalance, logAdminAction]
@@ -263,16 +313,21 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
   const updateWithdrawalStatus = useCallback(
     (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => {
       if (firestore) {
+        // Update master record
         const withdrawalDocRef = doc(firestore, 'withdrawal_transactions', withdrawalId);
+        updateDocumentNonBlocking(withdrawalDocRef, { status });
+        
+        // Update denormalized user record
+        const userWithdrawalDocRef = doc(firestore, `users/${userId}/withdrawal_transactions`, withdrawalId);
+        updateDocumentNonBlocking(userWithdrawalDocRef, { status });
+
         if (status === 'completed') {
-            // Balance is already deducted on request. Admin just confirms.
             logAdminAction(`Completed withdrawal of KES ${amount} for user ${userId}.`);
         } else if (status === 'cancelled') {
             // If cancelled, refund the amount to the user's balance.
             addBalance(amount, userId);
             logAdminAction(`Cancelled withdrawal of KES ${amount} for user ${userId}. Balance refunded.`);
         }
-        updateDocumentNonBlocking(withdrawalDocRef, { status });
       }
     },
     [firestore, addBalance, logAdminAction]
