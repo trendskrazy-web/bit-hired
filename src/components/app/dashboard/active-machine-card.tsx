@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Bitcoin, Clock, Cpu, Wallet } from "lucide-react";
+import { Bitcoin, Clock, Cpu, Wallet, TrendingUp } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -127,6 +127,13 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
         });
     }
   };
+  
+  const remainingPotentialEarnings = useMemo(() => {
+    if (timeRemaining <= 0) return 0;
+    const remainingDays = timeRemaining / (24 * 3600);
+    return remainingDays * dailyEarning;
+  }, [timeRemaining, dailyEarning]);
+
 
   const formatDuration = (seconds: number) => {
     if (seconds < 0) seconds = 0;
@@ -156,7 +163,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
           <div className="flex items-center space-x-3">
             <Cpu className="w-6 h-6 text-muted-foreground" />
             <div>
@@ -176,6 +183,13 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
             <div>
               <p className="text-sm text-muted-foreground">Total Accrued</p>
               <p className="font-semibold font-mono">KES {earnings.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>
+          </div>
+           <div className="flex items-center space-x-3">
+            <TrendingUp className="w-6 h-6 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">Remaining Potential</p>
+              <p className="font-semibold font-mono">KES {remainingPotentialEarnings.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
           </div>
         </div>
