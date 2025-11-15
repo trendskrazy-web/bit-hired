@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Bitcoin, Clock, Cpu, Wallet, TrendingUp } from "lucide-react";
+import { Bitcoin, Clock, Cpu, Wallet, TrendingUp, Landmark } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -179,10 +179,10 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <Bitcoin className="w-6 h-6 text-muted-foreground" />
+            <Landmark className="w-6 h-6 text-muted-foreground" />
             <div>
-              <p className="text-sm text-muted-foreground">Total Accrued</p>
-              <p className="font-semibold font-mono">KES {earnings.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <p className="text-sm text-muted-foreground">Total Cashed Out</p>
+              <p className="font-semibold font-mono">KES {cashedOutAmount.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
           </div>
            <div className="flex items-center space-x-3">
