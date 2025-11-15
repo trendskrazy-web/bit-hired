@@ -39,15 +39,15 @@ export default function ProtectedAdminLayout({
   // If the user is the super admin, render the admin layout.
   return (
     <AccountProvider>
-      <AdminAccountProvider>
-          <TransactionProvider>
+        <TransactionProvider>
+            <AdminAccountProvider>
               <RedeemCodeProvider>
                   <NotificationProvider>
                       <AdminLayout>{children}</AdminLayout>
                   </NotificationProvider>
               </RedeemCodeProvider>
-          </TransactionProvider>
-      </AdminAccountProvider>
+            </AdminAccountProvider>
+        </TransactionProvider>
     </AccountProvider>
   );
 }
