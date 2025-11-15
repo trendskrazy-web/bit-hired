@@ -171,9 +171,9 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       } else {
         // Regular user gets only their own documents, sorted
         q = query(
-          collectionRef
-          // where('userAccountId', '==', user.uid), // This is the line causing the issue.
-          // orderBy('createdAt', 'desc')
+          collectionRef,
+          where('userAccountId', '==', user.uid),
+          orderBy('createdAt', 'desc')
         );
       }
       const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -307,5 +307,3 @@ export function useTransactions() {
   }
   return context;
 }
-
-    
