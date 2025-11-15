@@ -33,10 +33,12 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     [machines, transaction.machineName]
   );
   
-  const dailyEarning = useMemo(() => {
-    if (!machine) return 0;
+  const { dailyEarning, totalPotentialEarnings } = useMemo(() => {
+    if (!machine) return { dailyEarning: 0, totalPotentialEarnings: 0 };
     const days = 45;
-    return machine.durations[0].totalEarnings / days;
+    const totalEarnings = machine.durations[0].totalEarnings;
+    const daily = totalEarnings / days;
+    return { dailyEarning: daily, totalPotentialEarnings: totalEarnings };
   }, [machine]);
 
   const totalDuration = 45 * 24 * 60 * 60; // 45 days in seconds
@@ -129,10 +131,10 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   };
   
   const remainingPotentialEarnings = useMemo(() => {
-    if (timeRemaining <= 0) return 0;
-    const remainingDays = timeRemaining / (24 * 3600);
-    return remainingDays * dailyEarning;
-  }, [timeRemaining, dailyEarning]);
+    if (!machine) return 0;
+    const remaining = totalPotentialEarnings - cashedOutAmount;
+    return remaining > 0 ? remaining : 0;
+  }, [totalPotentialEarnings, cashedOutAmount, machine]);
 
 
   const formatDuration = (seconds: number) => {
