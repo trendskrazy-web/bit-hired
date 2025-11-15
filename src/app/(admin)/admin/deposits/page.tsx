@@ -11,10 +11,14 @@ import {
 import { useTransactions } from '@/contexts/transaction-context';
 import { DataTable } from '@/components/admin/transactions/data-table';
 import { columns } from '@/components/admin/transactions/deposit-columns';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { AuthorizationDialog, type AuthAction } from '@/components/admin/transactions/authorization-dialog';
+import type { Deposit } from '@/contexts/transaction-context';
+
 
 export default function AdminDepositsPage() {
   const { deposits, updateDepositStatus } = useTransactions();
+  const [authAction, setAuthAction] = useState<AuthAction<Deposit> | null>(null);
 
   const sortedDeposits = useMemo(() => {
     return [...deposits].sort((a, b) => {
@@ -25,24 +29,40 @@ export default function AdminDepositsPage() {
     });
   }, [deposits]);
 
+  const handleConfirmAction = (isAuthorized: boolean) => {
+    if (isAuthorized && authAction) {
+      updateDepositStatus(authAction.item.id, authAction.newStatus as 'completed' | 'cancelled', authAction.item.amount, authAction.item.userAccountId);
+    }
+    setAuthAction(null); // Close dialog
+  };
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Deposit Transactions</CardTitle>
-          <CardDescription>
-            Review and manage all user deposit requests.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-           <DataTable
-            columns={columns({ onStatusUpdate: updateDepositStatus })}
-            data={sortedDeposits}
-            filterColumn="mobileNumber"
-            filterPlaceholder="Filter by mobile number..."
-          />
-        </CardContent>
-      </Card>
-    </div>
+    <>
+      <AuthorizationDialog
+        isOpen={!!authAction}
+        onClose={() => setAuthAction(null)}
+        onConfirm={handleConfirmAction}
+        action={authAction}
+        itemType="deposit"
+      />
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Deposit Transactions</CardTitle>
+            <CardDescription>
+              Review and manage all user deposit requests.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              columns={columns({ onAction: setAuthAction })}
+              data={sortedDeposits}
+              filterColumn="mobileNumber"
+              filterPlaceholder="Filter by mobile number..."
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }

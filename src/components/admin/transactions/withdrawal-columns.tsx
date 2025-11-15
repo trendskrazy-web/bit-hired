@@ -15,6 +15,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import type { AuthAction } from './authorization-dialog';
+
 
 const statusIcons: Record<Withdrawal['status'], React.ReactNode> = {
   pending: <Clock className="mr-2 h-4 w-4 text-yellow-500" />,
@@ -28,13 +30,11 @@ const statusVariants: Record<Withdrawal['status'], 'secondary' | 'default' | 'de
   cancelled: 'destructive',
 };
 
-type UpdateStatusFn = (withdrawalId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
-
 interface ColumnsProps {
-  onStatusUpdate: UpdateStatusFn;
+  onAction: (action: AuthAction<Withdrawal>) => void;
 }
 
-export const columns = ({ onStatusUpdate }: ColumnsProps): ColumnDef<Withdrawal>[] => [
+export const columns = ({ onAction }: ColumnsProps): ColumnDef<Withdrawal>[] => [
   {
     accessorKey: 'createdAt',
     header: ({ column }) => (
@@ -139,7 +139,7 @@ export const columns = ({ onStatusUpdate }: ColumnsProps): ColumnDef<Withdrawal>
             <ActionMenuItem disabled={!isActionable} tooltip="Approval available after 2 days">
                <DropdownMenuItem
                 className="text-green-600 focus:bg-green-100 focus:text-green-700"
-                onClick={() => onStatusUpdate(withdrawal.id, 'completed', withdrawal.amount, withdrawal.userAccountId)}
+                onClick={() => onAction({ item: withdrawal, newStatus: 'completed' })}
                 disabled={!isActionable}
               >
                  <CheckCircle className="mr-2 h-4 w-4" />
@@ -149,7 +149,7 @@ export const columns = ({ onStatusUpdate }: ColumnsProps): ColumnDef<Withdrawal>
              <ActionMenuItem disabled={!isActionable} tooltip="Decline available after 2 days">
               <DropdownMenuItem
                   className="text-red-600 focus:bg-red-100 focus:text-red-700"
-                  onClick={() => onStatusUpdate(withdrawal.id, 'cancelled', withdrawal.amount, withdrawal.userAccountId)}
+                  onClick={() => onAction({ item: withdrawal, newStatus: 'cancelled' })}
                   disabled={!isActionable}
               >
                    <XCircle className="mr-2 h-4 w-4" />

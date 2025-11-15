@@ -14,6 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import type { AuthAction } from './authorization-dialog';
+
 
 const statusIcons: Record<Deposit['status'], React.ReactNode> = {
   pending: <Clock className="mr-2 h-4 w-4 text-yellow-500" />,
@@ -27,14 +29,12 @@ const statusVariants: Record<Deposit['status'], 'secondary' | 'default' | 'destr
   cancelled: 'destructive',
 };
 
-type UpdateStatusFn = (depositId: string, status: 'completed' | 'cancelled', amount: number, userId: string) => void;
-
 interface ColumnsProps {
-  onStatusUpdate: UpdateStatusFn;
+  onAction: (action: AuthAction<Deposit>) => void;
 }
 
 
-export const columns = ({ onStatusUpdate }: ColumnsProps): ColumnDef<Deposit>[] => [
+export const columns = ({ onAction }: ColumnsProps): ColumnDef<Deposit>[] => [
   {
     accessorKey: 'createdAt',
     header: ({ column }) => (
@@ -115,14 +115,14 @@ export const columns = ({ onStatusUpdate }: ColumnsProps): ColumnDef<Deposit>[] 
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-green-600 focus:bg-green-100 focus:text-green-700"
-              onClick={() => onStatusUpdate(deposit.id, 'completed', deposit.amount, deposit.userAccountId)}
+              onClick={() => onAction({ item: deposit, newStatus: 'completed' })}
             >
                <CheckCircle className="mr-2 h-4 w-4" />
               Approve
             </DropdownMenuItem>
             <DropdownMenuItem
                 className="text-red-600 focus:bg-red-100 focus:text-red-700"
-                onClick={() => onStatusUpdate(deposit.id, 'cancelled', deposit.amount, deposit.userAccountId)}
+                onClick={() => onAction({ item: deposit, newStatus: 'cancelled' })}
             >
                  <XCircle className="mr-2 h-4 w-4" />
                 Decline
