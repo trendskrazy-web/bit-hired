@@ -3,6 +3,7 @@
 
 import { AppLayout } from '@/components/app/layout/app-layout';
 import { AccountProvider } from '@/contexts/account-context';
+import { NotificationProvider } from '@/contexts/notification-context';
 import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
 import { TransactionProvider } from '@/contexts/transaction-context';
 import { useUser } from '@/firebase';
@@ -31,7 +32,9 @@ function AuthenticatedLayoutContent({ children }: { children: React.ReactNode })
     <AccountProvider>
       <TransactionProvider>
         <RedeemCodeProvider>
-          <AppLayout>{children}</AppLayout>
+          <NotificationProvider>
+            <AppLayout>{children}</AppLayout>
+          </NotificationProvider>
         </RedeemCodeProvider>
       </TransactionProvider>
     </AccountProvider>
