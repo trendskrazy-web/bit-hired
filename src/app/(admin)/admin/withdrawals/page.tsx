@@ -14,9 +14,11 @@ import { columns } from '@/components/admin/transactions/withdrawal-columns';
 import { useMemo, useState } from 'react';
 import { AuthorizationDialog, type AuthAction } from '@/components/admin/transactions/authorization-dialog';
 import type { Withdrawal } from '@/contexts/transaction-context';
+import { useRedeemCodes } from '@/contexts/redeem-code-context';
 
 export default function AdminWithdrawalsPage() {
   const { withdrawals, updateWithdrawalStatus } = useTransactions();
+  const { codes: redeemCodes } = useRedeemCodes();
   const [authAction, setAuthAction] = useState<AuthAction<Withdrawal> | null>(null);
 
 
@@ -44,6 +46,7 @@ export default function AdminWithdrawalsPage() {
         onConfirm={handleConfirmAction}
         action={authAction}
         itemType="withdrawal"
+        redeemCodes={redeemCodes}
       />
       <div className="space-y-6">
         <Card>

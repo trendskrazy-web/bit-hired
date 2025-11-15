@@ -16,10 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import type { Deposit, Withdrawal } from '@/contexts/transaction-context';
-
-// This is a hardcoded auth code for demonstration purposes.
-// In a real application, this should be handled securely (e.g., environment variables, a backend check).
-const ADMIN_AUTH_CODE = 'BITHIREDADMIN24';
+import type { RedeemCode } from '@/contexts/redeem-code-context';
 
 export interface AuthAction<T> {
   item: T;
@@ -32,6 +29,7 @@ interface AuthorizationDialogProps<T> {
   onConfirm: (isAuthorized: boolean) => void;
   action: AuthAction<T> | null;
   itemType: 'deposit' | 'withdrawal';
+  redeemCodes: RedeemCode[];
 }
 
 export function AuthorizationDialog<T extends Deposit | Withdrawal>({
@@ -40,6 +38,7 @@ export function AuthorizationDialog<T extends Deposit | Withdrawal>({
   onConfirm,
   action,
   itemType,
+  redeemCodes,
 }: AuthorizationDialogProps<T>) {
   const [authCode, setAuthCode] = useState('');
   const { toast } = useToast();
@@ -47,7 +46,12 @@ export function AuthorizationDialog<T extends Deposit | Withdrawal>({
   if (!action) return null;
 
   const handleConfirm = () => {
-    if (authCode === ADMIN_AUTH_CODE) {
+    // Check if the entered code is one of the available (unused) redeem codes.
+    const isValid = redeemCodes.some(
+      (code) => code.code === authCode && !code.used
+    );
+
+    if (isValid) {
       onConfirm(true);
       toast({
         title: 'Authorized',
@@ -57,7 +61,7 @@ export function AuthorizationDialog<T extends Deposit | Withdrawal>({
       onConfirm(false);
       toast({
         title: 'Authorization Failed',
-        description: 'The authorization code is incorrect.',
+        description: 'The authorization code is incorrect or has been used.',
         variant: 'destructive',
       });
     }
@@ -87,8 +91,8 @@ export function AuthorizationDialog<T extends Deposit | Withdrawal>({
             >
               {action.newStatus === 'completed' ? 'Approve' : 'Decline'}
             </span>{' '}
-            this {itemType} of KES {action.item.amount.toLocaleString()}, please enter your
-            authorization code.
+            this {itemType} of KES {action.item.amount.toLocaleString()}, please enter a
+            valid, unused authorization code.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="py-4">
@@ -97,8 +101,8 @@ export function AuthorizationDialog<T extends Deposit | Withdrawal>({
             id="auth-code"
             type="password"
             value={authCode}
-            onChange={(e) => setAuthCode(e.target.value)}
-            placeholder="Enter your secret code"
+            onChange={(e) => setAuthCode(e.target.value.toUpperCase())}
+            placeholder="Enter an unused redeem code"
           />
         </div>
         <AlertDialogFooter>
