@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [otp, setOtp] = useState('');
+  const [invitationCode, setInvitationCode] = useState('');
 
   // UI flow state
   const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -253,7 +255,13 @@ export default function RegisterPage() {
             )}
              <div className="grid gap-2">
               <Label htmlFor="invitation-code">Invitation Code (Optional)</Label>
-              <Input id="invitation-code" type="text" placeholder="Enter your code" />
+              <Input 
+                id="invitation-code" 
+                type="text" 
+                placeholder="Enter your code" 
+                value={invitationCode}
+                onChange={(e) => setInvitationCode(e.target.value)}
+              />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">

@@ -65,27 +65,6 @@ export function AdminLayout({
   const pathname = usePathname();
   const isApprovalsActive = pathname.startsWith('/admin/deposits') || pathname.startsWith('/admin/withdrawals');
 
-  const renderMenuItems = (items: typeof adminMenuItems) => {
-    return items.map((item) => (
-      <SidebarMenuItem key={item.href}>
-        <SidebarMenuButton
-          asChild
-          isActive={pathname.startsWith(item.href)}
-          tooltip={{
-            children: item.label,
-            className: 'bg-sidebar-background text-sidebar-foreground',
-          }}
-        >
-          <Link href={item.href}>
-            <item.icon />
-            <span>{item.label}</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    ));
-  };
-
-
   return (
     <SidebarProvider>
       <Sidebar className="border-r" side="left" variant="sidebar">
@@ -137,7 +116,24 @@ export function AdminLayout({
                     </SidebarMenuSub>
                 </CollapsibleContent>
             </Collapsible>
-            {renderMenuItems(adminMenuItems)}
+
+            {adminMenuItems.map((item, index) => (
+              <SidebarMenuItem key={index}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith(item.href!)}
+                     tooltip={{
+                        children: item.label,
+                        className: 'bg-sidebar-background text-sidebar-foreground',
+                    }}
+                  >
+                    <Link href={item.href!}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="group-data-[collapsible=icon]:hidden space-y-2">
