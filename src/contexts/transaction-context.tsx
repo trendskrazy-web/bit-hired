@@ -158,31 +158,29 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     const unsubscribers: (() => void)[] = [];
     const isAdmin = user.uid === SUPER_ADMIN_UID;
 
-    const createSubscription = <T extends { id: string }>(
-        baseCollectionPath: string,
+    const createSubscription = <T,>(
+        collectionName: string,
         setData: React.Dispatch<React.SetStateAction<T[]>>
     ) => {
-        let queryRef: Query;
+        let q: Query;
         if (isAdmin) {
             // Admin queries the root collection
-            queryRef = query(collection(firestore, baseCollectionPath), orderBy('createdAt', 'desc'));
+            q = query(collection(firestore, collectionName), orderBy('createdAt', 'desc'));
         } else {
             // User queries their own sub-collection
-            const userSubCollectionPath = `users/${user.uid}/${baseCollectionPath}`;
-            queryRef = query(collection(firestore, userSubCollectionPath), orderBy('createdAt', 'desc'));
+            const userSubCollectionPath = `users/${user.uid}/${collectionName}`;
+            q = query(collection(firestore, userSubCollectionPath), orderBy('createdAt', 'desc'));
         }
         
-        const unsubscribe = onSnapshot(queryRef, (snapshot) => {
+        const unsubscribe = onSnapshot(q, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
             setData(data);
         }, (error) => {
-            const permissionError = new FirestorePermissionError({
-                path: (queryRef as any)._query.path.canonicalString(),
-                operation: 'list',
-            });
+            // The path is extracted from the query object itself for accuracy.
+            const path = (q as any)._query.path.canonicalString();
+            const permissionError = new FirestorePermissionError({ path: path, operation: 'list' });
             errorEmitter.emit('permission-error', permissionError);
         });
-
         unsubscribers.push(unsubscribe);
     };
 
@@ -362,3 +360,5 @@ export function useTransactions() {
   }
   return context;
 }
+
+    
