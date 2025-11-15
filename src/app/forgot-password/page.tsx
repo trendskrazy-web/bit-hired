@@ -39,7 +39,9 @@ export default function ForgotPasswordPage() {
         setIsLoading(true);
         
         // The user's auth email is their mobile number + @bithired.com
-        const emailForReset = `${mobileNumber}@bithired.com`;
+        // We must remove the '+' from the mobile number for the email to be valid for the reset function.
+        const sanitizedMobile = mobileNumber.startsWith('+') ? mobileNumber.substring(1) : mobileNumber;
+        const emailForReset = `${sanitizedMobile}@bithired.com`;
 
         try {
             await sendPasswordResetEmail(auth, emailForReset);
@@ -55,7 +57,14 @@ export default function ForgotPasswordPage() {
                     description: 'No account found with this mobile number.',
                     variant: 'destructive',
                 });
-            } else {
+            } else if (error.code === 'auth/invalid-email') {
+                 toast({
+                    title: 'Invalid Mobile Number',
+                    description: 'The mobile number format is incorrect. Please check and try again.',
+                    variant: 'destructive',
+                });
+            }
+            else {
                 toast({
                     title: 'Error',
                     description: 'An error occurred. Please try again later.',
@@ -114,3 +123,4 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+

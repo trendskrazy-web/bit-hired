@@ -121,7 +121,8 @@ export default function RegisterPage() {
         await auth.signOut();
       }
        
-       const authEmail = `${mobileNumber}@bithired.com`;
+       const sanitizedMobile = mobileNumber.startsWith('+') ? mobileNumber.substring(1) : mobileNumber;
+       const authEmail = `${sanitizedMobile}@bithired.com`;
        const userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
        const newUser = userCredential.user;
 

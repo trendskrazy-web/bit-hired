@@ -35,7 +35,8 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const email = `${mobileNumber}@bithired.com`;
+    const sanitizedMobile = mobileNumber.startsWith('+') ? mobileNumber.substring(1) : mobileNumber;
+    const email = `${sanitizedMobile}@bithired.com`;
     initiateEmailSignIn(auth, email, password, (error) => {
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         toast({
