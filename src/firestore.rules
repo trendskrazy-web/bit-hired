@@ -35,14 +35,14 @@ service cloud.firestore {
       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
       allow update: if isAdmin();
-      allow list: if isAdmin() || (isSignedIn() && request.query.where.userAccountId == request.auth.uid);
+      allow list: if isAdmin();
     }
 
     match /withdrawal_transactions/{withdrawalId} {
       allow get: if isSignedIn() && (resource.data.userAccountId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.userAccountId == request.auth.uid;
       allow update: if isAdmin();
-      allow list: if isAdmin() || (isSignedIn() && request.query.where.userAccountId == request.auth.uid);
+      allow list: if isAdmin();
     }
     
     match /redeem_codes/{code} {
@@ -59,6 +59,9 @@ service cloud.firestore {
 
     match /notifications/{notificationId} {
       allow read, write: if isAdmin();
+    }
+    
+     match /notifications/{path=**} {
       allow list: if isAdmin();
     }
   }
