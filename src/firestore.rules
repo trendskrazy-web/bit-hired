@@ -28,11 +28,11 @@ service cloud.firestore {
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) || isAdmin();
     }
     
     match /users/{userId}/withdrawal_transactions/{withdrawalId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) || isAdmin();
     }
 
 
@@ -43,12 +43,14 @@ service cloud.firestore {
 
     // Global collections for Admin review
     match /deposit_transactions/{depositId} {
-      allow get, create, update: if isSignedIn(); // Create is for users, update for admin
+      allow get, create: if isSignedIn(); // Create is for users
+      allow update: if isAdmin(); // update for admin
       allow list: if isAdmin(); // Only admins can list all transactions
     }
 
     match /withdrawal_transactions/{withdrawalId} {
-      allow get, create, update: if isSignedIn(); // Create for users, update for admin
+      allow get, create: if isSignedIn(); // Create for users
+      allow update: if isAdmin(); // update for admin
       allow list: if isAdmin(); // Only admins can list all transactions
     }
     
