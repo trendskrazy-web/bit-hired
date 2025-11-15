@@ -58,7 +58,7 @@ interface TransactionContextType {
 const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
 
 // These would typically come from a remote config or database
-const DEPOSIT_ACCOUNTS = ["0704356623", "0758669258"];
+const DEPOSIT_ACCOUNTS = ["0706541646"];
 const DAILY_LIMIT_PER_ACCOUNT = 500000;
 
 
@@ -360,5 +360,7 @@ export function useTransactions() {
   }
   return context;
 }
+
+    
 
     
