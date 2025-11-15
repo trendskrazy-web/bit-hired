@@ -28,11 +28,11 @@ service cloud.firestore {
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) || isAdmin();
     }
     
     match /users/{userId}/withdrawal_transactions/{withdrawalId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) || isAdmin();
     }
 
 
@@ -75,5 +75,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
