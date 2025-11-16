@@ -13,6 +13,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: 'BitHired',
   description: 'Virtual BTC Mining Machine Hiring',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -22,6 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+       <head>
+        <meta name="theme-color" content="#0a0a0a" />
+      </head>
       <body
         className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}
       >
