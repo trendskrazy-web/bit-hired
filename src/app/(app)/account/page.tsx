@@ -9,11 +9,10 @@ import { RedeemCodeCard } from "@/components/app/account/redeem-code-card";
 import { useUser } from "@/firebase";
 import { DepositCard } from "@/components/app/account/deposit-card";
 import { RecentTransactionsCard } from "@/components/app/account/recent-transactions-card";
-import { InviteCard } from "@/components/app/account/invite-card";
 import { useTransactions } from "@/contexts/transaction-context";
 
 export default function AccountPage() {
-  const { balance, mobileNumber, name, email, referralCode } = useAccount();
+  const { balance, mobileNumber, name, email } = useAccount();
   const { user } = useUser();
   const { deposits, withdrawals } = useTransactions();
 
@@ -65,7 +64,6 @@ export default function AccountPage() {
            <RecentTransactionsCard title="Recent Withdrawals" transactions={recentWithdrawals} type="withdrawal" />
         </div>
         <div className="lg:col-span-1 space-y-6">
-          <InviteCard referralCode={referralCode} />
           <DepositCard />
           <WithdrawCard
             accountBalance={balance}
@@ -76,5 +74,3 @@ export default function AccountPage() {
     </div>
   );
 }
-
-    
