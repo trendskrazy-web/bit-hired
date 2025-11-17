@@ -2,11 +2,8 @@
 
 import { InviteCard } from '@/components/app/account/invite-card';
 import { Separator } from '@/components/ui/separator';
-import { useAccount } from '@/contexts/account-context';
 
 export default function InvitePage() {
-  const { referralCode } = useAccount();
-
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div>
@@ -16,7 +13,7 @@ export default function InvitePage() {
         </p>
       </div>
       <Separator />
-      <InviteCard referralCode={referralCode} />
+      <InviteCard />
     </div>
   );
 }

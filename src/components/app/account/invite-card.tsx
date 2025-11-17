@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -7,13 +6,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Share2, Copy } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAccount } from "@/contexts/account-context";
 
-interface InviteCardProps {
-    referralCode?: string;
-}
-
-export function InviteCard({ referralCode }: InviteCardProps) {
+export function InviteCard() {
     const { toast } = useToast();
+    const { referralCode } = useAccount();
     const [inviteLink, setInviteLink] = useState('');
 
     useEffect(() => {
@@ -25,21 +22,37 @@ export function InviteCard({ referralCode }: InviteCardProps) {
 
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(inviteLink);
-        toast({
-            title: 'Copied!',
-            description: 'Invitation link copied to clipboard.',
-        });
+        if (inviteLink) {
+            navigator.clipboard.writeText(inviteLink);
+            toast({
+                title: 'Copied!',
+                description: 'Invitation link copied to clipboard.',
+            });
+        }
     };
 
     const handleWhatsAppShare = () => {
-        const message = encodeURIComponent(`Join me on BitHired and start earning! Use my link to sign up: ${inviteLink}`);
-        const whatsappUrl = `https://wa.me/?text=${message}`;
-        window.open(whatsappUrl, '_blank');
+        if (inviteLink) {
+            const message = encodeURIComponent(`Join me on BitHired and start earning! Use my link to sign up: ${inviteLink}`);
+            const whatsappUrl = `https://wa.me/?text=${message}`;
+            window.open(whatsappUrl, '_blank');
+        }
     };
 
     if (!referralCode) {
-        return null;
+        return (
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Share2 className="w-5 h-5" />
+                        Invite & Earn
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">Your unique invitation link is being generated. Please wait a moment...</p>
+                </CardContent>
+            </Card>
+        );
     }
 
     return (
@@ -58,7 +71,7 @@ export function InviteCard({ referralCode }: InviteCardProps) {
                     <p className="text-sm font-medium">Your Invite Link</p>
                     <div className="flex gap-2">
                         <Input value={inviteLink} readOnly />
-                        <Button variant="outline" size="icon" onClick={handleCopy}>
+                        <Button variant="outline" size="icon" onClick={handleCopy} disabled={!inviteLink}>
                             <Copy className="h-4 w-4" />
                             <span className="sr-only">Copy link</span>
                         </Button>
@@ -66,7 +79,7 @@ export function InviteCard({ referralCode }: InviteCardProps) {
                  </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
-                 <Button className="w-full" onClick={handleWhatsAppShare}>
+                 <Button className="w-full" onClick={handleWhatsAppShare} disabled={!inviteLink}>
                     <Share2 className="mr-2 h-4 w-4" />
                     Share on WhatsApp
                 </Button>
@@ -74,5 +87,3 @@ export function InviteCard({ referralCode }: InviteCardProps) {
         </Card>
     );
 }
-    
-    
