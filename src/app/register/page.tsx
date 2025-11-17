@@ -16,10 +16,10 @@ import { useAuth, useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Bitcoin } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, doc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 export default function RegisterPage() {
@@ -27,6 +27,7 @@ export default function RegisterPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Form state
   const [name, setName] = useState('');
@@ -38,6 +39,13 @@ export default function RegisterPage() {
 
   // UI flow state
   const [isRegistering, setIsRegistering] = useState(false);
+
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setInvitationCode(refCode.toUpperCase());
+    }
+  }, [searchParams]);
 
   const getInviterId = async (code: string): Promise<string | null> => {
     if (!firestore || !code) return null;
@@ -225,7 +233,7 @@ export default function RegisterPage() {
                 placeholder="Enter code from a friend"
                 value={invitationCode}
                 onChange={(e) => setInvitationCode(e.target.value.toUpperCase())}
-                disabled={isRegistering}
+                disabled={isRegistering || searchParams.get('ref') !== null}
               />
             </div>
           </CardContent>

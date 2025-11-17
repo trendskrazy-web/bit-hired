@@ -65,18 +65,20 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
     // Fetch data for the logged-in user
     const userDocRef = doc(firestore, 'users', user.uid);
-    const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
-      if (doc.exists()) {
-        const userData = doc.data() as UserAccount;
+    const unsubscribeUser = onSnapshot(userDocRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const userData = docSnapshot.data() as UserAccount;
         setBalance(userData.virtualBalance || 0);
         setName(userData.name || '');
         setEmail(userData.email || '');
         setMobileNumber(userData.mobileNumber || '');
 
-        // Check for referral code and backfill if missing
+        // This is the robust check and backfill logic.
         if (!userData.referralCode) {
             const newReferralCode = generateReferralCode(user.uid);
+            // Non-blocking update to Firestore
             updateDocumentNonBlocking(userDocRef, { referralCode: newReferralCode });
+            // Immediately update the local state so the UI reflects the change.
             setReferralCode(newReferralCode);
         } else {
             setReferralCode(userData.referralCode);
