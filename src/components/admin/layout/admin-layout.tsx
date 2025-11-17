@@ -26,6 +26,7 @@ import {
   SidebarInset,
   SidebarMenuSub,
   SidebarMenuSubButton,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { AppHeader } from '@/components/app/layout/header';
 import { Button } from '@/components/ui/button';
@@ -63,7 +64,12 @@ export function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
   const isApprovalsActive = pathname.startsWith('/admin/deposits') || pathname.startsWith('/admin/withdrawals');
+  
+  const handleLinkClick = () => {
+    setOpenMobile(false);
+  };
 
   return (
     <SidebarProvider>
@@ -72,6 +78,7 @@ export function AdminLayout({
           <Link
             href="/admin"
             className="flex items-center gap-2 py-2 font-headline text-lg font-semibold"
+            onClick={handleLinkClick}
           >
             <Bitcoin className="h-6 w-6 text-primary" />
             <span>BitHired Admin</span>
@@ -99,7 +106,7 @@ export function AdminLayout({
                     <SidebarMenuSub>
                         <SidebarMenuItem>
                             <SidebarMenuSubButton asChild isActive={pathname.startsWith('/admin/deposits')}>
-                                <Link href="/admin/deposits">
+                                <Link href="/admin/deposits" onClick={handleLinkClick}>
                                     <ArrowDownToDot />
                                     <span>Deposits</span>
                                 </Link>
@@ -107,7 +114,7 @@ export function AdminLayout({
                         </SidebarMenuItem>
                         <SidebarMenuItem>
                             <SidebarMenuSubButton asChild isActive={pathname.startsWith('/admin/withdrawals')}>
-                                <Link href="/admin/withdrawals">
+                                <Link href="/admin/withdrawals" onClick={handleLinkClick}>
                                     <ArrowUpFromDot />
                                     <span>Withdrawals</span>
                                 </Link>
@@ -127,7 +134,7 @@ export function AdminLayout({
                         className: 'bg-sidebar-background text-sidebar-foreground',
                     }}
                   >
-                    <Link href={item.href!}>
+                    <Link href={item.href!} onClick={handleLinkClick}>
                       <item.icon />
                       <span>{item.label}</span>
                     </Link>

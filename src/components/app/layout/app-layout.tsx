@@ -24,6 +24,7 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { AppHeader } from './header';
 import { Button } from '@/components/ui/button';
@@ -78,6 +79,12 @@ export function AppLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => {
+    setOpenMobile(false);
+  };
+
 
   const renderMenuItems = (items: typeof userMenuItems) => {
     return items.map((item) => (
@@ -94,7 +101,7 @@ export function AppLayout({
             className: 'bg-sidebar-background text-sidebar-foreground',
           }}
         >
-          <Link href={item.href}>
+          <Link href={item.href} onClick={handleLinkClick}>
             <item.icon />
             <span>{item.label}</span>
           </Link>
@@ -110,6 +117,7 @@ export function AppLayout({
           <Link
             href="/dashboard"
             className="flex items-center gap-2 py-2 font-headline text-lg font-semibold"
+            onClick={handleLinkClick}
           >
             <Bitcoin className="h-6 w-6 text-primary" />
             <span>BitHired</span>
