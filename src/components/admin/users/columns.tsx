@@ -44,6 +44,22 @@ export const columns: ColumnDef<UserAccount>[] = [
     },
   },
   {
+    accessorKey: "referralCode",
+    header: "Referral Code",
+     cell: ({ row }) => {
+        const referralCode = row.getValue("referralCode") as string | undefined;
+        return referralCode ? <div className="font-mono text-xs">{referralCode}</div> : <span className="text-muted-foreground">-</span>;
+    },
+  },
+  {
+    accessorKey: "invitedBy",
+    header: "Invited By (UID)",
+    cell: ({ row }) => {
+        const invitedBy = row.getValue("invitedBy") as string | undefined;
+        return invitedBy ? <div className="font-mono text-xs">{invitedBy}</div> : <span className="text-muted-foreground">-</span>;
+    },
+  },
+  {
     accessorKey: "id",
     header: "User ID",
     cell: ({ row }) => {

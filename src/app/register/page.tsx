@@ -19,7 +19,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 export default function RegisterPage() {
@@ -40,22 +40,25 @@ export default function RegisterPage() {
   const [isRegistering, setIsRegistering] = useState(false);
 
   const getInviterId = async (code: string): Promise<string | null> => {
-      if (!firestore || !code) return null;
-      // In a real app with many users, this would need a more scalable query.
-      // For this example, we assume we can query users collection.
-      // This is not ideal, a better approach would be to have a separate collection for referral codes.
-      // But for now, let's keep it simple.
-      // A query on all users is expensive and not secure. 
-      // The secure way is to check the referral code in a cloud function.
-      // For client-side, a simple getDoc on a redeem_codes collection would be better
-      // but we will assume for now we cannot change the structure much.
-      
-      // The invitation code is not unique in the user collection. We need a way to find the user.
-      // A better way would be `redeem_codes/{code}` collection.
-      // I'll simulate a lookup here, but this is NOT for production.
-      console.warn("Simulating a referral code lookup. This is not production-ready.");
-      return null; // Placeholder
-  }
+    if (!firestore || !code) return null;
+
+    const usersRef = collection(firestore, 'users');
+    const q = query(usersRef, where('referralCode', '==', code), limit(1));
+
+    try {
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        // Return the UID of the user who owns the code
+        return querySnapshot.docs[0].id;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error looking up invitation code:", error);
+      // Don't block registration if lookup fails, just return null
+      return null;
+    }
+  };
+
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +100,13 @@ export default function RegisterPage() {
          };
 
          setDocumentNonBlocking(userDocRef, userData, { merge: true });
+         
+         if (inviterId) {
+             toast({
+                 title: 'Referral Applied!',
+                 description: `You've successfully registered under an invitation.`,
+             });
+         }
       }
       
       toast({
