@@ -60,11 +60,12 @@ export function InviteCard({ referralCode }: InviteCardProps) {
                         <Input value={inviteLink} readOnly />
                         <Button variant="outline" size="icon" onClick={handleCopy}>
                             <Copy className="h-4 w-4" />
+                            <span className="sr-only">Copy link</span>
                         </Button>
                     </div>
                  </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex flex-col gap-2">
                  <Button className="w-full" onClick={handleWhatsAppShare}>
                     <Share2 className="mr-2 h-4 w-4" />
                     Share on WhatsApp
@@ -73,5 +74,5 @@ export function InviteCard({ referralCode }: InviteCardProps) {
         </Card>
     );
 }
-
+    
     

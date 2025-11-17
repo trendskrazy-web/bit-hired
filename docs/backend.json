@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserAccount": {
@@ -40,7 +41,8 @@
         "id",
         "name",
         "email",
-        "mobileNumber"
+        "mobileNumber",
+        "referralCode"
       ]
     },
     "MiningMachine": {
@@ -448,4 +450,5 @@
     "reasoning": "The Firestore data structure is designed to ensure security, scalability, and ease of debugging. User-specific data like rentals are nested under the user's document for clear ownership and security. Global data like mining machines are in a root collection. Deposit transactions and notifications are in root collections so that admins can query all of them, with security rules ensuring users can only read their own deposits, while admins can read all and update status. Redeem codes are in a root collection for admin management and user redemption. Daily limits are stored in a root collection to be globally accessible for checking transaction thresholds."
   }
 }
+    
     
