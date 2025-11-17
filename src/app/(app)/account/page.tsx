@@ -9,8 +9,8 @@ import { RedeemCodeCard } from "@/components/app/account/redeem-code-card";
 import { useUser } from "@/firebase";
 import { DepositCard } from "@/components/app/account/deposit-card";
 import { RecentTransactionsCard } from "@/components/app/account/recent-transactions-card";
-import { useTransactions } from "@/contexts/transaction-context";
 import { InviteCard } from "@/components/app/account/invite-card";
+import { useTransactions } from "@/contexts/transaction-context";
 
 export default function AccountPage() {
   const { balance, mobileNumber, name, email, referralCode } = useAccount();
