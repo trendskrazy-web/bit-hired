@@ -73,18 +73,13 @@ function SidebarFooterContent() {
   );
 }
 
-export function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
   const handleLinkClick = () => {
     setOpenMobile(false);
   };
-
 
   const renderMenuItems = (items: typeof userMenuItems) => {
     return items.map((item) => (
@@ -111,7 +106,7 @@ export function AppLayout({
   };
 
   return (
-    <SidebarProvider>
+    <>
       <Sidebar className="border-r" side="left" variant="sidebar">
         <SidebarHeader>
           <Link
@@ -134,6 +129,18 @@ export function AppLayout({
         <AppHeader />
         <main className="p-4 sm:p-6 lg:p-8 flex-1">{children}</main>
       </SidebarInset>
+    </>
+  );
+}
+
+export function AppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <SidebarProvider>
+      <AppLayoutContent>{children}</AppLayoutContent>
     </SidebarProvider>
   );
 }
