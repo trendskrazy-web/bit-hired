@@ -43,6 +43,10 @@ interface AccountContextType {
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
 
+const generateReferralCode = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -68,7 +72,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         setName(userData.name || '');
         setEmail(userData.email || '');
         setMobileNumber(userData.mobileNumber || '');
-        setReferralCode(userData.referralCode);
+        
+        // Backfill referral code if it's missing for existing users
+        if (!userData.referralCode) {
+          const newCode = generateReferralCode();
+          updateDocumentNonBlocking(userDocRef, { referralCode: newCode });
+          setReferralCode(newCode); // Immediately update state for the UI
+        } else {
+          setReferralCode(userData.referralCode);
+        }
+
       }
     }, (error) => {
       const permissionError = new FirestorePermissionError({ path: userDocRef.path, operation: 'get' });
