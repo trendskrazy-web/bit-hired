@@ -16,22 +16,17 @@ import { useAuth, useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Bitcoin } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { doc, collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-
-const generateReferralCode = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
 
 export default function RegisterPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Form state
   const [name, setName] = useState('');
@@ -39,35 +34,9 @@ export default function RegisterPage() {
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [invitationCode, setInvitationCode] = useState('');
 
   // UI flow state
   const [isRegistering, setIsRegistering] = useState(false);
-
-  useEffect(() => {
-    const refCode = searchParams.get('ref');
-    if (refCode) {
-      setInvitationCode(refCode.toUpperCase());
-    }
-  }, [searchParams]);
-  
-  const getInviterId = async (code: string): Promise<string | null> => {
-      if (!firestore || !code) return null;
-      try {
-        const usersRef = collection(firestore, 'users');
-        const q = query(usersRef, where('referralCode', '==', code), limit(1));
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-            return querySnapshot.docs[0].id;
-        }
-        return null;
-      } catch (error) {
-        console.error("Error finding inviter:", error);
-        return null;
-      }
-  }
-
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,14 +53,6 @@ export default function RegisterPage() {
     setIsRegistering(true);
 
     try {
-      // Find the user who invited the new user
-      const inviterId = await getInviterId(invitationCode);
-      if (invitationCode && !inviterId) {
-          toast({ title: 'Invalid Invitation Code', description: 'The invitation code you entered is not valid.', variant: 'destructive'});
-          setIsRegistering(false);
-          return;
-      }
-
       // The user's auth email is their mobile number + @bithired.com
       const sanitizedMobile = mobileNumber.startsWith('+') ? mobileNumber.substring(1) : mobileNumber;
       const authEmail = `${sanitizedMobile}@bithired.com`;
@@ -107,12 +68,7 @@ export default function RegisterPage() {
             email: email,
             mobileNumber: mobileNumber,
             virtualBalance: 0,
-            referralCode: generateReferralCode(),
          };
-
-         if (inviterId) {
-             userData.invitedBy = inviterId;
-         }
 
          setDocumentNonBlocking(userDocRef, userData, { merge: true });
       }
@@ -225,17 +181,6 @@ export default function RegisterPage() {
                     disabled={isRegistering}
                 />
             </div>
-             <div className="grid gap-2">
-              <Label htmlFor="invitation-code">Invitation Code (Optional)</Label>
-              <Input 
-                id="invitation-code" 
-                type="text" 
-                placeholder="Enter your code" 
-                value={invitationCode}
-                onChange={(e) => setInvitationCode(e.target.value.toUpperCase())}
-                disabled={isRegistering}
-              />
-            </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button className="w-full" type="submit" disabled={isRegistering}>
@@ -253,5 +198,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-    
-    
