@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -179,5 +178,3 @@ export function useAccount() {
   }
   return context;
 }
-    
-    
