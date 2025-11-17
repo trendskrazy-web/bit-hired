@@ -27,6 +27,14 @@
         "virtualBalance": {
           "type": "number",
           "description": "The user's current virtual currency balance."
+        },
+        "referralCode": {
+            "type": "string",
+            "description": "A unique code assigned to the user for inviting others."
+        },
+        "invitedBy": {
+            "type": "string",
+            "description": "The UID of the user who referred this user."
         }
       },
       "required": [

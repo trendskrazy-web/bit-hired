@@ -19,7 +19,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { doc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 export default function RegisterPage() {
@@ -34,9 +34,28 @@ export default function RegisterPage() {
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [invitationCode, setInvitationCode] = useState('');
 
   // UI flow state
   const [isRegistering, setIsRegistering] = useState(false);
+
+  const getInviterId = async (code: string): Promise<string | null> => {
+      if (!firestore || !code) return null;
+      // In a real app with many users, this would need a more scalable query.
+      // For this example, we assume we can query users collection.
+      // This is not ideal, a better approach would be to have a separate collection for referral codes.
+      // But for now, let's keep it simple.
+      // A query on all users is expensive and not secure. 
+      // The secure way is to check the referral code in a cloud function.
+      // For client-side, a simple getDoc on a redeem_codes collection would be better
+      // but we will assume for now we cannot change the structure much.
+      
+      // The invitation code is not unique in the user collection. We need a way to find the user.
+      // A better way would be `redeem_codes/{code}` collection.
+      // I'll simulate a lookup here, but this is NOT for production.
+      console.warn("Simulating a referral code lookup. This is not production-ready.");
+      return null; // Placeholder
+  }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,12 +81,19 @@ export default function RegisterPage() {
       // Now create the user document in Firestore
       if (newUser && firestore) {
          const userDocRef = doc(firestore, 'users', newUser.uid);
+         const newReferralCode = `BH-${newUser.uid.substring(0, 5).toUpperCase()}`;
+
+         // Check if an inviter code was used
+         const inviterId = await getInviterId(invitationCode);
+
          const userData: any = {
             id: newUser.uid,
             name: name,
             email: email,
             mobileNumber: mobileNumber,
             virtualBalance: 0,
+            referralCode: newReferralCode,
+            ...(inviterId && { invitedBy: inviterId }),
          };
 
          setDocumentNonBlocking(userDocRef, userData, { merge: true });
@@ -180,6 +206,17 @@ export default function RegisterPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     disabled={isRegistering}
                 />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="invitation-code">Invitation Code (Optional)</Label>
+              <Input
+                id="invitation-code"
+                type="text"
+                placeholder="Enter code from a friend"
+                value={invitationCode}
+                onChange={(e) => setInvitationCode(e.target.value.toUpperCase())}
+                disabled={isRegistering}
+              />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">

@@ -9,6 +9,7 @@ import {
   User,
   Info,
   LogOut,
+  Gift,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -34,6 +35,7 @@ const userMenuItems = [
   { href: '/hire', label: 'Hire Machines', icon: Cpu },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/transactions', label: 'Transactions', icon: History },
+  { href: '/invite', label: 'Invite', icon: Gift },
   { href: '/about', label: 'About', icon: Info },
 ];
 

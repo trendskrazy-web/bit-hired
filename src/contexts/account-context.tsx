@@ -21,6 +21,8 @@ export interface UserAccount {
   email: string;
   mobileNumber: string;
   virtualBalance: number;
+  referralCode?: string;
+  invitedBy?: string;
 }
 interface AccountContextType {
   balance: number;
@@ -36,9 +38,14 @@ interface AccountContextType {
   name: string;
   email: string;
   mobileNumber: string;
+  referralCode?: string;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
+
+const generateReferralCode = (uid: string) => {
+    return `BH-${uid.substring(0, 5).toUpperCase()}`;
+}
 
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState(0);
@@ -46,6 +53,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
+  const [referralCode, setReferralCode] = useState<string | undefined>();
   
   const { user } = useUser();
   const firestore = useFirestore();
@@ -64,6 +72,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         setName(userData.name || '');
         setEmail(userData.email || '');
         setMobileNumber(userData.mobileNumber || '');
+
+        // Check for referral code and backfill if missing
+        if (!userData.referralCode) {
+            const newReferralCode = generateReferralCode(user.uid);
+            updateDocumentNonBlocking(userDocRef, { referralCode: newReferralCode });
+            setReferralCode(newReferralCode);
+        } else {
+            setReferralCode(userData.referralCode);
+        }
+
       }
     }, (error) => {
       const permissionError = new FirestorePermissionError({ path: userDocRef.path, operation: 'get' });
@@ -141,6 +159,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     name,
     email,
     mobileNumber,
+    referralCode,
   };
 
 
