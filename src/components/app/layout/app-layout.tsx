@@ -9,7 +9,6 @@ import {
   User,
   Info,
   LogOut,
-  CreditCard,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -31,7 +30,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 
 const userMenuItems = [
-  { href: '/account', label: 'Billing', icon: CreditCard },
+  { href: '/account', label: 'Account', icon: User },
   { href: '/hire', label: 'Hire Machines', icon: Cpu },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/transactions', label: 'Transactions', icon: History },

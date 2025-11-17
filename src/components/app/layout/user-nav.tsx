@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAccount } from '@/contexts/account-context';
 import { useAuth, useUser } from '@/firebase';
-import { CreditCard, LogOut, User, Shield } from 'lucide-react';
+import { LogOut, User, Shield } from 'lucide-react';
 import Link from 'next/link';
 
 // This is a hardcoded UID for the super admin.
@@ -71,13 +71,7 @@ export function UserNav() {
           <DropdownMenuItem asChild>
             <Link href="/account">
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/account">
-              <CreditCard className="mr-2 h-4 w-4" />
-              <span>Billing</span>
+              <span>Account</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
