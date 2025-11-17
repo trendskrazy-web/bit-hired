@@ -76,7 +76,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         // This is the robust check and backfill logic.
         if (!userData.referralCode) {
             const newReferralCode = generateReferralCode(user.uid);
-            // Non-blocking update to Firestore
+            // Non-blocking update to Firestore to add the missing code
             updateDocumentNonBlocking(userDocRef, { referralCode: newReferralCode });
             // Immediately update the local state so the UI reflects the change.
             setReferralCode(newReferralCode);
