@@ -21,6 +21,8 @@ export interface UserAccount {
   email: string;
   mobileNumber: string;
   virtualBalance: number;
+  referralCode?: string;
+  invitedBy?: string;
 }
 interface AccountContextType {
   balance: number;
@@ -36,6 +38,7 @@ interface AccountContextType {
   name: string;
   email: string;
   mobileNumber: string;
+  referralCode?: string;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -46,6 +49,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
+  const [referralCode, setReferralCode] = useState<string | undefined>(undefined);
   
   const { user } = useUser();
   const firestore = useFirestore();
@@ -59,11 +63,12 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const userDocRef = doc(firestore, 'users', user.uid);
     const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
       if (doc.exists()) {
-        const userData = doc.data();
+        const userData = doc.data() as UserAccount;
         setBalance(userData.virtualBalance || 0);
         setName(userData.name || '');
         setEmail(userData.email || '');
         setMobileNumber(userData.mobileNumber || '');
+        setReferralCode(userData.referralCode);
       }
     }, (error) => {
       const permissionError = new FirestorePermissionError({ path: userDocRef.path, operation: 'get' });
@@ -141,6 +146,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     name,
     email,
     mobileNumber,
+    referralCode,
   };
 
 
@@ -160,3 +166,5 @@ export function useAccount() {
   }
   return context;
 }
+
+    

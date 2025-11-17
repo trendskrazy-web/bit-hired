@@ -19,8 +19,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { doc } from 'firebase/firestore';
+import { doc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+
+const generateReferralCode = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
 
 export default function RegisterPage() {
   const auth = useAuth();
@@ -38,6 +42,24 @@ export default function RegisterPage() {
 
   // UI flow state
   const [isRegistering, setIsRegistering] = useState(false);
+  
+  const getInviterId = async (code: string): Promise<string | null> => {
+      if (!firestore || !code) return null;
+      try {
+        const usersRef = collection(firestore, 'users');
+        const q = query(usersRef, where('referralCode', '==', code), limit(1));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+            return querySnapshot.docs[0].id;
+        }
+        return null;
+      } catch (error) {
+        console.error("Error finding inviter:", error);
+        return null;
+      }
+  }
+
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +76,14 @@ export default function RegisterPage() {
     setIsRegistering(true);
 
     try {
+      // Find the user who invited the new user
+      const inviterId = await getInviterId(invitationCode);
+      if (invitationCode && !inviterId) {
+          toast({ title: 'Invalid Invitation Code', description: 'The invitation code you entered is not valid.', variant: 'destructive'});
+          setIsRegistering(false);
+          return;
+      }
+
       // The user's auth email is their mobile number + @bithired.com
       const sanitizedMobile = mobileNumber.startsWith('+') ? mobileNumber.substring(1) : mobileNumber;
       const authEmail = `${sanitizedMobile}@bithired.com`;
@@ -63,17 +93,20 @@ export default function RegisterPage() {
       // Now create the user document in Firestore
       if (newUser && firestore) {
          const userDocRef = doc(firestore, 'users', newUser.uid);
-         setDocumentNonBlocking(
-            userDocRef,
-            {
-              id: newUser.uid,
-              name: name,
-              email: email,
-              mobileNumber: mobileNumber,
-              virtualBalance: 0,
-            },
-            { merge: true }
-          );
+         const userData: any = {
+            id: newUser.uid,
+            name: name,
+            email: email,
+            mobileNumber: mobileNumber,
+            virtualBalance: 0,
+            referralCode: generateReferralCode(),
+         };
+
+         if (inviterId) {
+             userData.invitedBy = inviterId;
+         }
+
+         setDocumentNonBlocking(userDocRef, userData, { merge: true });
       }
       
       toast({
@@ -191,7 +224,7 @@ export default function RegisterPage() {
                 type="text" 
                 placeholder="Enter your code" 
                 value={invitationCode}
-                onChange={(e) => setInvitationCode(e.target.value)}
+                onChange={(e) => setInvitationCode(e.target.value.toUpperCase())}
                 disabled={isRegistering}
               />
             </div>
@@ -212,3 +245,5 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+    

@@ -43,7 +43,19 @@ export const columns: ColumnDef<UserAccount>[] = [
       return <div className="text-right font-medium">{formatted}</div>;
     },
   },
-    {
+  {
+    accessorKey: "referralCode",
+    header: "Referral Code",
+  },
+  {
+    accessorKey: "invitedBy",
+    header: "Invited By (UID)",
+    cell: ({ row }) => {
+      const invitedBy = row.getValue("invitedBy") as string | undefined;
+      return invitedBy ? <div className="font-mono text-xs">{invitedBy}</div> : <span className="text-muted-foreground">-</span>;
+    },
+  },
+  {
     accessorKey: "id",
     header: "User ID",
     cell: ({ row }) => {
@@ -52,3 +64,5 @@ export const columns: ColumnDef<UserAccount>[] = [
     },
   },
 ];
+
+    
