@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ActiveMachineCard } from "@/components/app/dashboard/active-machine-card";

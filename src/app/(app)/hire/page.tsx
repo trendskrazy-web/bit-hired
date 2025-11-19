@@ -1,3 +1,4 @@
+
 import { MachineCard } from "@/components/app/hire/machine-card";
 import { Separator } from "@/components/ui/separator";
 import { getMachines } from "@/lib/data";

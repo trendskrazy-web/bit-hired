@@ -88,4 +88,3 @@ export function InviteCard({ referralCode }: InviteCardProps) {
         </Card>
     );
 }
-
