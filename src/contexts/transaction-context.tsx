@@ -59,7 +59,6 @@ const TransactionContext = createContext<TransactionContextType | undefined>(und
 
 // These would typically come from a remote config or database
 const DEPOSIT_ACCOUNTS = ["0706541646"];
-const DAILY_LIMIT_PER_ACCOUNT = 500000;
 
 
 export function TransactionProvider({ children }: { children: ReactNode }) {
@@ -89,60 +88,17 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
   const updateDesignatedAccount = useCallback(async () => {
     if (!firestore) return;
 
-    const today = new Date().toISOString().split("T")[0];
-    const dailyLimitsRef = collection(firestore, 'daily_limits');
-    
-    const accountTotals: Record<string, number> = {};
-    for (const acc of DEPOSIT_ACCOUNTS) {
-        accountTotals[acc] = 0;
+    // With limits removed, we just pick a random account or the first one.
+    if (DEPOSIT_ACCOUNTS.length > 0) {
+      const randomIndex = Math.floor(Math.random() * DEPOSIT_ACCOUNTS.length);
+      const designatedAccount = DEPOSIT_ACCOUNTS[randomIndex];
+      setDesignatedDepositAccount(designatedAccount);
+      setDepositsEnabled(true);
+    } else {
+      setDesignatedDepositAccount(null);
+      setDepositsEnabled(false);
     }
-
-    const q = query(dailyLimitsRef, where('date', '==', today));
-    
-    try {
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const accountId = doc.id.split('_')[1];
-            if(accountId && accountTotals.hasOwnProperty(accountId)) {
-                accountTotals[accountId] = data.totalAmount;
-            }
-        });
-
-        // Find the account with the minimum total
-        let minTotal = Infinity;
-        let designatedAccount: string | null = null;
-
-        // Create a shuffled array of accounts to pick from randomly if totals are equal
-        const shuffledAccounts = [...DEPOSIT_ACCOUNTS].sort(() => Math.random() - 0.5);
-
-        for (const acc of shuffledAccounts) {
-            if (accountTotals[acc] < DAILY_LIMIT_PER_ACCOUNT) {
-                if (accountTotals[acc] < minTotal) {
-                    minTotal = accountTotals[acc];
-                    designatedAccount = acc;
-                }
-            }
-        }
-        
-        // If all available accounts have the same minimum total, pick one
-        if (!designatedAccount) {
-             const availableAccounts = shuffledAccounts.filter(acc => accountTotals[acc] < DAILY_LIMIT_PER_ACCOUNT);
-             if (availableAccounts.length > 0) {
-                 designatedAccount = availableAccounts[0];
-             }
-        }
-
-        setDesignatedDepositAccount(designatedAccount);
-        setDepositsEnabled(designatedAccount !== null);
-
-    } catch (error) {
-        console.error("Error fetching daily limits:", error);
-        // Fallback to disabled if there's an error.
-        // We avoid emitting a permission error here because it could block the UI.
-        setDepositsEnabled(false);
-    }
-}, [firestore]);
+  }, [firestore]);
 
   useEffect(() => {
     updateDesignatedAccount();
@@ -220,20 +176,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
          const permissionError = new FirestorePermissionError({ path: userDepositDocRef.path, operation: 'create', requestResourceData: newDepositData });
          errorEmitter.emit('permission-error', permissionError);
       });
-
-
-      // 3. Update daily limit
-      const today = new Date().toISOString().split("T")[0];
-      const limitDocId = `${today}_${depositTo}`;
-      const limitDocRef = doc(firestore, 'daily_limits', limitDocId);
-
-      setDoc(limitDocRef, 
-        { totalAmount: increment(amount), date: today, account: depositTo }, 
-        { merge: true }
-      ).catch(error => {
-        const permissionError = new FirestorePermissionError({ path: limitDocRef.path, operation: 'update', requestResourceData: { totalAmount: `increment(${amount})` } });
-        errorEmitter.emit('permission-error', permissionError);
-      });
+      
       // Immediately update the state to reflect the new designated account
       updateDesignatedAccount();
     }

@@ -28,8 +28,7 @@ service cloud.firestore {
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow read, list: if isOwner(userId) || isAdmin();
-      allow write: if isOwner(userId) || isAdmin();
+      allow read, list, write: if isOwner(userId) || isAdmin();
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
@@ -64,19 +63,10 @@ service cloud.firestore {
       allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true;
     }
 
-    match /daily_limits/{limitId} {
-        allow get, list: if isSignedIn();
-        allow write: if isSignedIn(); // Should be more secure in production
-    }
-
     match /notifications/{notificationId} {
-      allow read, write: if isAdmin();
+      allow read, write, list: if isAdmin();
     }
     
-     match /notifications/{path=**} {
-      allow list: if isAdmin();
-    }
-
     // --- Collection Group Rules ---
     // Admins can list transactions across all users.
     match /{path=**}/deposit_transactions/{id} {
@@ -88,5 +78,3 @@ service cloud.firestore {
     }
   }
 }
-
-    

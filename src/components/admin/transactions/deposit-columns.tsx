@@ -67,10 +67,6 @@ export const columns = ({ onAction }: ColumnsProps): ColumnDef<Deposit>[] => [
       return <div className="text-right font-medium">{formatted}</div>;
     },
   },
-   {
-    accessorKey: 'depositTo',
-    header: 'Deposit To',
-  },
   {
     accessorKey: 'status',
     header: 'Status',
