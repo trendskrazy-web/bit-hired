@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,13 +6,9 @@ import { Progress } from '@/components/ui/progress';
 import {
   Clock,
   Cpu,
-  Wallet,
   TrendingUp,
-  Landmark,
 } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import type { Transaction, Machine } from '@/lib/data';
 import { useAccount } from '@/contexts/account-context';
 import { getMachines } from '@/lib/data';
@@ -21,13 +18,8 @@ interface ActiveMachineCardProps {
 }
 
 export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
-  const { toast } = useToast();
-  const { addBalance, updateTransactionStatus } = useAccount();
+  const { updateTransactionStatus } = useAccount();
   const [machines, setMachines] = useState<Machine[]>([]);
-
-  // Local state for this specific card instance
-  const [cashedOutAmount, setCashedOutAmount] = useState(0); 
-  const [lastCashOutDate, setLastCashOutDate] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMachines = async () => {
@@ -45,12 +37,9 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const purchaseDate = useMemo(() => new Date(transaction.date), [transaction.date]);
   const totalDurationSeconds = 45 * 24 * 60 * 60; // 45 days in seconds
 
-  const { dailyEarning, totalPotentialEarnings } = useMemo(() => {
-    if (!machine) return { dailyEarning: 0, totalPotentialEarnings: 0 };
-    const days = 45;
-    const totalEarnings = machine.durations[0].totalEarnings;
-    const daily = totalEarnings / days;
-    return { dailyEarning: daily, totalPotentialEarnings: totalEarnings };
+  const { totalPotentialEarnings } = useMemo(() => {
+    if (!machine) return { totalPotentialEarnings: 0 };
+    return { totalPotentialEarnings: machine.durations[0].totalEarnings };
   }, [machine]);
   
   const [timeRemaining, setTimeRemaining] = useState(() => {
@@ -58,7 +47,6 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
      return Math.max(0, totalDurationSeconds - elapsed);
   });
   
-  // Timer for countdown
   useEffect(() => {
     const timer = setInterval(() => {
       const elapsed = (new Date().getTime() - purchaseDate.getTime()) / 1000;
@@ -77,55 +65,6 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
 
     return () => clearInterval(timer);
   }, [transaction.id, transaction.status, updateTransactionStatus, purchaseDate, totalDurationSeconds]);
-
-  const { canCashOut, availableToCashOut } = useMemo(() => {
-    const now = new Date();
-    const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
-
-    // 1. Check if 24 hours have passed since purchase
-    const hasBeenActiveFor24h = (now.getTime() - purchaseDate.getTime()) >= twentyFourHoursInMs;
-
-    // 2. Check if already cashed out today
-    const lastCashOutDay = lastCashOutDate ? lastCashOutDate : null;
-    const todayDay = now.toISOString().split('T')[0];
-    const alreadyCashedOutToday = lastCashOutDay === todayDay;
-    
-    // 3. Check if machine is still active
-    const isExpired = timeRemaining <= 0;
-
-    if (!hasBeenActiveFor24h || alreadyCashedOutToday || isExpired) {
-        return { canCashOut: false, availableToCashOut: 0 };
-    }
-    
-    // If all checks pass, the user can cash out exactly the daily earning amount
-    return { canCashOut: true, availableToCashOut: dailyEarning };
-  }, [purchaseDate, lastCashOutDate, timeRemaining, dailyEarning]);
-
-
-  const handleCashOut = () => {
-    if (canCashOut && availableToCashOut > 0) {
-      addBalance(availableToCashOut);
-      setCashedOutAmount((prev) => prev + availableToCashOut);
-      setLastCashOutDate(new Date().toISOString().split('T')[0]);
-
-      toast({
-        title: 'Cash Out Successful!',
-        description: `You've cashed out KES ${availableToCashOut.toLocaleString(
-          'en-KE',
-          { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-        )}. It has been added to your main account balance.`,
-      });
-    } else {
-      toast({
-        title: 'Cash Out Unavailable',
-        description:
-          'You can cash out your daily earnings once per calendar day, after the first 24 hours of operation.',
-        variant: 'destructive',
-      });
-    }
-  };
-  
-  const remainingPotentialEarnings = Math.max(0, totalPotentialEarnings - cashedOutAmount);
 
   const formatDuration = (seconds: number) => {
     if (seconds <= 0) return '0d 0h 0m 0s';
@@ -154,7 +93,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           <div className="flex items-center space-x-3">
             <Cpu className="w-6 h-6 text-muted-foreground" />
             <div>
@@ -172,27 +111,14 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <Landmark className="w-6 h-6 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">Total Cashed Out</p>
-              <p className="font-semibold font-mono">
-                KES{' '}
-                {cashedOutAmount.toLocaleString('en-KE', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
             <TrendingUp className="w-6 h-6 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">
-                Remaining Potential
+                Total Potential Earnings
               </p>
               <p className="font-semibold font-mono">
                 KES{' '}
-                {remainingPotentialEarnings.toLocaleString('en-KE', {
+                {totalPotentialEarnings.toLocaleString('en-KE', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
@@ -200,30 +126,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center space-x-3">
-            <Wallet className="w-6 h-6 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Available to Cash Out
-              </p>
-              <p className="font-semibold font-mono">
-                KES{' '}
-                {availableToCashOut.toLocaleString('en-KE', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
-            </div>
-          </div>
-          <Button
-            onClick={handleCashOut}
-            size="sm"
-            disabled={!canCashOut || availableToCashOut <= 0}
-          >
-            Cash Out
-          </Button>
-        </div>
+        
         <div>
           <Progress value={progressPercentage} className="w-full h-2 mt-4" />
           <p className="text-xs text-right text-muted-foreground mt-1">
