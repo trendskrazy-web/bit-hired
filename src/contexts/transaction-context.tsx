@@ -36,12 +36,6 @@ export interface Withdrawal {
     userName?: string;
 }
 
-export interface DailyLimit {
-    id: string; // Composite key: YYYY-MM-DD_accountNumber
-    totalAmount: number;
-    date: string;
-}
-
 interface TransactionContextType {
   deposits: Deposit[];
   withdrawals: Withdrawal[];
