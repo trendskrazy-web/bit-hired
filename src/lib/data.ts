@@ -21,8 +21,6 @@ export interface Transaction {
   cost: number;
   date: string; // Purchase date
   status: "Active" | "Expired" | "Pending";
-  totalCashedOut: number; // Total amount cashed out from this machine
-  lastCashedOutDate?: string; // YYYY-MM-DD format
 }
 
 export interface Notification {
@@ -104,11 +102,26 @@ const machines: Machine[] = [
     power: 1570,
     durations: [{ label: "45 Days", cost: 200000, totalEarnings: 410000 }],
   },
+  {
+    id: 'antminer-s21',
+    name: 'Bitmain Antminer S21',
+    description: 'The latest generation of mining hardware, offering unparalleled efficiency and hash rate for maximum profitability.',
+    miningRate: 200,
+    power: 3500,
+    durations: [{ label: "45 Days", cost: 350000, totalEarnings: 720000 }],
+  },
+  {
+    id: 'whatsminer-m50s',
+    name: 'MicroBT Whatsminer M50S++',
+    description: 'Pushing the boundaries of SHA-256 mining, this machine is a powerhouse for those seeking top performance.',
+    miningRate: 150,
+    power: 3300,
+    durations: [{ label: "45 Days", cost: 500000, totalEarnings: 1050000 }],
+  },
 ];
 
-const transactions: Omit<Transaction, 'totalCashedOut'>[] = [
+const transactions: Omit<Transaction, 'id'>[] = [
   {
-    id: "txn1",
     machineName: "Antminer S19 Pro",
     duration: "1 Month",
     cost: 400,
@@ -116,7 +129,6 @@ const transactions: Omit<Transaction, 'totalCashedOut'>[] = [
     status: "Active",
   },
   {
-    id: "txn2",
     machineName: "Whatsminer M30S++",
     duration: "1 Week",
     cost: 120,
@@ -124,7 +136,6 @@ const transactions: Omit<Transaction, 'totalCashedOut'>[] = [
     status: "Expired",
   },
   {
-    id: "txn3",
     machineName: "AvalonMiner 1246",
     duration: "3 Days",
     cost: 40,
@@ -132,7 +143,6 @@ const transactions: Omit<Transaction, 'totalCashedOut'>[] = [
     status: "Expired",
   },
   {
-    id: "txn4",
     machineName: "DragonMint T1",
     duration: "1 Month",
     cost: 100,
@@ -140,7 +150,6 @@ const transactions: Omit<Transaction, 'totalCashedOut'>[] = [
     status: "Expired",
   },
   {
-    id: "txn5",
     machineName: "Antminer S19 Pro",
     duration: "1 Week",
     cost: 110,
@@ -155,8 +164,8 @@ export const getMachines = async (): Promise<Machine[]> => {
 };
 
 export const getTransactions = async (): Promise<Transaction[]> => {
-  const transactionsWithCashout = transactions.map(t => ({...t, totalCashedOut: 0}));
-  return new Promise((resolve) => setTimeout(() => resolve(transactionsWithCashout), 50));
+  const transactionsWithId = transactions.map((t, i) => ({...t, id: `txn${i+1}`}));
+  return new Promise((resolve) => setTimeout(() => resolve(transactionsWithId), 50));
 };
 
 export const getBitcoinData = async () => {

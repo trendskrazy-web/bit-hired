@@ -47,6 +47,18 @@
       "description": "An efficient miner designed for long-term, stable operations.",
       "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjUFUlMjBmYW58ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "computer fan"
+    },
+    {
+      "id": "antminer-s21",
+      "description": "The latest generation of mining hardware, offering unparalleled efficiency and hash rate for maximum profitability.",
+      "imageUrl": "https://images.unsplash.com/photo-1621999203923-c52c2c5c9a78?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
+    },
+    {
+      "id": "whatsminer-m50s",
+      "description": "Pushing the boundaries of SHA-256 mining, this machine is a powerhouse for those seeking top performance.",
+      "imageUrl": "https://images.unsplash.com/photo-1621999203923-c52c2c5c9a78?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     }
   ]
 }

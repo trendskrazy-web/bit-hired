@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import {
   Clock,
@@ -99,19 +99,12 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
             <div className="flex items-center space-x-3">
                 <TrendingUp className="w-6 h-6 text-muted-foreground" />
                 <div>
                 <p className="text-sm text-muted-foreground">Daily Earning</p>
                 <p className="font-semibold">KES {dailyEarning.toFixed(2)}</p>
-                </div>
-            </div>
-            <div className="flex items-center space-x-3">
-                <Wallet className="w-6 h-6 text-muted-foreground" />
-                <div>
-                <p className="text-sm text-muted-foreground">Total Cashed Out</p>
-                 <p className="font-semibold">KES {(transaction.totalCashedOut || 0).toFixed(2)}</p>
                 </div>
             </div>
             <div className="flex items-center space-x-3">

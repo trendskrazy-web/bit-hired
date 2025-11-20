@@ -4,12 +4,42 @@
 import { ActiveMachineCard } from "@/components/app/dashboard/active-machine-card";
 import { Separator } from "@/components/ui/separator";
 import { useAccount } from "@/contexts/account-context";
+import { CollectEarningsCard } from "@/components/app/dashboard/collect-earnings-card";
+import { getMachines } from "@/lib/data";
+import { useState, useEffect, useMemo } from 'react';
+import type { Machine } from '@/lib/data';
+
 
 export default function DashboardPage() {
-  const { transactions } = useAccount();
+  const { transactions, collectDailyEarnings, lastCollectedAt } = useAccount();
+  const [machines, setMachines] = useState<Machine[]>([]);
+
+   useEffect(() => {
+    const fetchMachines = async () => {
+      const allMachines = await getMachines();
+      setMachines(allMachines);
+    };
+    fetchMachines();
+  }, []);
+
+
   const activeTransactions = transactions.filter(
     (t) => t.status === "Active"
   );
+
+  const totalDailyEarnings = useMemo(() => {
+     if (!machines.length || !activeTransactions.length) return 0;
+     return activeTransactions.reduce((total, transaction) => {
+        const machine = machines.find(m => m.name === transaction.machineName);
+        if (machine) {
+            const totalEarnings = machine.durations[0].totalEarnings;
+            const daily = totalEarnings / 45;
+            return total + daily;
+        }
+        return total;
+     }, 0);
+  }, [activeTransactions, machines]);
+
 
   return (
     <div className="space-y-6">
@@ -20,6 +50,13 @@ export default function DashboardPage() {
         </p>
       </div>
       <Separator />
+
+      <CollectEarningsCard 
+        totalDailyEarnings={totalDailyEarnings}
+        onCollect={collectDailyEarnings}
+        lastCollectedAt={lastCollectedAt}
+      />
+
       <div className="grid gap-6 md:grid-cols-1">
         <h2 className="text-xl font-headline font-bold">Active Machines</h2>
         {activeTransactions.length > 0 ? (

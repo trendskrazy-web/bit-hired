@@ -8,12 +8,14 @@ import {
   ReactNode,
   useEffect,
   useCallback,
+  useMemo,
 } from 'react';
-import type { Transaction } from '@/lib/data';
+import type { Transaction, Machine } from '@/lib/data';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
 import { collection, doc, onSnapshot, increment } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { getMachines } from '@/lib/data';
 
 export interface UserAccount {
   id: string;
@@ -23,6 +25,7 @@ export interface UserAccount {
   virtualBalance: number;
   referralCode?: string;
   invitedBy?: string;
+  lastCollectedAt?: string; // YYYY-MM-DD
 }
 interface AccountContextType {
   balance: number;
@@ -35,11 +38,12 @@ interface AccountContextType {
     transactionId: string,
     status: 'Active' | 'Expired' | 'Pending'
   ) => void;
-  cashOutFromMachine: (transactionId: string, amount: number) => void;
   name: string;
   email: string;
   mobileNumber: string;
   referralCode?: string;
+  lastCollectedAt?: string;
+  collectDailyEarnings: () => void;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -55,16 +59,25 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [referralCode, setReferralCode] = useState<string | undefined>();
+  const [lastCollectedAt, setLastCollectedAt] = useState<string | undefined>();
+  const [machines, setMachines] = useState<Machine[]>([]);
   
   const { user } = useUser();
   const firestore = useFirestore();
+
+  useEffect(() => {
+    const fetchMachines = async () => {
+      const allMachines = await getMachines();
+      setMachines(allMachines);
+    };
+    fetchMachines();
+  }, []);
 
   useEffect(() => {
     if (!user || !firestore) return;
 
     const unsubscribers: (() => void)[] = [];
 
-    // Fetch data for the logged-in user
     const userDocRef = doc(firestore, 'users', user.uid);
     const unsubscribeUser = onSnapshot(userDocRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
@@ -73,13 +86,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         setName(userData.name || '');
         setEmail(userData.email || '');
         setMobileNumber(userData.mobileNumber || '');
+        setLastCollectedAt(userData.lastCollectedAt);
 
-        // This is the robust check and backfill logic.
         if (!userData.referralCode) {
             const newReferralCode = generateReferralCode(user.uid);
-            // Non-blocking update to Firestore to add the missing code
             updateDocumentNonBlocking(userDocRef, { referralCode: newReferralCode });
-            // Immediately update the local state so the UI reflects the change.
             setReferralCode(newReferralCode);
         } else {
             setReferralCode(userData.referralCode);
@@ -130,15 +141,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addTransaction = (transaction: Omit<Transaction, 'id' | 'status' | 'totalCashedOut'> & { status?: 'Active' | 'Expired' | 'Pending' }) => {
+  const addTransaction = (transaction: Omit<Transaction, 'id' | 'status'> & { status?: 'Active' | 'Expired' | 'Pending' }) => {
     if(user && firestore) {
         const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
         addDocumentNonBlocking(rentalsColRef, {
             ...transaction,
             userAccountId: user.uid,
             status: transaction.status || 'Active',
-            totalCashedOut: 0,
-            lastCashedOutDate: null,
         });
     }
   };
@@ -152,24 +161,37 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     },
     [user, firestore]
   );
-  
-  const cashOutFromMachine = useCallback(
-    (transactionId: string, amount: number) => {
-        if(user && firestore) {
-            // 1. Add amount to user's main balance
-            addBalance(amount, user.uid);
 
-            // 2. Update the rental transaction with the new cashout info
-            const transactionDocRef = doc(firestore, 'users', user.uid, 'rentals', transactionId);
-            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-            
-            updateDocumentNonBlocking(transactionDocRef, {
-                totalCashedOut: increment(amount),
-                lastCashedOutDate: today
-            });
+  const collectDailyEarnings = useCallback(() => {
+    if (!user || !firestore || !machines.length) return 0;
+    
+    const today = new Date().toISOString().split('T')[0];
+    if (lastCollectedAt === today) {
+        console.log("Already collected today.");
+        return;
+    }
+
+    const activeTransactions = transactions.filter(t => t.status === 'Active');
+    const totalDailyEarnings = activeTransactions.reduce((total, transaction) => {
+        const machine = machines.find(m => m.name === transaction.machineName);
+        if (machine) {
+            const totalEarnings = machine.durations[0].totalEarnings;
+            const daily = totalEarnings / 45;
+            return total + daily;
         }
-    }, [user, firestore, addBalance]
-  );
+        return total;
+    }, 0);
+
+    if (totalDailyEarnings > 0) {
+        // Add earnings to balance
+        addBalance(totalDailyEarnings);
+        // Update last collected date
+        const userDocRef = doc(firestore, 'users', user.uid);
+        updateDocumentNonBlocking(userDocRef, { lastCollectedAt: today });
+    }
+
+  }, [user, firestore, transactions, machines, lastCollectedAt, addBalance]);
+  
 
   const contextValue = {
     balance,
@@ -179,11 +201,12 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     transactions,
     addTransaction,
     updateTransactionStatus,
-    cashOutFromMachine,
     name,
     email,
     mobileNumber,
     referralCode,
+    lastCollectedAt,
+    collectDailyEarnings,
   };
 
 
