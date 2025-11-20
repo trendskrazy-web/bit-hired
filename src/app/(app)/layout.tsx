@@ -1,4 +1,3 @@
-
 'use client';
 
 import { AppLayout } from '@/components/app/layout/app-layout';
@@ -33,9 +32,11 @@ function AuthenticatedLayoutContent({ children }: { children: React.ReactNode })
     <AccountProvider>
       <TransactionProvider>
         <RedeemCodeProvider>
+          <NotificationProvider>
             <MessageProvider>
               <AppLayout>{children}</AppLayout>
             </MessageProvider>
+          </NotificationProvider>
         </RedeemCodeProvider>
       </TransactionProvider>
     </AccountProvider>
