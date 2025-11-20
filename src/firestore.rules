@@ -24,13 +24,13 @@ service cloud.firestore {
     
     // User-specific sub-collections
     match /users/{userId}/rentals/{rentalId} {
-      allow get, write, list: if isOwner(userId) || isAdmin();
+      allow read, write: if isOwner(userId) || isAdmin();
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow read: if isOwner(userId);
+      allow get, update: if isOwner(userId);
+      allow list: if isOwner(userId);
       allow create: if isAdmin();
-      allow update: if isOwner(userId) && request.resource.data.read == true && resource.data.read == false;
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
