@@ -72,7 +72,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
   const firestore = useFirestore();
   const { mobileNumber, addBalance, name } = useAccount();
 
-  const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+  const SUPER_ADMIN_UID = 'F7hBfGV8QYhgZ7KXbcmThjlisuo2';
 
   const logAdminAction = useCallback((message: string) => {
     if (user && firestore && user.uid === SUPER_ADMIN_UID) {

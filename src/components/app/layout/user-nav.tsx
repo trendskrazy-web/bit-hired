@@ -18,7 +18,7 @@ import { LogOut, User, Shield } from 'lucide-react';
 import Link from 'next/link';
 
 // This is a hardcoded UID for the super admin.
-const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+const SUPER_ADMIN_UID = 'F7hBfGV8QYhgZ7KXbcmThjlisuo2';
 
 export function UserNav() {
   const { user } = useUser();

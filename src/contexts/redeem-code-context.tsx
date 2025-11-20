@@ -60,7 +60,7 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
   const [codes, setCodes] = useState<RedeemCode[]>([]);
 
   // This is a hardcoded UID for the super admin.
-  const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+  const SUPER_ADMIN_UID = 'F7hBfGV8QYhgZ7KXbcmThjlisuo2';
 
   // Admin: Fetch all redeem codes
   useEffect(() => {

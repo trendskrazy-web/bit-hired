@@ -14,7 +14,7 @@ import { MessageProvider } from '@/contexts/message-context';
 // This is a hardcoded UID for the super admin.
 // In a real-world application, you would use a more robust role-based access control system,
 // like Firebase Custom Claims.
-const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+const SUPER_ADMIN_UID = 'F7hBfGV8QYhgZ7KXbcmThjlisuo2';
 
 export default function ProtectedAdminLayout({
   children,

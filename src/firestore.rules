@@ -13,7 +13,7 @@ service cloud.firestore {
 
     function isAdmin() {
       // This is a hardcoded UID for the super admin.
-      return isSignedIn() && request.auth.uid == 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+      return isSignedIn() && request.auth.uid == 'F7hBfGV8QYhgZ7KXbcmThjlisuo2';
     }
 
     match /users/{userId} {
@@ -24,12 +24,12 @@ service cloud.firestore {
     
     // User-specific sub-collections
     match /users/{userId}/rentals/{rentalId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow list, get: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow get, update: if isOwner(userId);
-      allow list: if isOwner(userId);
+      allow get, update, list: if isOwner(userId);
       allow create: if isAdmin();
     }
     

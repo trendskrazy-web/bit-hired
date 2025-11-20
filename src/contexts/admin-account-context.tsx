@@ -24,7 +24,7 @@ export function AdminAccountProvider({ children }: { children: ReactNode }) {
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const SUPER_ADMIN_UID = 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+  const SUPER_ADMIN_UID = 'F7hBfGV8QYhgZ7KXbcmThjlisuo2';
 
   useEffect(() => {
     if (user?.uid !== SUPER_ADMIN_UID || !firestore) return;
