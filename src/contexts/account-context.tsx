@@ -163,7 +163,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   );
 
   const collectDailyEarnings = useCallback(() => {
-    if (!user || !firestore || !machines.length) return 0;
+    if (!user || !firestore || !machines.length) return; // FIX: Ensure machines are loaded
     
     const today = new Date().toISOString().split('T')[0];
     if (lastCollectedAt === today) {
