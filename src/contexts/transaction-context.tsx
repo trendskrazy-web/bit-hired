@@ -10,7 +10,7 @@ import {
   useCallback,
 } from 'react';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
-import { collection, doc, onSnapshot, query, where, setDoc, increment, getDocs, orderBy, CollectionReference, Query } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, where, setDoc, increment, getDocs, orderBy, CollectionReference, Query, collectionGroup } from 'firebase/firestore';
 import { useAccount } from './account-context';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -157,25 +157,30 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     const unsubscribers: (() => void)[] = [];
     const isAdmin = user.uid === SUPER_ADMIN_UID;
 
-    const createSubscription = <T,>(
-        collectionName: string,
-        setData: React.Dispatch<React.SetStateAction<T[]>>
+    const createSubscription = <T extends { id: string }>(
+      collectionName: 'deposit_transactions' | 'withdrawal_transactions',
+      setData: React.Dispatch<React.SetStateAction<T[]>>
     ) => {
-        let q: Query;
-        const collectionPath = isAdmin ? collectionName : `users/${user.uid}/${collectionName}`;
-        const ref = collection(firestore, collectionPath);
+      let q: Query;
+      if (isAdmin) {
+        // Admin gets all transactions from the root collection group
+        q = query(collectionGroup(firestore, collectionName), orderBy('createdAt', 'desc'));
+      } else {
+        // User gets only their own transactions from their sub-collection
+        const ref = collection(firestore, `users/${user.uid}/${collectionName}`);
         q = query(ref, orderBy('createdAt', 'desc'));
-        
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
-            setData(data);
-        }, (error) => {
-            const permissionError = new FirestorePermissionError({ path: ref.path, operation: 'list' });
-            errorEmitter.emit('permission-error', permissionError);
-        });
-        unsubscribers.push(unsubscribe);
-    };
+      }
 
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+        setData(data);
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({ path: q.toString(), operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+      unsubscribers.push(unsubscribe);
+    };
+    
     createSubscription<Deposit>('deposit_transactions', setDeposits);
     createSubscription<Withdrawal>('withdrawal_transactions', setWithdrawals);
 

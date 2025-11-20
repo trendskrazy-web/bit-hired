@@ -24,12 +24,11 @@ service cloud.firestore {
     
     // User-specific sub-collections
     match /users/{userId}/rentals/{rentalId} {
-      allow list, get: if isOwner(userId) || isAdmin();
-      allow write: if isOwner(userId) || isAdmin();
+      allow read, write: if isOwner(userId) || isAdmin();
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow get, update, list: if isOwner(userId);
+      allow read, write, list: if isOwner(userId);
       allow create: if isAdmin();
     }
     
@@ -40,7 +39,6 @@ service cloud.firestore {
     match /users/{userId}/withdrawal_transactions/{withdrawalId} {
       allow read, write: if isOwner(userId) || isAdmin();
     }
-
 
     match /mining_machines/{machineId} {
       allow get, list: if isSignedIn();
@@ -77,6 +75,16 @@ service cloud.firestore {
     }
     
      match /notifications/{path=**} {
+      allow list: if isAdmin();
+    }
+
+    // --- Collection Group Rules ---
+    // Admins can list transactions across all users.
+    match /{path=**}/deposit_transactions/{id} {
+      allow list: if isAdmin();
+    }
+
+    match /{path=**}/withdrawal_transactions/{id} {
       allow list: if isAdmin();
     }
   }
