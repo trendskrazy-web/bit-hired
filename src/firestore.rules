@@ -33,7 +33,7 @@ service cloud.firestore {
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow read, list, update: if isOwner(userId) || isAdmin();
+      allow read, list, update, create: if isOwner(userId) || isAdmin();
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
@@ -71,7 +71,7 @@ service cloud.firestore {
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
       allow list, create: if isAdmin();
-      allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true || isAdmin();
+      allow update: if (isSignedIn() && resource.data.used == false && request.resource.data.used == true) || isAdmin();
     }
 
     match /notifications/{notificationId} {
