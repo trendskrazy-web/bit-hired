@@ -113,7 +113,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     const unsubscribers: (() => void)[] = [];
 
     if (isAdmin) {
-      // Admin: Use collectionGroup queries
+      // Admin: Use collectionGroup queries to get all transactions
       const depositsQuery = query(collectionGroup(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
       const depositsUnsub = onSnapshot(depositsQuery, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
@@ -133,7 +133,6 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         errorEmitter.emit('permission-error', permissionError);
       });
       unsubscribers.push(withdrawalsUnsub);
-
     } else {
       // Regular user: Query their own sub-collections
       const userDepositsPath = `users/${user.uid}/deposit_transactions`;
@@ -288,3 +287,5 @@ export function useTransactions() {
   }
   return context;
 }
+
+    
