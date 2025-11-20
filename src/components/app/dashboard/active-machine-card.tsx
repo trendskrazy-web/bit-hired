@@ -4,7 +4,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import {
-  Bitcoin,
   Clock,
   Cpu,
   Wallet,
@@ -62,8 +61,8 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const [timeRemaining, setTimeRemaining] = useState(
     totalDuration - getElapsedTime()
   );
-  const [cashedOutAmount, setCashedOutAmount] = useState(0); // This should be loaded from db in a real app
-  const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null); // This should be loaded from db
+  const [cashedOutAmount, setCashedOutAmount] = useState(0); 
+  const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
 
   // Timer for countdown
   useEffect(() => {
@@ -101,7 +100,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     const oneDayInMs = 24 * 60 * 60 * 1000;
     return new Date().getTime() - purchaseDate.getTime() >= oneDayInMs;
   }, [purchaseDate]);
-
+  
   const availableToCashOut = useMemo(() => {
     if (
       timeRemaining <= 0 ||
@@ -141,7 +140,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
       });
     }
   };
-
+  
   const remainingPotentialEarnings = useMemo(() => {
     if (!machine) return 0;
     const remaining = totalPotentialEarnings - cashedOutAmount;
