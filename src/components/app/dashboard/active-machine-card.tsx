@@ -10,7 +10,7 @@ import {
   TrendingUp,
   Landmark,
 } from 'lucide-react';
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Transaction, Machine } from '@/lib/data';
@@ -26,7 +26,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const { addBalance, updateTransactionStatus } = useAccount();
   const [machines, setMachines] = useState<Machine[]>([]);
 
-  // State to track earnings and cash-out history for this specific machine
+  // Local state for this specific card instance
   const [cashedOutAmount, setCashedOutAmount] = useState(0); 
   const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
 
@@ -43,6 +43,9 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     [machines, transaction.machineName]
   );
 
+  const purchaseDate = useMemo(() => new Date(transaction.date), [transaction.date]);
+  const totalDurationSeconds = 45 * 24 * 60 * 60; // 45 days in seconds
+
   const { dailyEarning, totalPotentialEarnings } = useMemo(() => {
     if (!machine) return { dailyEarning: 0, totalPotentialEarnings: 0 };
     const days = 45;
@@ -50,26 +53,18 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     const daily = totalEarnings / days;
     return { dailyEarning: daily, totalPotentialEarnings: totalEarnings };
   }, [machine]);
-
-  const totalDuration = 45 * 24 * 60 * 60; // 45 days in seconds
-  const purchaseDate = useMemo(
-    () => new Date(transaction.date),
-    [transaction.date]
-  );
-
-  const getElapsedTime = useCallback(() => {
-    const now = new Date();
-    return Math.floor((now.getTime() - purchaseDate.getTime()) / 1000);
-  }, [purchaseDate]);
-
-  const [timeRemaining, setTimeRemaining] = useState(
-    totalDuration - getElapsedTime()
-  );
+  
+  const [timeRemaining, setTimeRemaining] = useState(() => {
+     const elapsed = (new Date().getTime() - purchaseDate.getTime()) / 1000;
+     return Math.max(0, totalDurationSeconds - elapsed);
+  });
   
   // Timer for countdown
   useEffect(() => {
     const timer = setInterval(() => {
-      const remaining = totalDuration - getElapsedTime();
+      const elapsed = (new Date().getTime() - purchaseDate.getTime()) / 1000;
+      const remaining = totalDurationSeconds - elapsed;
+      
       if (remaining > 0) {
         setTimeRemaining(remaining);
       } else {
@@ -82,35 +77,32 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [transaction.id, transaction.status, updateTransactionStatus, totalDuration, getElapsedTime]);
+  }, [transaction.id, transaction.status, updateTransactionStatus, purchaseDate, totalDurationSeconds]);
 
-  // Determine if a cash out is possible today
-  const canCashOutToday = useMemo(() => {
-    if (!lastCashOutDate) {
-      return true; // Never cashed out before
-    }
+  const { canCashOutToday, availableToCashOut } = useMemo(() => {
     const now = new Date();
-    // Compare just the date part, ignoring time
-    return now.toDateString() !== lastCashOutDate.toDateString();
-  }, [lastCashOutDate]);
-
-  // Determine if at least 24 hours have passed since purchase
-  const hasBeenActiveFor24h = useMemo(() => {
     const oneDayInMs = 24 * 60 * 60 * 1000;
-    return new Date().getTime() - purchaseDate.getTime() >= oneDayInMs;
-  }, [purchaseDate]);
-  
-  // Calculate the amount available to be cashed out
-  const availableToCashOut = useMemo(() => {
-    if (timeRemaining <= 0 || !canCashOutToday || !hasBeenActiveFor24h) {
-      return 0;
+
+    // 1. Check if 24 hours have passed since purchase
+    const hasBeenActiveFor24h = now.getTime() - purchaseDate.getTime() >= oneDayInMs;
+
+    // 2. Check if already cashed out today
+    const alreadyCashedOutToday = lastCashOutDate ? now.toDateString() === lastCashOutDate.toDateString() : false;
+    
+    // 3. Check if machine is still active
+    const isExpired = timeRemaining <= 0;
+
+    if (!hasBeenActiveFor24h || alreadyCashedOutToday || isExpired) {
+        return { canCashOutToday: false, availableToCashOut: 0 };
     }
-    // Capped at daily earning
-    return dailyEarning;
-  }, [dailyEarning, timeRemaining, canCashOutToday, hasBeenActiveFor24h]);
+    
+    // If all checks pass, the user can cash out exactly the daily earning amount
+    return { canCashOutToday: true, availableToCashOut: dailyEarning };
+  }, [purchaseDate, lastCashOutDate, timeRemaining, dailyEarning]);
+
 
   const handleCashOut = () => {
-    if (availableToCashOut > 0) {
+    if (canCashOutToday && availableToCashOut > 0) {
       addBalance(availableToCashOut);
       setCashedOutAmount((prev) => prev + availableToCashOut);
       setLastCashOutDate(new Date());
@@ -132,14 +124,10 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     }
   };
   
-  const remainingPotentialEarnings = useMemo(() => {
-    if (!machine) return 0;
-    const remaining = totalPotentialEarnings - cashedOutAmount;
-    return remaining > 0 ? remaining : 0;
-  }, [totalPotentialEarnings, cashedOutAmount, machine]);
+  const remainingPotentialEarnings = Math.max(0, totalPotentialEarnings - cashedOutAmount);
 
   const formatDuration = (seconds: number) => {
-    if (seconds < 0) seconds = 0;
+    if (seconds <= 0) return '0d 0h 0m 0s';
     const d = Math.floor(seconds / (3600 * 24));
     const h = Math.floor((seconds % (3600 * 24)) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -147,8 +135,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     return `${d}d ${h}h ${m}m ${s}s`;
   };
 
-  const progressPercentage =
-    ((totalDuration - timeRemaining) / totalDuration) * 100;
+  const progressPercentage = ((totalDurationSeconds - timeRemaining) / totalDurationSeconds) * 100;
 
   return (
     <Card>
@@ -231,7 +218,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
           <Button
             onClick={handleCashOut}
             size="sm"
-            disabled={availableToCashOut <= 0}
+            disabled={!canCashOutToday || availableToCashOut <= 0}
           >
             Cash Out
           </Button>
@@ -246,3 +233,4 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     </Card>
   );
 }
+
