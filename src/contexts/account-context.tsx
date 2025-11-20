@@ -163,7 +163,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   );
 
   const collectDailyEarnings = useCallback(() => {
-    if (!user || !firestore || !machines.length) return; // FIX: Ensure machines are loaded
+    if (!user || !firestore || !machines.length) {
+        console.log("Cannot collect: missing user, firestore, or machine data.");
+        return;
+    }
     
     const today = new Date().toISOString().split('T')[0];
     if (lastCollectedAt === today) {
@@ -183,9 +186,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }, 0);
 
     if (totalDailyEarnings > 0) {
-        // Add earnings to balance
         addBalance(totalDailyEarnings);
-        // Update last collected date
         const userDocRef = doc(firestore, 'users', user.uid);
         updateDocumentNonBlocking(userDocRef, { lastCollectedAt: today });
     }
