@@ -137,8 +137,9 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         setDepositsEnabled(designatedAccount !== null);
 
     } catch (error) {
-        const permissionError = new FirestorePermissionError({ path: dailyLimitsRef.path, operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error fetching daily limits:", error);
+        // Fallback to disabled if there's an error.
+        // We avoid emitting a permission error here because it could block the UI.
         setDepositsEnabled(false);
     }
 }, [firestore]);
@@ -162,12 +163,15 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       setData: React.Dispatch<React.SetStateAction<T[]>>
     ) => {
       let q: Query;
+      let path: string;
       if (isAdmin) {
         // Admin gets all transactions from the root collection group
         q = query(collectionGroup(firestore, collectionName), orderBy('createdAt', 'desc'));
+        path = collectionName; // The path is the collection group name
       } else {
         // User gets only their own transactions from their sub-collection
-        const ref = collection(firestore, `users/${user.uid}/${collectionName}`);
+        path = `users/${user.uid}/${collectionName}`;
+        const ref = collection(firestore, path);
         q = query(ref, orderBy('createdAt', 'desc'));
       }
 
@@ -175,7 +179,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
         setData(data);
       }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: q.toString(), operation: 'list' });
+        const permissionError = new FirestorePermissionError({ path, operation: 'list' });
         errorEmitter.emit('permission-error', permissionError);
       });
       unsubscribers.push(unsubscribe);
