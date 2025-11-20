@@ -10,6 +10,7 @@ import {
   Info,
   LogOut,
   Gift,
+  Inbox,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -25,13 +26,16 @@ import {
   SidebarFooter,
   SidebarInset,
   useSidebar,
+  SidebarMenuBadge,
 } from '@/components/ui/sidebar';
 import { AppHeader } from './header';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
+import { useMessages } from '@/contexts/message-context';
 
 const userMenuItems = [
   { href: '/account', label: 'Account', icon: User },
+  { href: '/inbox', label: 'Inbox', icon: Inbox, requiresBadge: true },
   { href: '/hire', label: 'Hire Machines', icon: Cpu },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/transactions', label: 'Transactions', icon: History },
@@ -76,6 +80,7 @@ function SidebarFooterContent() {
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
+  const { unreadCount } = useMessages();
 
   const handleLinkClick = () => {
     setOpenMobile(false);
@@ -99,6 +104,9 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           <Link href={item.href} onClick={handleLinkClick}>
             <item.icon />
             <span>{item.label}</span>
+             {item.requiresBadge && unreadCount > 0 && (
+              <SidebarMenuBadge>{unreadCount}</SidebarMenuBadge>
+            )}
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>

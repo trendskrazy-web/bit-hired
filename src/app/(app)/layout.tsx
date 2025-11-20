@@ -3,6 +3,7 @@
 
 import { AppLayout } from '@/components/app/layout/app-layout';
 import { AccountProvider } from '@/contexts/account-context';
+import { MessageProvider } from '@/contexts/message-context';
 import { NotificationProvider } from '@/contexts/notification-context';
 import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
 import { TransactionProvider } from '@/contexts/transaction-context';
@@ -33,7 +34,9 @@ function AuthenticatedLayoutContent({ children }: { children: React.ReactNode })
       <TransactionProvider>
         <RedeemCodeProvider>
           <NotificationProvider>
-            <AppLayout>{children}</AppLayout>
+            <MessageProvider>
+              <AppLayout>{children}</AppLayout>
+            </MessageProvider>
           </NotificationProvider>
         </RedeemCodeProvider>
       </TransactionProvider>

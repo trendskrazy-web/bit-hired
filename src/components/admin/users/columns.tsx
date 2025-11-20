@@ -2,9 +2,17 @@
 "use client";
 
 import { type ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { UserAccount } from "@/contexts/account-context";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import Link from "next/link";
 
 
 export const columns: ColumnDef<UserAccount>[] = [
@@ -60,11 +68,27 @@ export const columns: ColumnDef<UserAccount>[] = [
     },
   },
   {
-    accessorKey: "id",
-    header: "User ID",
+    id: "actions",
     cell: ({ row }) => {
-        const userId = row.getValue("id") as string | undefined;
-        return userId ? <div className="font-mono text-xs">{userId}</div> : null;
+      const user = row.original;
+      return (
+        <div className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/users/${user.id}`}>View and Message User</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
     },
   },
 ];
