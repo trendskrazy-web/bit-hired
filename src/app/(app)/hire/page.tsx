@@ -3,11 +3,12 @@ import { MachineCard } from "@/components/app/hire/machine-card";
 import { Separator } from "@/components/ui/separator";
 import { getMachines } from "@/lib/data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import type { ImagePlaceholder } from "@/lib/placeholder-images";
 
 export default async function HirePage() {
   const machines = await getMachines();
 
-  const getImage = (id: string) => {
+  const getImage = (id: string): ImagePlaceholder | undefined => {
     return PlaceHolderImages.find((img) => img.id === id);
   };
 

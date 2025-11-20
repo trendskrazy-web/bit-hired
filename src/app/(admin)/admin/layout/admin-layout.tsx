@@ -26,6 +26,7 @@ import {
   SidebarInset,
   SidebarMenuSub,
   SidebarMenuSubButton,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { AppHeader } from '@/components/app/layout/header';
 import { Button } from '@/components/ui/button';
@@ -57,93 +58,107 @@ function SidebarFooterContent() {
   );
 }
 
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const { setOpenMobile } = useSidebar();
+    const isApprovalsActive = pathname.startsWith('/admin/deposits') || pathname.startsWith('/admin/withdrawals');
+    
+    const handleLinkClick = () => {
+      setOpenMobile(false);
+    };
+
+    return (
+        <>
+            <Sidebar className="border-r" side="left" variant="sidebar">
+                <SidebarHeader>
+                <Link
+                    href="/admin"
+                    className="flex items-center gap-2 py-2 font-headline text-lg font-semibold"
+                    onClick={handleLinkClick}
+                >
+                    <Bitcoin className="h-6 w-6 text-primary" />
+                    <span>BitHired Admin</span>
+                </Link>
+                </SidebarHeader>
+                <SidebarContent>
+                <SidebarMenu>
+                    <Collapsible defaultOpen={isApprovalsActive}>
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                                <SidebarMenuButton
+                                    className="w-full"
+                                    isActive={isApprovalsActive}
+                                    tooltip={{
+                                        children: 'Approvals',
+                                        className: 'bg-sidebar-background text-sidebar-foreground',
+                                    }}
+                                >
+                                    <CheckSquare />
+                                    <span>Approvals</span>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                        </SidebarMenuItem>
+                        <CollapsibleContent>
+                            <SidebarMenuSub>
+                                <SidebarMenuItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.startsWith('/admin/deposits')}>
+                                        <Link href="/admin/deposits" onClick={handleLinkClick}>
+                                            <ArrowDownToDot />
+                                            <span>Deposits</span>
+                                        </Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuItem>
+                                <SidebarMenuItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.startsWith('/admin/withdrawals')}>
+                                        <Link href="/admin/withdrawals" onClick={handleLinkClick}>
+                                            <ArrowUpFromDot />
+                                            <span>Withdrawals</span>
+                                        </Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuItem>
+                            </SidebarMenuSub>
+                        </CollapsibleContent>
+                    </Collapsible>
+
+                    {adminMenuItems.map((item, index) => (
+                    <SidebarMenuItem key={index}>
+                        <SidebarMenuButton
+                            asChild
+                            isActive={pathname.startsWith(item.href!)}
+                            tooltip={{
+                                children: item.label,
+                                className: 'bg-sidebar-background text-sidebar-foreground',
+                            }}
+                        >
+                            <Link href={item.href!} onClick={handleLinkClick}>
+                            <item.icon />
+                            <span>{item.label}</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    ))}
+                </SidebarMenu>
+                </SidebarContent>
+                <SidebarFooter className="group-data-[collapsible=icon]:hidden space-y-2">
+                <SidebarFooterContent />
+                </SidebarFooter>
+            </Sidebar>
+            <SidebarInset className="bg-background">
+                <AppHeader />
+                <main className="p-4 sm:p-6 lg:p-8 flex-1">{children}</main>
+            </SidebarInset>
+        </>
+    )
+}
+
 export function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const isApprovalsActive = pathname.startsWith('/admin/deposits') || pathname.startsWith('/admin/withdrawals');
-
   return (
     <SidebarProvider>
-      <Sidebar className="border-r" side="left" variant="sidebar">
-        <SidebarHeader>
-          <Link
-            href="/admin"
-            className="flex items-center gap-2 py-2 font-headline text-lg font-semibold"
-          >
-            <Bitcoin className="h-6 w-6 text-primary" />
-            <span>BitHired Admin</span>
-          </Link>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <Collapsible defaultOpen={isApprovalsActive}>
-                <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                        <SidebarMenuButton
-                            className="w-full"
-                            isActive={isApprovalsActive}
-                            tooltip={{
-                                children: 'Approvals',
-                                className: 'bg-sidebar-background text-sidebar-foreground',
-                            }}
-                        >
-                            <CheckSquare />
-                            <span>Approvals</span>
-                        </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                </SidebarMenuItem>
-                <CollapsibleContent>
-                    <SidebarMenuSub>
-                        <SidebarMenuItem>
-                            <SidebarMenuSubButton asChild isActive={pathname.startsWith('/admin/deposits')}>
-                                <Link href="/admin/deposits">
-                                    <ArrowDownToDot />
-                                    <span>Deposits</span>
-                                </Link>
-                            </SidebarMenuSubButton>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                            <SidebarMenuSubButton asChild isActive={pathname.startsWith('/admin/withdrawals')}>
-                                <Link href="/admin/withdrawals">
-                                    <ArrowUpFromDot />
-                                    <span>Withdrawals</span>
-                                </Link>
-                            </SidebarMenuSubButton>
-                        </SidebarMenuItem>
-                    </SidebarMenuSub>
-                </CollapsibleContent>
-            </Collapsible>
-
-            {adminMenuItems.map((item, index) => (
-              <SidebarMenuItem key={index}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith(item.href!)}
-                     tooltip={{
-                        children: item.label,
-                        className: 'bg-sidebar-background text-sidebar-foreground',
-                    }}
-                  >
-                    <Link href={item.href!}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter className="group-data-[collapsible=icon]:hidden space-y-2">
-          <SidebarFooterContent />
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset className="bg-background">
-        <AppHeader />
-        <main className="p-4 sm:p-6 lg:p-8 flex-1">{children}</main>
-      </SidebarInset>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
     </SidebarProvider>
   );
 }
