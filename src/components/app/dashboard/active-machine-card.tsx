@@ -50,24 +50,8 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   }
 
   const [timeRemaining, setTimeRemaining] = useState(totalDuration - getElapsedTime());
-  const [earnings, setEarnings] = useState(0);
   const [cashedOutAmount, setCashedOutAmount] = useState(0);
   const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
-  
-  // Calculate total number of full 24-hour periods passed
-  const daysPassed = useMemo(() => {
-    const elapsedSeconds = getElapsedTime();
-    if (elapsedSeconds < 0) return 0;
-    return Math.floor(elapsedSeconds / (24 * 3600));
-  }, [timeRemaining]); // Reruns when timeRemaining updates
-
-  // Calculate total earned based on full days passed
-  useEffect(() => {
-    if (dailyEarning > 0) {
-      const totalEarned = daysPassed * dailyEarning;
-      setEarnings(totalEarned);
-    }
-  }, [daysPassed, dailyEarning]);
   
   // Timer for countdown
   useEffect(() => {
@@ -88,38 +72,39 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   }, [transaction.id, transaction.status, updateTransactionStatus]);
   
   const canCashOut = useMemo(() => {
-    const available = earnings - cashedOutAmount;
-    if (available <= 0 || timeRemaining <= 0) {
+    if (timeRemaining <= 0 || dailyEarning <= 0) {
       return false;
     }
 
     const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    // Check if at least one full 24-hour period has passed since purchase.
+    const oneDayInMs = 24 * 60 * 60 * 1000;
+    if (now.getTime() - purchaseDate.getTime() < oneDayInMs) {
+      return false;
+    }
 
+    // If never cashed out, it's possible.
     if (!lastCashOutDate) {
-      // If never cashed out, check if at least one full day has passed since purchase.
-      const oneDayInMs = 24 * 60 * 60 * 1000;
-      return now.getTime() - purchaseDate.getTime() >= oneDayInMs;
+      return true;
     }
     
+    // Check if the current day is after the last cash-out day.
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const lastCashOutDay = new Date(lastCashOutDate.getFullYear(), lastCashOutDate.getMonth(), lastCashOutDate.getDate());
 
-    // Can cash out if the current day is after the last cash-out day.
     return today > lastCashOutDay;
-  }, [earnings, cashedOutAmount, lastCashOutDate, purchaseDate, timeRemaining]);
+  }, [dailyEarning, lastCashOutDate, purchaseDate, timeRemaining]);
 
 
   const handleCashOut = () => {
-    const availableToCashOut = earnings - cashedOutAmount;
-
-    if (availableToCashOut > 0 && canCashOut) {
-      addBalance(availableToCashOut);
-      setCashedOutAmount(prev => prev + availableToCashOut);
+    if (canCashOut) {
+      addBalance(dailyEarning);
+      setCashedOutAmount(prev => prev + dailyEarning);
       setLastCashOutDate(new Date());
       
       toast({
         title: "Cash Out Successful!",
-        description: `You've cashed out KES ${availableToCashOut.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. It has been added to your main account balance.`,
+        description: `You've cashed out KES ${dailyEarning.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. It has been added to your main account balance.`,
       });
     } else {
          toast({
@@ -147,7 +132,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   };
 
   const progressPercentage = ((totalDuration - timeRemaining) / totalDuration) * 100;
-  const availableToCashOut = earnings - cashedOutAmount;
+  const availableToCashOut = canCashOut ? dailyEarning : 0;
 
   return (
     <Card>
