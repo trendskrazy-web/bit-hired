@@ -3,62 +3,62 @@
     {
       "id": "antminer-s19",
       "description": "A high-performance ASIC miner.",
-      "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjUFUlMjBmYW58ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1760087959406-8d9ee5319e53?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjb21wdXRlciUyMGZhbnxlbnwwfHx8fDE3NjM2NTY3Mzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "computer fan"
     },
     {
       "id": "whatsminer-m30s",
       "description": "An efficient and powerful mining rig.",
-      "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjUFUlMjBmYW58ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "computer fan"
+      "imageUrl": "https://images.unsplash.com/photo-1591238372408-8b98667c0460?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb21wdXRlciUyMGhhcmR3YXJlfGVufDB8fHx8MTc2MzYyMjMwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "computer hardware"
     },
     {
       "id": "avalonminer-1246",
       "description": "A reliable choice for steady mining operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjUFUlMjBmYW58ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "computer fan"
+      "imageUrl": "https://images.unsplash.com/photo-1651340550839-3b295d930048?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y2lyY3VpdCUyMGJvYXJkfGVufDB8fHx8MTc2MzY0NTY4OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "circuit board"
     },
     {
       "id": "dragonmint-t1",
       "description": "A legacy miner still capable of delivering results. Great for entry-level exploration.",
-      "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjUFUlMjBmYW58ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "computer fan"
+      "imageUrl": "https://images.unsplash.com/photo-1524391697575-8ea102803604?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzYzNjU2NzM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mining rig"
     },
     {
       "id": "innosilicon-t3",
       "description": "A powerful and efficient miner with a strong hash rate.",
-      "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjUFUlMjBmYW58ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "computer fan"
+      "imageUrl": "https://images.unsplash.com/photo-1682559736721-c2e77ff4c650?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkYXRhJTIwY2VudGVyfGVufDB8fHx8MTc2MzYwNzM4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "data center"
     },
     {
       "id": "ebang-ebit-e12",
       "description": "High-performance mining with a focus on energy efficiency.",
-      "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjUFUlMjBmYW58ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "computer fan"
+      "imageUrl": "https://images.unsplash.com/photo-1687300172792-68a13c4e149a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c2VydmVyJTIwcmFja3xlbnwwfHx8fDE3NjM2MjIzMDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "server rack"
     },
     {
       "id": "bitfury-tardis",
       "description": "An enterprise-grade solution offering robust performance and scalability.",
-      "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjUFUlMjBmYW58ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlibrb-4.1.0&q=80&w=1080",
-      "imageHint": "computer fan"
+      "imageUrl": "https://images.unsplash.com/photo-1679486622067-a4cc6b796303?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y29vbGluZyUyMHN5c3RlbXxlbnwwfHx8fDE3NjM2NTY3Mzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cooling system"
     },
     {
       "id": "halong-dragonmint-t2",
       "description": "An efficient miner designed for long-term, stable operations.",
-      "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjUFUlMjBmYW58ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib.rb-4.1.0&q=80&w=1080",
-      "imageHint": "computer fan"
+      "imageUrl": "https://images.unsplash.com/photo-1639234911987-3d047101d432?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxBU0lDJTIwbWluZXJ8ZW58MHx8fHwxNzYzNjU2NzM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ASIC miner"
     },
     {
       "id": "antminer-s21",
       "description": "The latest generation of mining hardware, offering unparalleled efficiency and hash rate for maximum profitability.",
-      "imageUrl": "https://images.unsplash.com/photo-1621999203923-c52c2c5c9a78?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib.rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1671550877242-316748acb3da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxiaXRjb2luJTIwZmFybXxlbnwwfHx8fDE3NjM2NTY3Mzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bitcoin farm"
     },
     {
       "id": "whatsminer-m50s",
       "description": "Pushing the boundaries of SHA-256 mining, this machine is a powerhouse for those seeking top performance.",
-      "imageUrl": "https://images.unsplash.com/photo-1621999203923-c52c2c5c9a78?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pbmclMjByaWd8ZW58MHx8fHwxNzE4NzQzNjIxfDA&ixlib.rb-4.1.0&q=80&w=1080",
-      "imageHint": "mining rig"
+      "imageUrl": "https://images.unsplash.com/photo-1694219782948-afcab5c095d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjcnlwdG8lMjBtaW5pbmd8ZW58MHx8fHwxNzYzNjU2NzM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "crypto mining"
     }
   ]
 }
