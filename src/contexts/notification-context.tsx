@@ -20,6 +20,7 @@ import {
   query,
   orderBy,
   doc,
+  collectionGroup,
 } from "firebase/firestore";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { errorEmitter } from "@/firebase/error-emitter";
@@ -50,14 +51,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (user?.uid === SUPER_ADMIN_UID && firestore) {
-      const notifsColRef = collection(firestore, 'notifications');
+      const notifsColRef = collectionGroup(firestore, 'notifications');
       const q = query(notifsColRef, orderBy("createdAt", "desc"));
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const notifsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification));
         setNotifications(notifsData);
       }, (error) => {
-        const permissionError = new FirestorePermissionError({ path: notifsColRef.path, operation: 'list' });
+        const permissionError = new FirestorePermissionError({ path: 'notifications', operation: 'list' });
         errorEmitter.emit('permission-error', permissionError);
       });
 

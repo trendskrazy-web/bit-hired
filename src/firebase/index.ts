@@ -12,9 +12,6 @@ export function initializeFirebase() {
     return getSdks(getApp());
   }
   
-  // Important! initializeApp() is called without any arguments because Firebase App Hosting
-  // integrates with the initializeApp() function to provide the environment variables needed to
-  // populate the FirebaseOptions in production.
   const firebaseApp = initializeApp(firebaseConfig);
   return getSdks(firebaseApp);
 }
