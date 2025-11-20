@@ -62,6 +62,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     totalDuration - getElapsedTime()
   );
   
+  // State to track earnings and cash-out history for this specific machine
   const [cashedOutAmount, setCashedOutAmount] = useState(0); 
   const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
 
@@ -83,41 +84,30 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     return () => clearInterval(timer);
   }, [transaction.id, transaction.status, updateTransactionStatus]);
 
+  // Determine if a cash out is possible today
   const canCashOutToday = useMemo(() => {
     if (!lastCashOutDate) {
       return true; // Never cashed out before
     }
     const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const lastCashOutDay = new Date(
-      lastCashOutDate.getFullYear(),
-      lastCashOutDate.getMonth(),
-      lastCashOutDate.getDate()
-    );
-    return today > lastCashOutDay;
+    // Compare just the date part, ignoring time
+    return now.toDateString() !== lastCashOutDate.toDateString();
   }, [lastCashOutDate]);
 
+  // Determine if at least 24 hours have passed since purchase
   const hasBeenActiveFor24h = useMemo(() => {
     const oneDayInMs = 24 * 60 * 60 * 1000;
     return new Date().getTime() - purchaseDate.getTime() >= oneDayInMs;
   }, [purchaseDate]);
   
+  // Calculate the amount available to be cashed out
   const availableToCashOut = useMemo(() => {
-    if (
-      timeRemaining <= 0 ||
-      !canCashOutToday ||
-      !hasBeenActiveFor24h
-    ) {
+    if (timeRemaining <= 0 || !canCashOutToday || !hasBeenActiveFor24h) {
       return 0;
     }
     // Capped at daily earning
     return dailyEarning;
-  }, [
-    dailyEarning,
-    timeRemaining,
-    canCashOutToday,
-    hasBeenActiveFor24h,
-  ]);
+  }, [dailyEarning, timeRemaining, canCashOutToday, hasBeenActiveFor24h]);
 
   const handleCashOut = () => {
     if (availableToCashOut > 0) {
@@ -256,3 +246,5 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     </Card>
   );
 }
+
+    
