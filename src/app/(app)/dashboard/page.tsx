@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ActiveMachineCard } from "@/components/app/dashboard/active-machine-card";
@@ -71,7 +72,9 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 md:grid-cols-1">
         <h2 className="text-xl font-headline font-bold">Active Machines</h2>
-        {activeTransactions.length > 0 ? (
+        {isLoadingMachines ? (
+           <p className="text-muted-foreground">Loading active machines...</p>
+        ) : activeTransactions.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-1">
             {activeTransactions.map((transaction) => (
               <ActiveMachineCard
