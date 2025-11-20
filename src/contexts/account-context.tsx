@@ -33,7 +33,7 @@ interface AccountContextType {
   deductBalance: (amount: number) => void;
   addBalance: (amount: number, userId?: string) => void;
   transactions: Transaction[];
-  addTransaction: (transaction: Omit<Transaction, 'id' | 'status' | 'totalCashedOut'> & { status?: 'Active' | 'Expired' | 'Pending' }) => void;
+  addTransaction: (transaction: Omit<Transaction, 'id' | 'status' | 'totalCashedOut' | 'lastCashedOutDate'> & { status?: 'Active' | 'Expired' | 'Pending' }) => void;
   updateTransactionStatus: (
     transactionId: string,
     status: 'Active' | 'Expired' | 'Pending'
@@ -141,7 +141,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addTransaction = (transaction: Omit<Transaction, 'id' | 'status'> & { status?: 'Active' | 'Expired' | 'Pending' }) => {
+  const addTransaction = (transaction: Omit<Transaction, 'id' | 'status' | 'totalCashedOut' | 'lastCashedOutDate'> & { status?: 'Active' | 'Expired' | 'Pending' }) => {
     if(user && firestore) {
         const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
         addDocumentNonBlocking(rentalsColRef, {
