@@ -46,20 +46,21 @@ export default function AdminRedeemCodesPage() {
       return;
     }
     setIsGenerating(true);
+    
     try {
-        await generateCodes(numAmount, numCount);
-        toast({
-            title: 'Codes Generated',
-            description: `${numCount} new code(s) for KES ${numAmount} created.`,
-        });
-        setAmount('');
-        setCount('1');
+      await generateCodes(numAmount, numCount);
+      toast({
+          title: 'Code Generation Started',
+          description: `Started generating ${numCount} new code(s) for KES ${numAmount}. They will appear in the list shortly.`,
+      });
+      setAmount('');
+      setCount('1');
     } catch (error) {
-         toast({
-            title: 'Error',
-            description: 'Failed to generate codes.',
-            variant: 'destructive',
-        });
+       toast({
+          title: 'Error',
+          description: 'Failed to start code generation.',
+          variant: 'destructive',
+      });
     }
 
     setIsGenerating(false);

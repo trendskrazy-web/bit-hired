@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   addDocumentNonBlocking,
+  setDocumentNonBlocking,
   updateDocumentNonBlocking,
   useFirestore,
   useUser,
@@ -21,6 +22,7 @@ import {
   getDoc,
   onSnapshot,
   query,
+  setDoc,
 } from "firebase/firestore";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { errorEmitter } from "@/firebase/error-emitter";
@@ -86,21 +88,15 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
     
     const newCode = generateUniqueCode();
     const codeDocRef = doc(firestore, 'redeem_codes', newCode);
-    
-    // We use setDoc here with the code as the ID for easier lookup.
-    await setDoc(codeDocRef, {
+    const codeData = {
         code: newCode,
         amount,
         used: false,
         createdAt: new Date().toISOString(),
-    }).catch(err => {
-         const permissionError = new FirestorePermissionError({ 
-            path: codeDocRef.path, 
-            operation: 'create',
-            requestResourceData: { code: newCode, amount, used: false }
-        });
-        errorEmitter.emit('permission-error', permissionError);
-    });
+    };
+    
+    // We use setDoc here with the code as the ID for easier lookup.
+    setDocumentNonBlocking(codeDocRef, codeData);
 
     return newCode;
   }, [firestore]);
