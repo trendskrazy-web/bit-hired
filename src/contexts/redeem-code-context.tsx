@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   setDocumentNonBlocking,
+  updateDocumentNonBlocking,
   useFirestore,
   useUser,
 } from "@/firebase";
@@ -93,7 +94,6 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
         createdAt: new Date().toISOString(),
     };
     
-    // We use setDoc here with the code as the ID for easier lookup.
     setDocumentNonBlocking(codeDocRef, codeData);
 
     return newCode;
@@ -163,17 +163,10 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
     (code: string) => {
       if (firestore && user) {
         const codeDocRef = doc(firestore, "redeem_codes", code);
-        updateDoc(codeDocRef, {
+        updateDocumentNonBlocking(codeDocRef, {
           used: true,
           usedBy: user.uid,
           usedAt: new Date().toISOString(),
-        }).catch(error => {
-            const permissionError = new FirestorePermissionError({
-                path: codeDocRef.path,
-                operation: 'update',
-                requestResourceData: { used: true, usedBy: user.uid },
-            });
-            errorEmitter.emit('permission-error', permissionError);
         });
       }
     },

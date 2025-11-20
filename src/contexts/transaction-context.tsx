@@ -54,82 +54,9 @@ const TransactionContext = createContext<TransactionContextType | undefined>(und
 // These would typically come from a remote config or database
 const DEPOSIT_ACCOUNTS = ["0706541646"];
 
-const useAdminTransactions = () => {
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
-  const firestore = useFirestore();
-
-  useEffect(() => {
-    if (!firestore) return;
-    
-    const depositsQuery = query(collectionGroup(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
-    const depositsUnsub = onSnapshot(depositsQuery, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
-      setDeposits(data);
-    }, (error) => {
-      console.error("Admin deposits listener error:", error);
-    });
-
-    const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawal_transactions'), orderBy('createdAt', 'desc'));
-    const withdrawalsUnsub = onSnapshot(withdrawalsQuery, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
-      setWithdrawals(data);
-    }, (error) => {
-       console.error("Admin withdrawals listener error:", error);
-    });
-
-    return () => {
-      depositsUnsub();
-      withdrawalsUnsub();
-    };
-  }, [firestore]);
-
-  return { deposits, withdrawals };
-};
-
-const useUserTransactions = () => {
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
-  const { user } = useUser();
-  const firestore = useFirestore();
-
-  useEffect(() => {
-    if (!firestore || !user) {
-      setDeposits([]);
-      setWithdrawals([]);
-      return;
-    };
-
-    const userDepositsPath = `users/${user.uid}/deposit_transactions`;
-    const userDepositsQuery = query(collection(firestore, userDepositsPath), orderBy('createdAt', 'desc'));
-    const userDepositsUnsub = onSnapshot(userDepositsQuery, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
-      setDeposits(data);
-    }, (error) => {
-      const permissionError = new FirestorePermissionError({ path: userDepositsPath, operation: 'list' });
-      errorEmitter.emit('permission-error', permissionError);
-    });
-
-    const userWithdrawalsPath = `users/${user.uid}/withdrawal_transactions`;
-    const userWithdrawalsQuery = query(collection(firestore, userWithdrawalsPath), orderBy('createdAt', 'desc'));
-    const userWithdrawalsUnsub = onSnapshot(userWithdrawalsQuery, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
-      setWithdrawals(data);
-    }, (error) => {
-      const permissionError = new FirestorePermissionError({ path: userWithdrawalsPath, operation: 'list' });
-      errorEmitter.emit('permission-error', permissionError);
-    });
-    
-    return () => {
-      userDepositsUnsub();
-      userWithdrawalsUnsub();
-    };
-  }, [user, firestore]);
-
-  return { deposits, withdrawals };
-}
-
 export function TransactionProvider({ children }: { children: ReactNode }) {
+  const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [designatedDepositAccount, setDesignatedDepositAccount] = useState<string | null>(null);
   const [depositsEnabled, setDepositsEnabled] = useState(true);
   
@@ -140,14 +67,68 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
   const SUPER_ADMIN_UID = 'F7hBfGV8QYhgZ7KXbcmThjlisuo2';
   const isAdmin = user?.uid === SUPER_ADMIN_UID;
 
-  const { deposits: adminDeposits, withdrawals: adminWithdrawals } = useAdminTransactions();
-  const { deposits: userDeposits, withdrawals: userWithdrawals } = useUserTransactions();
+  useEffect(() => {
+    if (!firestore || !user) {
+      setDeposits([]);
+      setWithdrawals([]);
+      return;
+    }
 
-  const deposits = isAdmin ? adminDeposits : userDeposits;
-  const withdrawals = isAdmin ? adminWithdrawals : userWithdrawals;
+    const unsubscribers: (()=>void)[] = [];
+
+    if (isAdmin) {
+      // Admin: Listen to all transactions
+      const depositsQuery = query(collectionGroup(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
+      const depositsUnsub = onSnapshot(depositsQuery, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
+        setDeposits(data);
+      }, (error) => {
+         console.error("Admin deposits listener error:", error);
+      });
+      unsubscribers.push(depositsUnsub);
+
+      const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawal_transactions'), orderBy('createdAt', 'desc'));
+      const withdrawalsUnsub = onSnapshot(withdrawalsQuery, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
+        setWithdrawals(data);
+      }, (error) => {
+        console.error("Admin withdrawals listener error:", error);
+      });
+      unsubscribers.push(withdrawalsUnsub);
+
+    } else {
+      // User: Listen to own transactions
+      const userDepositsPath = `users/${user.uid}/deposit_transactions`;
+      const userDepositsQuery = query(collection(firestore, userDepositsPath), orderBy('createdAt', 'desc'));
+      const userDepositsUnsub = onSnapshot(userDepositsQuery, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
+        setDeposits(data);
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({ path: userDepositsPath, operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+      unsubscribers.push(userDepositsUnsub);
+
+      const userWithdrawalsPath = `users/${user.uid}/withdrawal_transactions`;
+      const userWithdrawalsQuery = query(collection(firestore, userWithdrawalsPath), orderBy('createdAt', 'desc'));
+      const userWithdrawalsUnsub = onSnapshot(userWithdrawalsQuery, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
+        setWithdrawals(data);
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({ path: userWithdrawalsPath, operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+      unsubscribers.push(userWithdrawalsUnsub);
+    }
+    
+    return () => {
+      unsubscribers.forEach(unsub => unsub());
+    };
+  }, [user, firestore, isAdmin]);
+
 
   const logAdminAction = useCallback((message: string) => {
-    if (user && firestore && user.uid === SUPER_ADMIN_UID) {
+    if (isAdmin && user && firestore) {
       const notificationsColRef = collection(firestore, 'notifications');
       addDocumentNonBlocking(notificationsColRef, {
         message,
@@ -156,7 +137,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         read: false,
       });
     }
-  }, [user, firestore]);
+  }, [user, firestore, isAdmin]);
 
   const updateDesignatedAccount = useCallback(async () => {
     if (!firestore) return;
