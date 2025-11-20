@@ -148,14 +148,16 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
           amount: foundCode.amount,
         };
       } catch (error) {
+        // This is the proper way to handle permission errors.
         const permissionError = new FirestorePermissionError({
           path: codeDocRef.path,
           operation: 'get',
         });
         errorEmitter.emit('permission-error', permissionError);
+        // We still return a user-friendly error message for the UI.
         return {
           success: false,
-          message: "An error occurred while redeeming the code.",
+          message: "Could not verify redeem code. Check your permissions.",
           amount: 0,
         };
       }
