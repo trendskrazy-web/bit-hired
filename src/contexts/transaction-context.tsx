@@ -105,30 +105,50 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!firestore || !user) return;
 
-    const unsubscribers: (() => void)[] = [];
+    let unsubDeposits = () => {};
+    let unsubWithdrawals = () => {};
 
-    const setupSubscription = <T,>(
-        collectionName: 'deposit_transactions' | 'withdrawal_transactions',
-        setData: React.Dispatch<React.SetStateAction<T[]>>
-    ) => {
-        const path = `users/${user.uid}/${collectionName}`;
-        const q = query(collection(firestore, path), orderBy('createdAt', 'desc'));
+    const isAdmin = user.uid === SUPER_ADMIN_UID;
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
-            setData(data);
-        }, (error) => {
-            const permissionError = new FirestorePermissionError({ path, operation: 'list' });
-            errorEmitter.emit('permission-error', permissionError);
-        });
-        unsubscribers.push(unsubscribe);
-    };
+    if (isAdmin) {
+      // Admin: Listen to collection groups
+      const depositsQuery = query(collectionGroup(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
+      unsubDeposits = onSnapshot(depositsQuery, snapshot => {
+        setDeposits(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit)));
+      }, error => {
+        const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
 
-    setupSubscription<Deposit>('deposit_transactions', setDeposits);
-    setupSubscription<Withdrawal>('withdrawal_transactions', setWithdrawals);
+      const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawal_transactions'), orderBy('createdAt', 'desc'));
+      unsubWithdrawals = onSnapshot(withdrawalsQuery, snapshot => {
+        setWithdrawals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal)));
+      }, error => {
+         const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
+         errorEmitter.emit('permission-error', permissionError);
+      });
+    } else {
+      // User: Listen to their own sub-collections
+      const userDepositsQuery = query(collection(firestore, `users/${user.uid}/deposit_transactions`), orderBy('createdAt', 'desc'));
+      unsubDeposits = onSnapshot(userDepositsQuery, snapshot => {
+        setDeposits(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit)));
+      }, error => {
+         const permissionError = new FirestorePermissionError({ path: `users/${user.uid}/deposit_transactions`, operation: 'list' });
+         errorEmitter.emit('permission-error', permissionError);
+      });
+
+      const userWithdrawalsQuery = query(collection(firestore, `users/${user.uid}/withdrawal_transactions`), orderBy('createdAt', 'desc'));
+      unsubWithdrawals = onSnapshot(userWithdrawalsQuery, snapshot => {
+        setWithdrawals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal)));
+      }, error => {
+        const permissionError = new FirestorePermissionError({ path: `users/${user.uid}/withdrawal_transactions`, operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+    }
 
     return () => {
-      unsubscribers.forEach((unsub) => unsub());
+      unsubDeposits();
+      unsubWithdrawals();
     };
   }, [user, firestore]);
 
