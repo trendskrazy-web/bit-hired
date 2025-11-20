@@ -12,14 +12,14 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth, useFirestore, FirestorePermissionError, errorEmitter } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Bitcoin } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { collection, query, where, getDocs, limit, doc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 export default function RegisterPage() {
@@ -27,7 +27,6 @@ export default function RegisterPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Form state
   const [name, setName] = useState('');
@@ -35,42 +34,9 @@ export default function RegisterPage() {
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [invitationCode, setInvitationCode] = useState('');
 
   // UI flow state
   const [isRegistering, setIsRegistering] = useState(false);
-
-  useEffect(() => {
-    const refCode = searchParams.get('ref');
-    if (refCode) {
-      setInvitationCode(refCode.toUpperCase());
-    }
-  }, [searchParams]);
-
-  const getInviterId = async (code: string): Promise<string | null> => {
-    if (!firestore || !code) return null;
-
-    const usersRef = collection(firestore, 'users');
-    const q = query(usersRef, where('referralCode', '==', code), limit(1));
-
-    try {
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        // Return the UID of the user who owns the code
-        return querySnapshot.docs[0].id;
-      }
-      return null;
-    } catch (error) {
-       const permissionError = new FirestorePermissionError({
-        path: usersRef.path,
-        operation: 'list',
-      });
-      errorEmitter.emit('permission-error', permissionError);
-      // Don't block registration, just return null
-      return null;
-    }
-  };
-
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,9 +64,6 @@ export default function RegisterPage() {
          const userDocRef = doc(firestore, 'users', newUser.uid);
          const newReferralCode = `BH-${newUser.uid.substring(0, 5).toUpperCase()}`;
 
-         // Check if an inviter code was used
-         const inviterId = await getInviterId(invitationCode);
-
          const userData: any = {
             id: newUser.uid,
             name: name,
@@ -108,17 +71,9 @@ export default function RegisterPage() {
             mobileNumber: mobileNumber,
             virtualBalance: 0,
             referralCode: newReferralCode,
-            ...(inviterId && { invitedBy: inviterId }),
          };
 
          setDocumentNonBlocking(userDocRef, userData, { merge: true });
-         
-         if (inviterId) {
-             toast({
-                 title: 'Referral Applied!',
-                 description: `You've successfully registered under an invitation.`,
-             });
-         }
       }
       
       toast({
@@ -228,17 +183,6 @@ export default function RegisterPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     disabled={isRegistering}
                 />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="invitation-code">Invitation Code (Optional)</Label>
-              <Input
-                id="invitation-code"
-                type="text"
-                placeholder="Enter code from a friend"
-                value={invitationCode}
-                onChange={(e) => setInvitationCode(e.target.value.toUpperCase())}
-                disabled={isRegistering || searchParams.get('ref') !== null}
-              />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
