@@ -163,7 +163,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   );
 
   const collectDailyEarnings = useCallback(() => {
-    if (!user || !firestore || !machines.length) {
+    if (!user || !firestore || !machines || machines.length === 0) {
         console.log("Cannot collect: missing user, firestore, or machine data.");
         return;
     }
