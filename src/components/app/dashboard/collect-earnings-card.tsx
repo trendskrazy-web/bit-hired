@@ -5,14 +5,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/hooks/use-toast";
 import { Wallet } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CollectEarningsCardProps {
     totalDailyEarnings: number;
     onCollect: () => void;
     lastCollectedAt?: string;
+    isLoading?: boolean;
 }
 
-export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollectedAt }: CollectEarningsCardProps) {
+export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollectedAt, isLoading }: CollectEarningsCardProps) {
     const { toast } = useToast();
     const [isCollecting, setIsCollecting] = useState(false);
 
@@ -58,9 +60,13 @@ export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollect
             <CardContent>
                 <div className="text-center">
                     <p className="text-sm text-muted-foreground">Total Available to Collect</p>
-                    <p className="text-4xl font-bold text-primary">
-                        KES {canCollectToday ? totalDailyEarnings.toFixed(2) : '0.00'}
-                    </p>
+                    {isLoading ? (
+                        <Skeleton className="h-10 w-48 mx-auto mt-1" />
+                    ) : (
+                        <p className="text-4xl font-bold text-primary">
+                            KES {canCollectToday ? totalDailyEarnings.toFixed(2) : '0.00'}
+                        </p>
+                    )}
                     {!canCollectToday && (
                          <p className="text-xs text-muted-foreground mt-2">
                             You have already collected your earnings today. Please check back tomorrow.
@@ -72,7 +78,7 @@ export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollect
                 <Button 
                     className="w-full"
                     onClick={handleCollect}
-                    disabled={!canCollectToday || isCollecting}
+                    disabled={!canCollectToday || isCollecting || isLoading}
                 >
                     {isCollecting ? 'Collecting...' : 'Collect All Earnings'}
                 </Button>

@@ -12,32 +12,41 @@ import type { Machine } from '@/lib/data';
 export default function DashboardPage() {
   const { transactions, collectDailyEarnings, lastCollectedAt } = useAccount();
   const [machines, setMachines] = useState<Machine[]>([]);
+  const [isLoadingMachines, setIsLoadingMachines] = useState(true);
 
    useEffect(() => {
     const fetchMachines = async () => {
+      setIsLoadingMachines(true);
       const allMachines = await getMachines();
       setMachines(allMachines);
+      setIsLoadingMachines(false);
     };
     fetchMachines();
   }, []);
 
 
-  const activeTransactions = transactions.filter(
-    (t) => t.status === "Active"
-  );
+  const activeTransactions = useMemo(() => {
+    return transactions.filter(
+      (t) => t.status === "Active"
+    );
+  }, [transactions]);
 
   const totalDailyEarnings = useMemo(() => {
-     if (!machines.length || !activeTransactions.length) return 0;
+     // Ensure machines are loaded and there are active transactions before calculating
+     if (isLoadingMachines || !machines.length || !activeTransactions.length) {
+       return 0;
+     }
+     
      return activeTransactions.reduce((total, transaction) => {
         const machine = machines.find(m => m.name === transaction.machineName);
-        if (machine) {
+        if (machine && machine.durations.length > 0) {
             const totalEarnings = machine.durations[0].totalEarnings;
-            const daily = totalEarnings / 45;
+            const daily = totalEarnings / 45; // All cycles are 45 days
             return total + daily;
         }
         return total;
      }, 0);
-  }, [activeTransactions, machines]);
+  }, [activeTransactions, machines, isLoadingMachines]);
 
 
   return (
@@ -54,6 +63,7 @@ export default function DashboardPage() {
         totalDailyEarnings={totalDailyEarnings}
         onCollect={() => collectDailyEarnings(totalDailyEarnings)}
         lastCollectedAt={lastCollectedAt}
+        isLoading={isLoadingMachines}
       />
 
       <div className="grid gap-6 md:grid-cols-1">

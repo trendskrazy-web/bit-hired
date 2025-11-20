@@ -40,7 +40,7 @@ interface AccountContextType {
   mobileNumber: string;
   referralCode?: string;
   lastCollectedAt?: string;
-  collectDailyEarnings: (totalDailyEarnings: number) => void;
+  collectDailyEarnings: (earnings: number) => void;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -150,7 +150,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [user, firestore]
   );
 
-  const collectDailyEarnings = useCallback((totalDailyEarnings: number) => {
+  const collectDailyEarnings = useCallback((earnings: number) => {
     if (!user || !firestore) {
         return;
     }
@@ -161,8 +161,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         return;
     }
 
-    if (totalDailyEarnings > 0) {
-        addBalance(totalDailyEarnings);
+    if (earnings > 0) {
+        addBalance(earnings);
         const userDocRef = doc(firestore, 'users', user.uid);
         updateDocumentNonBlocking(userDocRef, { lastCollectedAt: today });
     }
