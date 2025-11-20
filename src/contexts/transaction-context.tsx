@@ -10,7 +10,7 @@ import {
   useCallback,
 } from 'react';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
-import { collection, doc, onSnapshot, query, where, setDoc, increment, getDocs, orderBy, CollectionReference, Query, collectionGroup } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, setDoc, getDocs, orderBy, CollectionReference, Query, collectionGroup } from 'firebase/firestore';
 import { useAccount } from './account-context';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -114,6 +114,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     ) => {
       let q: Query;
       let path: string;
+
       if (isAdmin) {
         // Admin gets all transactions from the root collection group
         path = collectionName;

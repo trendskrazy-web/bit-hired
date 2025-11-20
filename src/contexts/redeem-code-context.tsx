@@ -87,11 +87,19 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
     const newCode = generateUniqueCode();
     const codeDocRef = doc(firestore, 'redeem_codes', newCode);
     
-    addDocumentNonBlocking(codeDocRef, {
+    // We use setDoc here with the code as the ID for easier lookup.
+    await setDoc(codeDocRef, {
         code: newCode,
         amount,
         used: false,
         createdAt: new Date().toISOString(),
+    }).catch(err => {
+         const permissionError = new FirestorePermissionError({ 
+            path: codeDocRef.path, 
+            operation: 'create',
+            requestResourceData: { code: newCode, amount, used: false }
+        });
+        errorEmitter.emit('permission-error', permissionError);
     });
 
     return newCode;
