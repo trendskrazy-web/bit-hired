@@ -28,8 +28,8 @@ service cloud.firestore {
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow read, list: if isOwner(userId);
       allow write: if isOwner(userId) || isAdmin();
+      allow read, list: if isOwner(userId);
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
@@ -49,21 +49,18 @@ service cloud.firestore {
     match /deposit_transactions/{depositId} {
       allow get, create: if isSignedIn(); // Create is for users
       allow update: if isAdmin(); // update for admin
-      // Explicitly block list on the root collection for non-admins
       allow list: if isAdmin(); 
     }
 
     match /withdrawal_transactions/{withdrawalId} {
       allow get, create: if isSignedIn(); // Create for users
       allow update: if isAdmin(); // update for admin
-       // Explicitly block list on the root collection for non-admins
       allow list: if isAdmin();
     }
     
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
+      allow list, create: if isAdmin();
       // Allow update if the code is being marked as used by any signed-in user, or if admin is editing
       allow update: if (isSignedIn() && resource.data.used == false && request.resource.data.used == true) || isAdmin();
     }
