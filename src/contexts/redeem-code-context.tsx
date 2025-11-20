@@ -36,7 +36,7 @@ export interface RedeemCode {
 }
 
 interface RedeemCodeContextType {
-  generateCode: (amount: number) => Promise<string>;
+  generateCode: (amount: number) => void;
   generateCodes: (amount: number, count: number) => Promise<void>;
   redeemCode: (
     code: string
@@ -81,7 +81,7 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
   }, [user, firestore]);
 
 
-  const generateCode = useCallback(async (amount: number) => {
+  const generateCode = useCallback((amount: number) => {
     if (!firestore) throw new Error("Firestore not available");
     
     const newCode = generateUniqueCode();
@@ -94,13 +94,11 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
     };
     
     setDocumentNonBlocking(codeDocRef, codeData);
-
-    return newCode;
   }, [firestore]);
 
   const generateCodes = useCallback(async (amount: number, count: number) => {
     for (let i = 0; i < count; i++) {
-        await generateCode(amount);
+        generateCode(amount);
     }
   }, [generateCode]);
 

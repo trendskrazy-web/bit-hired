@@ -159,9 +159,9 @@ export function AdminLayout({
 }) {
   return (
     <SidebarProvider>
-        <NotificationProvider>
-            <AdminLayoutContent>{children}</AdminLayoutContent>
-        </NotificationProvider>
+      <NotificationProvider>
+        <AdminLayoutContent>{children}</AdminLayoutContent>
+      </NotificationProvider>
     </SidebarProvider>
   );
 }
