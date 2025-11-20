@@ -68,6 +68,9 @@ export function MessageProvider({ children }: { children: ReactNode }) {
       });
 
       return () => unsubscribe();
+    } else {
+        setMessages([]);
+        setUnreadCount(0);
     }
   }, [user, firestore]);
 

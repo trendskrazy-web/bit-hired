@@ -24,19 +24,14 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { AppHeader } from '@/components/app/layout/header';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const adminMenuItems = [
   { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: KeyRound },
-  { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/history', label: 'Admin History', icon: History },
 ];
 
 function SidebarFooterContent() {
@@ -61,7 +56,6 @@ function SidebarFooterContent() {
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const { setOpenMobile } = useSidebar();
-    const isApprovalsActive = pathname.startsWith('/admin/deposits') || pathname.startsWith('/admin/withdrawals');
     
     const handleLinkClick = () => {
       setOpenMobile(false);
@@ -82,44 +76,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                 </SidebarHeader>
                 <SidebarContent>
                 <SidebarMenu>
-                    <Collapsible defaultOpen={isApprovalsActive}>
-                        <SidebarMenuItem>
-                            <CollapsibleTrigger asChild>
-                                <SidebarMenuButton
-                                    className="w-full"
-                                    isActive={isApprovalsActive}
-                                    tooltip={{
-                                        children: 'Approvals',
-                                        className: 'bg-sidebar-background text-sidebar-foreground',
-                                    }}
-                                >
-                                    <CheckSquare />
-                                    <span>Approvals</span>
-                                </SidebarMenuButton>
-                            </CollapsibleTrigger>
-                        </SidebarMenuItem>
-                        <CollapsibleContent>
-                            <SidebarMenuSub>
-                                <SidebarMenuItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.startsWith('/admin/deposits')}>
-                                        <Link href="/admin/deposits" onClick={handleLinkClick}>
-                                            <ArrowDownToDot />
-                                            <span>Deposits</span>
-                                        </Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuItem>
-                                <SidebarMenuItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.startsWith('/admin/withdrawals')}>
-                                        <Link href="/admin/withdrawals" onClick={handleLinkClick}>
-                                            <ArrowUpFromDot />
-                                            <span>Withdrawals</span>
-                                        </Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuItem>
-                            </SidebarMenuSub>
-                        </CollapsibleContent>
-                    </Collapsible>
-
                     {adminMenuItems.map((item, index) => (
                     <SidebarMenuItem key={index}>
                         <SidebarMenuButton

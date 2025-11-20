@@ -1,5 +1,4 @@
 
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -25,12 +24,12 @@ service cloud.firestore {
     
     // User-specific sub-collections
     match /users/{userId}/rentals/{rentalId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, write: if isOwner(userId);
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow write: if isOwner(userId) || isAdmin();
-      allow read, list, update: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin(); // Admin can send messages to users
+      allow read, list, update: if isOwner(userId); // Owner can manage their own messages
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
@@ -49,14 +48,12 @@ service cloud.firestore {
     // Global collections for Admin review
     match /deposit_transactions/{depositId} {
       allow read, update: if isAdmin();
-      allow get: if isSignedIn(); // User or admin can get single
       allow create: if isSignedIn(); // Create is for users
       allow list: if isAdmin(); // Admin can list all
     }
 
     match /withdrawal_transactions/{withdrawalId} {
       allow read, update: if isAdmin();
-      allow get: if isSignedIn(); // User or admin can get single
       allow create: if isSignedIn(); // Create for users
       allow list: if isAdmin(); // Admin can list all
     }
@@ -64,24 +61,11 @@ service cloud.firestore {
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
       allow create, list: if isAdmin();
-      // Allow update if the code is being marked as used by any signed-in user, or if admin is editing
       allow update: if (isSignedIn() && resource.data.used == false && request.resource.data.used == true) || isAdmin();
     }
 
     match /notifications/{notificationId} {
       allow read, write, list: if isAdmin();
     }
-    
-    // --- Collection Group Rules ---
-    // Admins can list transactions across all users.
-    match /{path=**}/deposit_transactions/{id} {
-      allow list: if isAdmin();
-    }
-
-    match /{path=**}/withdrawal_transactions/{id} {
-      allow list: if isAdmin();
-    }
   }
 }
-
-    

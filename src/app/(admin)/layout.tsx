@@ -4,7 +4,6 @@
 import { useUser } from '@/firebase';
 import { redirect } from 'next/navigation';
 import { AdminLayout } from '@/components/admin/layout/admin-layout';
-import { AdminAccountProvider } from '@/contexts/admin-account-context';
 import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
 import { NotificationProvider } from '@/contexts/notification-context';
 import { TransactionProvider } from '@/contexts/transaction-context';
@@ -41,15 +40,13 @@ export default function ProtectedAdminLayout({
   return (
     <AccountProvider>
         <TransactionProvider>
-            <AdminAccountProvider>
-              <RedeemCodeProvider>
-                  <NotificationProvider>
-                    <MessageProvider>
-                      <AdminLayout>{children}</AdminLayout>
-                    </MessageProvider>
-                  </NotificationProvider>
-              </RedeemCodeProvider>
-            </AdminAccountProvider>
+            <RedeemCodeProvider>
+                <NotificationProvider>
+                  <MessageProvider>
+                    <AdminLayout>{children}</AdminLayout>
+                  </MessageProvider>
+                </NotificationProvider>
+            </RedeemCodeProvider>
         </TransactionProvider>
     </AccountProvider>
   );
