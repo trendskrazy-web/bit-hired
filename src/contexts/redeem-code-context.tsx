@@ -10,9 +10,7 @@ import {
   useEffect,
 } from "react";
 import {
-  addDocumentNonBlocking,
   setDocumentNonBlocking,
-  updateDocumentNonBlocking,
   useFirestore,
   useUser,
 } from "@/firebase";
@@ -22,7 +20,7 @@ import {
   getDoc,
   onSnapshot,
   query,
-  setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { errorEmitter } from "@/firebase/error-emitter";
@@ -165,10 +163,17 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
     (code: string) => {
       if (firestore && user) {
         const codeDocRef = doc(firestore, "redeem_codes", code);
-        updateDocumentNonBlocking(codeDocRef, {
+        updateDoc(codeDocRef, {
           used: true,
           usedBy: user.uid,
           usedAt: new Date().toISOString(),
+        }).catch(error => {
+            const permissionError = new FirestorePermissionError({
+                path: codeDocRef.path,
+                operation: 'update',
+                requestResourceData: { used: true, usedBy: user.uid },
+            });
+            errorEmitter.emit('permission-error', permissionError);
         });
       }
     },
