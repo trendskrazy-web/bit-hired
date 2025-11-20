@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const { transactions, collectDailyEarnings, lastCollectedAt } = useAccount();
   const [machines, setMachines] = useState<Machine[]>([]);
   const [isLoadingMachines, setIsLoadingMachines] = useState(true);
+  const [totalDailyEarnings, setTotalDailyEarnings] = useState(0);
 
    useEffect(() => {
     const fetchMachines = async () => {
@@ -31,21 +32,23 @@ export default function DashboardPage() {
     );
   }, [transactions]);
 
-  const totalDailyEarnings = useMemo(() => {
-     // Ensure machines are loaded and there are active transactions before calculating
-     if (isLoadingMachines || !machines.length || !activeTransactions.length) {
-       return 0;
-     }
-     
-     return activeTransactions.reduce((total, transaction) => {
+  useEffect(() => {
+    // This calculation must happen in a useEffect to ensure it only runs on the client
+    // after all data (machines and transactions) has been loaded.
+    if (!isLoadingMachines && machines.length > 0 && activeTransactions.length > 0) {
+      const dailyEarnings = activeTransactions.reduce((total, transaction) => {
         const machine = machines.find(m => m.name === transaction.machineName);
         if (machine && machine.durations.length > 0) {
-            const totalEarnings = machine.durations[0].totalEarnings;
-            const daily = totalEarnings / 45; // All cycles are 45 days
-            return total + daily;
+          const totalEarnings = machine.durations[0].totalEarnings;
+          const daily = totalEarnings / 45; // All cycles are 45 days
+          return total + daily;
         }
         return total;
-     }, 0);
+      }, 0);
+      setTotalDailyEarnings(dailyEarnings);
+    } else {
+        setTotalDailyEarnings(0);
+    }
   }, [activeTransactions, machines, isLoadingMachines]);
 
 

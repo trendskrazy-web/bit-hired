@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Wallet } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface CollectEarningsCardProps {
@@ -17,6 +17,7 @@ interface CollectEarningsCardProps {
 export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollectedAt, isLoading }: CollectEarningsCardProps) {
     const { toast } = useToast();
     const [isCollecting, setIsCollecting] = useState(false);
+    const [displayEarnings, setDisplayEarnings] = useState(0);
 
     const canCollectToday = useMemo(() => {
         if (!lastCollectedAt) return true; // Can collect if they never have before
@@ -24,11 +25,19 @@ export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollect
         return lastCollectedAt < today;
     }, [lastCollectedAt]);
 
+    useEffect(() => {
+        if (canCollectToday) {
+            setDisplayEarnings(totalDailyEarnings);
+        } else {
+            setDisplayEarnings(0);
+        }
+    }, [totalDailyEarnings, canCollectToday]);
+
     const handleCollect = () => {
-        if (totalDailyEarnings <= 0) {
+        if (displayEarnings <= 0) {
              toast({
                 title: 'No Earnings to Collect',
-                description: `You have no active machines generating earnings.`,
+                description: `You have no active machines generating earnings, or you've already collected today.`,
                 variant: 'destructive'
             });
             return;
@@ -41,7 +50,7 @@ export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollect
             setIsCollecting(false);
             toast({
                 title: 'Earnings Collected!',
-                description: `KES ${totalDailyEarnings.toFixed(2)} has been added to your balance.`
+                description: `KES ${displayEarnings.toFixed(2)} has been added to your balance.`
             });
         }, 1000);
     }
@@ -64,10 +73,10 @@ export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollect
                         <Skeleton className="h-10 w-48 mx-auto mt-1" />
                     ) : (
                         <p className="text-4xl font-bold text-primary">
-                            KES {canCollectToday ? totalDailyEarnings.toFixed(2) : '0.00'}
+                            KES {displayEarnings.toFixed(2)}
                         </p>
                     )}
-                    {!canCollectToday && (
+                    {!canCollectToday && !isLoading && (
                          <p className="text-xs text-muted-foreground mt-2">
                             You have already collected your earnings today. Please check back tomorrow.
                         </p>
