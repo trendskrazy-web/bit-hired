@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useUser } from '@/firebase';
@@ -8,6 +7,7 @@ import { RedeemCodeProvider } from '@/contexts/redeem-code-context';
 import { NotificationProvider } from '@/contexts/notification-context';
 import { TransactionProvider } from '@/contexts/transaction-context';
 import { AccountProvider } from '@/contexts/account-context';
+import { AdminAccountProvider } from '@/contexts/admin-account-context';
 import { MessageProvider } from '@/contexts/message-context';
 
 // This is a hardcoded UID for the super admin.
@@ -39,15 +39,17 @@ export default function ProtectedAdminLayout({
   // If the user is the super admin, render the admin layout.
   return (
     <AccountProvider>
+      <AdminAccountProvider>
         <TransactionProvider>
-            <RedeemCodeProvider>
-                <NotificationProvider>
-                  <MessageProvider>
-                    <AdminLayout>{children}</AdminLayout>
-                  </MessageProvider>
-                </NotificationProvider>
-            </RedeemCodeProvider>
+          <RedeemCodeProvider>
+            <NotificationProvider>
+              <MessageProvider>
+                <AdminLayout>{children}</AdminLayout>
+              </MessageProvider>
+            </NotificationProvider>
+          </RedeemCodeProvider>
         </TransactionProvider>
+      </AdminAccountProvider>
     </AccountProvider>
   );
 }
