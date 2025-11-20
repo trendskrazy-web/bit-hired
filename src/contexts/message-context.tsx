@@ -22,6 +22,8 @@ import {
   orderBy,
   doc,
 } from "firebase/firestore";
+import { FirestorePermissionError } from "@/firebase/errors";
+import { errorEmitter } from "@/firebase/error-emitter";
 
 export interface UserMessage {
   id: string;
@@ -61,7 +63,8 @@ export function MessageProvider({ children }: { children: ReactNode }) {
         const unread = userMessages.filter(msg => !msg.read).length;
         setUnreadCount(unread);
       }, (error) => {
-        console.error("Error fetching messages:", error);
+        const permissionError = new FirestorePermissionError({ path: messagesColRef.path, operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
       });
 
       return () => unsubscribe();

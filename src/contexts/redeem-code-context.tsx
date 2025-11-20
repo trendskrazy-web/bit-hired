@@ -22,6 +22,8 @@ import {
   onSnapshot,
   query,
 } from "firebase/firestore";
+import { FirestorePermissionError } from "@/firebase/errors";
+import { errorEmitter } from "@/firebase/error-emitter";
 
 export interface RedeemCode {
   id: string; // Document ID is the code itself
@@ -70,7 +72,8 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
         const codesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RedeemCode));
         setCodes(codesData);
       }, (error) => {
-        console.error("Error fetching redeem codes:", error);
+        const permissionError = new FirestorePermissionError({ path: codesColRef.path, operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
       });
 
       return () => unsubscribe();
@@ -142,7 +145,8 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
           amount: foundCode.amount,
         };
       } catch (error) {
-        console.error("Error redeeming code:", error);
+        const permissionError = new FirestorePermissionError({ path: codeDocRef.path, operation: 'get' });
+        errorEmitter.emit('permission-error', permissionError);
         return {
           success: false,
           message: "Could not verify redeem code. Please try again.",

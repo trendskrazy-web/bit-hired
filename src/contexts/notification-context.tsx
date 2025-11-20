@@ -21,6 +21,8 @@ import {
   orderBy,
   doc,
 } from "firebase/firestore";
+import { FirestorePermissionError } from "@/firebase/errors";
+import { errorEmitter } from "@/firebase/error-emitter";
 
 export interface Notification {
   id: string;
@@ -55,7 +57,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         const notifsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification));
         setNotifications(notifsData);
       }, (error) => {
-        console.error("Error fetching notifications:", error);
+        const permissionError = new FirestorePermissionError({ path: notifsColRef.path, operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
       });
 
       return () => unsubscribe();

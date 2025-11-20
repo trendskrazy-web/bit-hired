@@ -12,6 +12,8 @@ import {
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
 import { collection, doc, onSnapshot, query, where, setDoc, increment, getDocs, orderBy, CollectionReference, Query } from 'firebase/firestore';
 import { useAccount } from './account-context';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 export interface Deposit {
   id: string;
@@ -135,7 +137,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         setDepositsEnabled(designatedAccount !== null);
 
     } catch (error) {
-        console.error("Error fetching daily limits:", error);
+        const permissionError = new FirestorePermissionError({ path: dailyLimitsRef.path, operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
         setDepositsEnabled(false);
     }
 }, [firestore]);
@@ -159,20 +162,16 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         setData: React.Dispatch<React.SetStateAction<T[]>>
     ) => {
         let q: Query;
-        if (isAdmin) {
-            // Admin queries the root collection
-            q = query(collection(firestore, collectionName), orderBy('createdAt', 'desc'));
-        } else {
-            // User queries their own sub-collection
-            const userSubCollectionPath = `users/${user.uid}/${collectionName}`;
-            q = query(collection(firestore, userSubCollectionPath), orderBy('createdAt', 'desc'));
-        }
+        const collectionPath = isAdmin ? collectionName : `users/${user.uid}/${collectionName}`;
+        const ref = collection(firestore, collectionPath);
+        q = query(ref, orderBy('createdAt', 'desc'));
         
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
             setData(data);
         }, (error) => {
-            console.error(`Error fetching ${collectionName}:`, error);
+            const permissionError = new FirestorePermissionError({ path: ref.path, operation: 'list' });
+            errorEmitter.emit('permission-error', permissionError);
         });
         unsubscribers.push(unsubscribe);
     };
@@ -202,13 +201,15 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         userName: name,
       };
       setDoc(newDocRef, newDepositData).catch(error => {
-        console.error("Error creating global deposit request:", error);
+        const permissionError = new FirestorePermissionError({ path: newDocRef.path, operation: 'create', requestResourceData: newDepositData });
+        errorEmitter.emit('permission-error', permissionError);
       });
       
       // 2. Denormalize: Add a copy to the user's sub-collection
       const userDepositDocRef = doc(firestore, `users/${user.uid}/deposit_transactions`, newDocRef.id);
       setDoc(userDepositDocRef, newDepositData).catch(error => {
-         console.error("Error creating user deposit request:", error);
+         const permissionError = new FirestorePermissionError({ path: userDepositDocRef.path, operation: 'create', requestResourceData: newDepositData });
+         errorEmitter.emit('permission-error', permissionError);
       });
 
 
@@ -221,7 +222,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         { totalAmount: increment(amount), date: today, account: depositTo }, 
         { merge: true }
       ).catch(error => {
-        console.error("Error updating daily limit:", error);
+        const permissionError = new FirestorePermissionError({ path: limitDocRef.path, operation: 'update', requestResourceData: { totalAmount: `increment(${amount})` } });
+        errorEmitter.emit('permission-error', permissionError);
       });
       // Immediately update the state to reflect the new designated account
       updateDesignatedAccount();
@@ -243,13 +245,15 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
           userName: name,
       };
       setDoc(newDocRef, newWithdrawalData).catch(error => {
-        console.error("Error creating global withdrawal request:", error);
+        const permissionError = new FirestorePermissionError({ path: newDocRef.path, operation: 'create', requestResourceData: newWithdrawalData });
+        errorEmitter.emit('permission-error', permissionError);
       });
 
       // 2. Denormalize: Add a copy to the user's sub-collection
       const userWithdrawalDocRef = doc(firestore, `users/${user.uid}/withdrawal_transactions`, newDocRef.id);
       setDoc(userWithdrawalDocRef, newWithdrawalData).catch(error => {
-        console.error("Error creating user withdrawal request:", error);
+        const permissionError = new FirestorePermissionError({ path: userWithdrawalDocRef.path, operation: 'create', requestResourceData: newWithdrawalData });
+        errorEmitter.emit('permission-error', permissionError);
       });
     }
   };

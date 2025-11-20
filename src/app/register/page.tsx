@@ -18,9 +18,11 @@ import { Bitcoin } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { doc } from 'firebase/firestore';
+import { setDoc, doc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+
 
 export default function RegisterPage() {
   const auth = useAuth();
@@ -73,7 +75,15 @@ export default function RegisterPage() {
             referralCode: newReferralCode,
          };
 
-         setDocumentNonBlocking(userDocRef, userData, { merge: true });
+         setDoc(userDocRef, userData, { merge: true })
+            .catch((serverError) => {
+              const permissionError = new FirestorePermissionError({
+                path: userDocRef.path,
+                operation: 'create',
+                requestResourceData: userData,
+              });
+              errorEmitter.emit('permission-error', permissionError);
+            });
       }
       
       toast({
