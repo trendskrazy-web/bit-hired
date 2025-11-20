@@ -24,7 +24,7 @@ service cloud.firestore {
     
     // User-specific sub-collections
     match /users/{userId}/rentals/{rentalId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow get, list, write: if isOwner(userId) || isAdmin();
     }
 
     match /users/{userId}/messages/{messageId} {
