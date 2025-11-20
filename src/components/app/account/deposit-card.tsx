@@ -69,13 +69,33 @@ export function DepositCard() {
     }, 1500);
   };
 
+    const copyToClipboard = (text: string) => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            toast({
+                title: 'Copied to clipboard',
+                description: `Account number ${text} copied.`,
+            });
+        } catch (err) {
+            toast({
+                title: 'Copy Failed',
+                description: 'Could not copy the account number.',
+                variant: 'destructive',
+            });
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    };
+
   const handleCopy = () => {
     if (designatedDepositAccount) {
-      navigator.clipboard.writeText(designatedDepositAccount);
-      toast({
-        title: 'Copied to clipboard',
-        description: `Account number ${designatedDepositAccount} copied.`,
-      });
+      copyToClipboard(designatedDepositAccount);
     }
   }
 

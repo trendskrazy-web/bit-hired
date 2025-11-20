@@ -33,13 +33,33 @@ export function InviteCard({ referralCode }: InviteCardProps) {
         }
     }, [referralCode]);
 
+    const copyToClipboard = (text: string) => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            toast({
+                title: "Link Copied!",
+                description: "Your invite link has been copied to the clipboard.",
+            });
+        } catch (err) {
+            toast({
+                title: "Copy Failed",
+                description: "Could not copy the link.",
+                variant: "destructive",
+            });
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    };
+
     const handleCopy = () => {
         if (!inviteLink) return;
-        navigator.clipboard.writeText(inviteLink);
-        toast({
-            title: "Link Copied!",
-            description: "Your invite link has been copied to the clipboard.",
-        });
+        copyToClipboard(inviteLink);
     };
 
     const handleShare = () => {
