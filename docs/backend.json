@@ -141,6 +141,15 @@
         "rentalCost": {
           "type": "number",
           "description": "The cost of renting the mining machine for the specified period."
+        },
+        "totalCashedOut": {
+            "type": "number",
+            "description": "The total amount of earnings cashed out from this rental."
+        },
+        "lastCashedOutDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The date (YYYY-MM-DD) of the last cash out for this rental."
         }
       },
       "required": [

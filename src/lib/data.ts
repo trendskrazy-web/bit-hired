@@ -15,12 +15,14 @@ export interface Machine {
 }
 
 export interface Transaction {
-  id: string;
+  id:string;
   machineName: string;
   duration: string;
   cost: number;
-  date: string;
+  date: string; // Purchase date
   status: "Active" | "Expired" | "Pending";
+  totalCashedOut: number; // Total amount cashed out from this machine
+  lastCashedOutDate?: string; // YYYY-MM-DD format
 }
 
 export interface Notification {
@@ -104,7 +106,7 @@ const machines: Machine[] = [
   },
 ];
 
-const transactions: Transaction[] = [
+const transactions: Omit<Transaction, 'totalCashedOut'>[] = [
   {
     id: "txn1",
     machineName: "Antminer S19 Pro",
@@ -153,7 +155,8 @@ export const getMachines = async (): Promise<Machine[]> => {
 };
 
 export const getTransactions = async (): Promise<Transaction[]> => {
-  return new Promise((resolve) => setTimeout(() => resolve(transactions), 50));
+  const transactionsWithCashout = transactions.map(t => ({...t, totalCashedOut: 0}));
+  return new Promise((resolve) => setTimeout(() => resolve(transactionsWithCashout), 50));
 };
 
 export const getBitcoinData = async () => {

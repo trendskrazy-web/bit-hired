@@ -30,11 +30,12 @@ interface AccountContextType {
   deductBalance: (amount: number) => void;
   addBalance: (amount: number, userId?: string) => void;
   transactions: Transaction[];
-  addTransaction: (transaction: Omit<Transaction, 'id' | 'status'> & { status?: 'Active' | 'Expired' | 'Pending' }) => void;
+  addTransaction: (transaction: Omit<Transaction, 'id' | 'status' | 'totalCashedOut'> & { status?: 'Active' | 'Expired' | 'Pending' }) => void;
   updateTransactionStatus: (
     transactionId: string,
     status: 'Active' | 'Expired' | 'Pending'
   ) => void;
+  cashOutFromMachine: (transactionId: string, amount: number) => void;
   name: string;
   email: string;
   mobileNumber: string;
@@ -129,13 +130,15 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addTransaction = (transaction: Omit<Transaction, 'id' | 'status'> & { status?: 'Active' | 'Expired' | 'Pending' }) => {
+  const addTransaction = (transaction: Omit<Transaction, 'id' | 'status' | 'totalCashedOut'> & { status?: 'Active' | 'Expired' | 'Pending' }) => {
     if(user && firestore) {
         const rentalsColRef = collection(firestore, 'users', user.uid, 'rentals');
         addDocumentNonBlocking(rentalsColRef, {
             ...transaction,
             userAccountId: user.uid,
             status: transaction.status || 'Active',
+            totalCashedOut: 0,
+            lastCashedOutDate: null,
         });
     }
   };
@@ -150,6 +153,24 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [user, firestore]
   );
   
+  const cashOutFromMachine = useCallback(
+    (transactionId: string, amount: number) => {
+        if(user && firestore) {
+            // 1. Add amount to user's main balance
+            addBalance(amount, user.uid);
+
+            // 2. Update the rental transaction with the new cashout info
+            const transactionDocRef = doc(firestore, 'users', user.uid, 'rentals', transactionId);
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+            
+            updateDocumentNonBlocking(transactionDocRef, {
+                totalCashedOut: increment(amount),
+                lastCashedOutDate: today
+            });
+        }
+    }, [user, firestore, addBalance]
+  );
+
   const contextValue = {
     balance,
     setBalance,
@@ -158,6 +179,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     transactions,
     addTransaction,
     updateTransactionStatus,
+    cashOutFromMachine,
     name,
     email,
     mobileNumber,
