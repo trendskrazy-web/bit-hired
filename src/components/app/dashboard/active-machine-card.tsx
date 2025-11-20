@@ -7,33 +7,21 @@ import {
   Clock,
   Cpu,
   TrendingUp,
-  Wallet,
-  DollarSign,
-  Info
+  Wallet
 } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import type { Transaction, Machine } from '@/lib/data';
 import { useAccount } from '@/contexts/account-context';
 import { getMachines } from '@/lib/data';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface ActiveMachineCardProps {
   transaction: Transaction;
 }
 
 export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
-  const { updateTransactionStatus, cashOutFromMachine } = useAccount();
+  const { updateTransactionStatus } = useAccount();
   const [machines, setMachines] = useState<Machine[]>([]);
-  const { toast } = useToast();
-  const [isCashingOut, setIsCashingOut] = useState(false);
-
+  
   useEffect(() => {
     const fetchMachines = async () => {
       const allMachines = await getMachines();
@@ -92,33 +80,6 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
 
   const progressPercentage = ((totalDurationSeconds - timeRemaining) / totalDurationSeconds) * 100;
 
-  // --- New, Robust Cash Out Logic ---
-  const todayStr = new Date().toISOString().split('T')[0];
-  const hireDate = new Date(transaction.date);
-  const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
-  const hasBeenActiveFor24h = new Date().getTime() - hireDate.getTime() >= twentyFourHoursInMs;
-  const canCashOutToday = hasBeenActiveFor24h && transaction.lastCashedOutDate !== todayStr;
-  
-  const handleCashOut = () => {
-    setIsCashingOut(true);
-    try {
-        cashOutFromMachine(transaction.id, dailyEarning);
-        toast({
-            title: 'Cash Out Successful!',
-            description: `KES ${dailyEarning.toFixed(2)} has been added to your main balance.`
-        });
-    } catch(error) {
-        toast({
-            title: 'Cash Out Failed',
-            description: 'An unexpected error occurred. Please try again.',
-            variant: 'destructive'
-        });
-    } finally {
-        setIsCashingOut(false);
-    }
-  };
-
-
   return (
     <Card>
       <CardHeader>
@@ -150,14 +111,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
                 <Wallet className="w-6 h-6 text-muted-foreground" />
                 <div>
                 <p className="text-sm text-muted-foreground">Total Cashed Out</p>
-                <p className="font-semibold">KES {(transaction.totalCashedOut || 0).toFixed(2)}</p>
-                </div>
-            </div>
-            <div className="flex items-center space-x-3">
-                <DollarSign className="w-6 h-6 text-muted-foreground" />
-                <div>
-                <p className="text-sm text-muted-foreground">Available to Cash Out</p>
-                <p className="font-semibold text-primary">KES {canCashOutToday ? dailyEarning.toFixed(2) : '0.00'}</p>
+                 <p className="font-semibold">KES {(transaction.totalCashedOut || 0).toFixed(2)}</p>
                 </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -177,27 +131,6 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
             {progressPercentage.toFixed(2)}% Complete
           </p>
         </div>
-
-        <div className="flex justify-end items-center gap-2 pt-4">
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger>
-                        <Info className="w-4 h-4 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p className="max-w-xs">You can cash out your daily earnings once per day after the first 24 hours of hiring.</p>
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-
-            <Button
-                onClick={handleCashOut}
-                disabled={!canCashOutToday || isCashingOut}
-            >
-                {isCashingOut ? 'Processing...' : 'Cash Out'}
-            </Button>
-        </div>
-
       </CardContent>
     </Card>
   );
