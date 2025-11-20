@@ -33,7 +33,7 @@ service cloud.firestore {
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow read, list, update: if isOwner(userId);
+      allow read, list, update: if isOwner(userId) || isAdmin();
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
@@ -52,15 +52,28 @@ service cloud.firestore {
     match /deposit_transactions/{depositId} {
       allow create: if isSignedIn();
     }
-
+    
     match /withdrawal_transactions/{withdrawalId} {
       allow create: if isSignedIn();
+    }
+
+    // Collection Group queries for Admin
+    match /{path=**}/deposit_transactions/{depositId} {
+      allow read, list: if isAdmin();
+    }
+
+    match /{path=**}/withdrawal_transactions/{withdrawalId} {
+      allow read, list: if isAdmin();
     }
     
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
       allow list, create: if isAdmin();
       allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true;
+    }
+
+    match /notifications/{notificationId} {
+        allow read, list, create: if isAdmin();
     }
   }
 }
