@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -9,12 +8,11 @@ import {
   useEffect,
   useCallback,
 } from 'react';
-import type { Transaction, Machine } from '@/lib/data';
+import type { Transaction } from '@/lib/data';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
 import { collection, doc, onSnapshot, increment } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { getMachines } from '@/lib/data';
 
 export interface UserAccount {
   id: string;
@@ -42,7 +40,7 @@ interface AccountContextType {
   mobileNumber: string;
   referralCode?: string;
   lastCollectedAt?: string;
-  collectDailyEarnings: () => void;
+  collectDailyEarnings: (totalDailyEarnings: number) => void;
 }
 
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
@@ -59,18 +57,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [mobileNumber, setMobileNumber] = useState('');
   const [referralCode, setReferralCode] = useState<string | undefined>();
   const [lastCollectedAt, setLastCollectedAt] = useState<string | undefined>();
-  const [machines, setMachines] = useState<Machine[]>([]);
   
   const { user } = useUser();
   const firestore = useFirestore();
-
-  useEffect(() => {
-    const fetchMachines = async () => {
-      const allMachines = await getMachines();
-      setMachines(allMachines);
-    };
-    fetchMachines();
-  }, []);
 
   useEffect(() => {
     if (!user || !firestore) return;
@@ -161,9 +150,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [user, firestore]
   );
 
-  const collectDailyEarnings = useCallback(() => {
-    if (!user || !firestore || !machines || machines.length === 0) {
-        console.log("Cannot collect: missing user, firestore, or machine data.");
+  const collectDailyEarnings = useCallback((totalDailyEarnings: number) => {
+    if (!user || !firestore) {
         return;
     }
     
@@ -173,24 +161,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         return;
     }
 
-    const activeTransactions = transactions.filter(t => t.status === 'Active');
-    const totalDailyEarnings = activeTransactions.reduce((total, transaction) => {
-        const machine = machines.find(m => m.name === transaction.machineName);
-        if (machine) {
-            const totalEarnings = machine.durations[0].totalEarnings;
-            const daily = totalEarnings / 45;
-            return total + daily;
-        }
-        return total;
-    }, 0);
-
     if (totalDailyEarnings > 0) {
         addBalance(totalDailyEarnings);
         const userDocRef = doc(firestore, 'users', user.uid);
         updateDocumentNonBlocking(userDocRef, { lastCollectedAt: today });
     }
 
-  }, [user, firestore, transactions, machines, lastCollectedAt, addBalance]);
+  }, [user, firestore, lastCollectedAt, addBalance]);
   
 
   const contextValue = {
@@ -226,5 +203,3 @@ export function useAccount() {
   }
   return context;
 }
-
-    

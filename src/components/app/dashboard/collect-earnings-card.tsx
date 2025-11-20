@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,14 @@ export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollect
     }, [lastCollectedAt]);
 
     const handleCollect = () => {
+        if (totalDailyEarnings <= 0) {
+             toast({
+                title: 'No Earnings to Collect',
+                description: `You have no active machines generating earnings.`,
+                variant: 'destructive'
+            });
+            return;
+        }
         setIsCollecting(true);
         onCollect();
         
@@ -65,7 +72,7 @@ export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollect
                 <Button 
                     className="w-full"
                     onClick={handleCollect}
-                    disabled={!canCollectToday || totalDailyEarnings <= 0 || isCollecting}
+                    disabled={!canCollectToday || isCollecting}
                 >
                     {isCollecting ? 'Collecting...' : 'Collect All Earnings'}
                 </Button>
@@ -73,5 +80,3 @@ export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollect
         </Card>
     )
 }
-
-    

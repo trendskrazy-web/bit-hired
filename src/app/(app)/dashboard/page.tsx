@@ -1,4 +1,3 @@
-
 "use client";
 
 import { ActiveMachineCard } from "@/components/app/dashboard/active-machine-card";
@@ -53,7 +52,7 @@ export default function DashboardPage() {
 
       <CollectEarningsCard 
         totalDailyEarnings={totalDailyEarnings}
-        onCollect={collectDailyEarnings}
+        onCollect={() => collectDailyEarnings(totalDailyEarnings)}
         lastCollectedAt={lastCollectedAt}
       />
 
@@ -77,5 +76,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
