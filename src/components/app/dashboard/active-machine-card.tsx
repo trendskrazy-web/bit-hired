@@ -10,7 +10,7 @@ import {
   TrendingUp,
   Landmark,
 } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Transaction, Machine } from '@/lib/data';
@@ -25,6 +25,10 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const { toast } = useToast();
   const { addBalance, updateTransactionStatus } = useAccount();
   const [machines, setMachines] = useState<Machine[]>([]);
+
+  // State to track earnings and cash-out history for this specific machine
+  const [cashedOutAmount, setCashedOutAmount] = useState(0); 
+  const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchMachines = async () => {
@@ -53,36 +57,32 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     [transaction.date]
   );
 
-  const getElapsedTime = () => {
+  const getElapsedTime = useCallback(() => {
     const now = new Date();
     return Math.floor((now.getTime() - purchaseDate.getTime()) / 1000);
-  };
+  }, [purchaseDate]);
 
   const [timeRemaining, setTimeRemaining] = useState(
     totalDuration - getElapsedTime()
   );
   
-  // State to track earnings and cash-out history for this specific machine
-  const [cashedOutAmount, setCashedOutAmount] = useState(0); 
-  const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
-
   // Timer for countdown
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev > 1) {
-          return prev - 1;
-        } else {
-          if (transaction.status === 'Active') {
-            updateTransactionStatus(transaction.id, 'Expired');
-          }
-          return 0;
+      const remaining = totalDuration - getElapsedTime();
+      if (remaining > 0) {
+        setTimeRemaining(remaining);
+      } else {
+        setTimeRemaining(0);
+        if (transaction.status === 'Active') {
+          updateTransactionStatus(transaction.id, 'Expired');
         }
-      });
+        clearInterval(timer);
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [transaction.id, transaction.status, updateTransactionStatus]);
+  }, [transaction.id, transaction.status, updateTransactionStatus, totalDuration, getElapsedTime]);
 
   // Determine if a cash out is possible today
   const canCashOutToday = useMemo(() => {
@@ -246,5 +246,3 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     </Card>
   );
 }
-
-    
