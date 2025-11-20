@@ -40,6 +40,9 @@ export default function InboxPage() {
     // This is a more robust way to copy to clipboard that works in more environments
     const textarea = document.createElement('textarea');
     textarea.value = text;
+    // Make the textarea invisible
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
     document.body.appendChild(textarea);
     textarea.select();
     try {
@@ -54,8 +57,9 @@ export default function InboxPage() {
         description: 'Could not copy the content.',
         variant: 'destructive',
       });
+    } finally {
+        document.body.removeChild(textarea);
     }
-    document.body.removeChild(textarea);
   };
   
   const handleCopy = () => {
