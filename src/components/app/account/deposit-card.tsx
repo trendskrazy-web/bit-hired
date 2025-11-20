@@ -176,7 +176,7 @@ export function DepositCard() {
       <CardContent className="space-y-4">
         {depositsEnabled && designatedDepositAccount ? (
         <div className="space-y-2">
-            <Label>1. Send Deposit To:</Label>
+            <Label>1. Send money to the account below:</Label>
              <Alert>
                 <div className="flex justify-between items-center">
                    <AlertDescription className='font-bold text-lg'>
