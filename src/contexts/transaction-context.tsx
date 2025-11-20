@@ -103,52 +103,50 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
 
 
   useEffect(() => {
-    if (!firestore || !user) return;
-
-    let unsubDeposits = () => {};
-    let unsubWithdrawals = () => {};
+    if (!firestore || !user) {
+      setDeposits([]);
+      setWithdrawals([]);
+      return;
+    }
 
     const isAdmin = user.uid === SUPER_ADMIN_UID;
+    const unsubscribers: (() => void)[] = [];
+
+    const createSubscription = <T,>(
+      path: string,
+      isCollectionGroup: boolean,
+      setData: React.Dispatch<React.SetStateAction<T[]>>
+    ) => {
+      let q: Query;
+      if (isCollectionGroup) {
+        q = query(collectionGroup(firestore, path), orderBy('createdAt', 'desc'));
+      } else {
+        q = query(collection(firestore, path), orderBy('createdAt', 'desc'));
+      }
+      
+      const unsubscribe = onSnapshot(q, 
+        (snapshot) => {
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+          setData(data);
+        }, 
+        (error) => {
+          const permissionError = new FirestorePermissionError({ path, operation: 'list' });
+          errorEmitter.emit('permission-error', permissionError);
+        }
+      );
+      unsubscribers.push(unsubscribe);
+    };
 
     if (isAdmin) {
-      // Admin: Listen to collection groups
-      const depositsQuery = query(collectionGroup(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
-      unsubDeposits = onSnapshot(depositsQuery, snapshot => {
-        setDeposits(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit)));
-      }, error => {
-        const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-
-      const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawal_transactions'), orderBy('createdAt', 'desc'));
-      unsubWithdrawals = onSnapshot(withdrawalsQuery, snapshot => {
-        setWithdrawals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal)));
-      }, error => {
-         const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
-         errorEmitter.emit('permission-error', permissionError);
-      });
+      createSubscription<Deposit>('deposit_transactions', true, setDeposits);
+      createSubscription<Withdrawal>('withdrawal_transactions', true, setWithdrawals);
     } else {
-      // User: Listen to their own sub-collections
-      const userDepositsQuery = query(collection(firestore, `users/${user.uid}/deposit_transactions`), orderBy('createdAt', 'desc'));
-      unsubDeposits = onSnapshot(userDepositsQuery, snapshot => {
-        setDeposits(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit)));
-      }, error => {
-         const permissionError = new FirestorePermissionError({ path: `users/${user.uid}/deposit_transactions`, operation: 'list' });
-         errorEmitter.emit('permission-error', permissionError);
-      });
-
-      const userWithdrawalsQuery = query(collection(firestore, `users/${user.uid}/withdrawal_transactions`), orderBy('createdAt', 'desc'));
-      unsubWithdrawals = onSnapshot(userWithdrawalsQuery, snapshot => {
-        setWithdrawals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal)));
-      }, error => {
-        const permissionError = new FirestorePermissionError({ path: `users/${user.uid}/withdrawal_transactions`, operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
-      });
+      createSubscription<Deposit>(`users/${user.uid}/deposit_transactions`, false, setDeposits);
+      createSubscription<Withdrawal>(`users/${user.uid}/withdrawal_transactions`, false, setWithdrawals);
     }
 
     return () => {
-      unsubDeposits();
-      unsubWithdrawals();
+      unsubscribers.forEach(unsub => unsub());
     };
   }, [user, firestore]);
 
@@ -276,3 +274,5 @@ export function useTransactions() {
   }
   return context;
 }
+
+    
