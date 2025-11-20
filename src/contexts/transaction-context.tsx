@@ -112,37 +112,51 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     const isAdmin = user.uid === SUPER_ADMIN_UID;
     const unsubscribers: (() => void)[] = [];
 
-    const createSubscription = <T,>(
-      path: string,
-      isCollectionGroup: boolean,
-      setData: React.Dispatch<React.SetStateAction<T[]>>
-    ) => {
-      let q: Query;
-      if (isCollectionGroup) {
-        q = query(collectionGroup(firestore, path), orderBy('createdAt', 'desc'));
-      } else {
-        q = query(collection(firestore, path), orderBy('createdAt', 'desc'));
-      }
-      
-      const unsubscribe = onSnapshot(q, 
-        (snapshot) => {
-          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
-          setData(data);
-        }, 
-        (error) => {
-          const permissionError = new FirestorePermissionError({ path, operation: 'list' });
-          errorEmitter.emit('permission-error', permissionError);
-        }
-      );
-      unsubscribers.push(unsubscribe);
-    };
-
     if (isAdmin) {
-      createSubscription<Deposit>('deposit_transactions', true, setDeposits);
-      createSubscription<Withdrawal>('withdrawal_transactions', true, setWithdrawals);
+      // Admin: Use collectionGroup queries
+      const depositsQuery = query(collectionGroup(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
+      const depositsUnsub = onSnapshot(depositsQuery, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
+        setDeposits(data);
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+      unsubscribers.push(depositsUnsub);
+
+      const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawal_transactions'), orderBy('createdAt', 'desc'));
+      const withdrawalsUnsub = onSnapshot(withdrawalsQuery, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
+        setWithdrawals(data);
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+      unsubscribers.push(withdrawalsUnsub);
+
     } else {
-      createSubscription<Deposit>(`users/${user.uid}/deposit_transactions`, false, setDeposits);
-      createSubscription<Withdrawal>(`users/${user.uid}/withdrawal_transactions`, false, setWithdrawals);
+      // Regular user: Query their own sub-collections
+      const userDepositsPath = `users/${user.uid}/deposit_transactions`;
+      const userDepositsQuery = query(collection(firestore, userDepositsPath), orderBy('createdAt', 'desc'));
+      const userDepositsUnsub = onSnapshot(userDepositsQuery, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
+        setDeposits(data);
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({ path: userDepositsPath, operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+      unsubscribers.push(userDepositsUnsub);
+
+      const userWithdrawalsPath = `users/${user.uid}/withdrawal_transactions`;
+      const userWithdrawalsQuery = query(collection(firestore, userWithdrawalsPath), orderBy('createdAt', 'desc'));
+      const userWithdrawalsUnsub = onSnapshot(userWithdrawalsQuery, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
+        setWithdrawals(data);
+      }, (error) => {
+        const permissionError = new FirestorePermissionError({ path: userWithdrawalsPath, operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+      unsubscribers.push(userWithdrawalsUnsub);
     }
 
     return () => {
@@ -274,5 +288,3 @@ export function useTransactions() {
   }
   return context;
 }
-
-    
