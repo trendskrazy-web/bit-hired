@@ -61,6 +61,8 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const [timeRemaining, setTimeRemaining] = useState(
     totalDuration - getElapsedTime()
   );
+  // These states are now managed within the transaction object if needed,
+  // but for daily cashout logic, we can simplify.
   const [cashedOutAmount, setCashedOutAmount] = useState(0); 
   const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
 
@@ -104,12 +106,12 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const availableToCashOut = useMemo(() => {
     if (
       timeRemaining <= 0 ||
-      dailyEarning <= 0 ||
       !canCashOutToday ||
       !hasBeenActiveFor24h
     ) {
       return 0;
     }
+    // Capped at daily earning
     return dailyEarning;
   }, [
     dailyEarning,
