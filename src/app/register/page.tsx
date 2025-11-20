@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth, useFirestore, FirestorePermissionError, errorEmitter } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Bitcoin } from 'lucide-react';
 import Link from 'next/link';
@@ -61,8 +61,12 @@ export default function RegisterPage() {
       }
       return null;
     } catch (error) {
-      console.error("Error looking up invitation code:", error);
-      // Don't block registration if lookup fails, just return null
+       const permissionError = new FirestorePermissionError({
+        path: usersRef.path,
+        operation: 'list',
+      });
+      errorEmitter.emit('permission-error', permissionError);
+      // Don't block registration, just return null
       return null;
     }
   };
