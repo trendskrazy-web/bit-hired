@@ -21,7 +21,6 @@ import {
   getDoc,
   onSnapshot,
   query,
-  updateDoc,
 } from "firebase/firestore";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { errorEmitter } from "@/firebase/error-emitter";
@@ -38,7 +37,7 @@ export interface RedeemCode {
 
 interface RedeemCodeContextType {
   generateCode: (amount: number) => Promise<string>;
-  generateCodes: (amount: number, count: number) => Promise<string[]>;
+  generateCodes: (amount: number, count: number) => Promise<void>;
   redeemCode: (
     code: string
   ) => Promise<{ success: boolean; message: string; amount: number }>;
@@ -100,12 +99,9 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
   }, [firestore]);
 
   const generateCodes = useCallback(async (amount: number, count: number) => {
-    const generatedCodes: string[] = [];
     for (let i = 0; i < count; i++) {
-        const code = await generateCode(amount);
-        generatedCodes.push(code);
+        await generateCode(amount);
     }
-    return generatedCodes;
   }, [generateCode]);
 
 

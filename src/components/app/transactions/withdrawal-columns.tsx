@@ -13,9 +13,9 @@ const statusIcons: Record<Withdrawal['status'], React.ReactNode> = {
   cancelled: <XCircle className="mr-2 h-4 w-4 text-red-500" />,
 };
 
-const statusVariants: Record<Withdrawal['status'], 'secondary' | 'default' | 'destructive'> = {
+const statusVariants: Record<Withdrawal['status'], 'secondary' | 'outline' | 'destructive'> = {
   pending: 'secondary',
-  completed: 'default',
+  completed: 'outline',
   cancelled: 'destructive',
 };
 
@@ -62,7 +62,7 @@ export const columns: ColumnDef<Withdrawal>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as Withdrawal['status'];
       return (
-        <Badge variant={statusVariants[status]} className="capitalize">
+        <Badge variant={status === 'completed' ? 'default' : statusVariants[status]} className="capitalize">
           {statusIcons[status]}
           {status}
         </Badge>

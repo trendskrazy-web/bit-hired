@@ -23,9 +23,9 @@ const statusIcons: Record<Deposit['status'], React.ReactNode> = {
   cancelled: <XCircle className="mr-2 h-4 w-4 text-red-500" />,
 };
 
-const statusVariants: Record<Deposit['status'], 'secondary' | 'default' | 'destructive'> = {
+const statusVariants: Record<Deposit['status'], 'secondary' | 'outline' | 'destructive'> = {
   pending: 'secondary',
-  completed: 'default',
+  completed: 'outline',
   cancelled: 'destructive',
 };
 
@@ -73,7 +73,7 @@ export const columns = ({ onAction }: ColumnsProps): ColumnDef<Deposit>[] => [
     cell: ({ row }) => {
       const status = row.getValue('status') as Deposit['status'];
       return (
-        <Badge variant={statusVariants[status]} className="capitalize">
+        <Badge variant={status === 'completed' ? 'default' : statusVariants[status]} className="capitalize">
           {statusIcons[status]}
           {status}
         </Badge>
