@@ -16,17 +16,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
 import { useState } from 'react';
 import type { UserMessage } from '@/contexts/message-context';
 import { Button } from '@/components/ui/button';
-import { Mail, MailOpen } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Mail, MailOpen, Copy } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function InboxPage() {
   const { messages, markMessageAsRead } = useMessages();
   const [selectedMessage, setSelectedMessage] = useState<UserMessage | null>(null);
+  const { toast } = useToast();
 
   const handleMessageClick = (message: UserMessage) => {
     setSelectedMessage(message);
@@ -34,6 +36,16 @@ export default function InboxPage() {
       markMessageAsRead(message.id);
     }
   };
+  
+  const handleCopy = () => {
+    if (selectedMessage?.content) {
+        navigator.clipboard.writeText(selectedMessage.content);
+        toast({
+            title: "Content Copied",
+            description: "The message content has been copied to your clipboard.",
+        })
+    }
+  }
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -107,12 +119,18 @@ export default function InboxPage() {
               Received: {selectedMessage && new Date(selectedMessage.createdAt).toLocaleString()}
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 whitespace-pre-wrap break-words">
+          <div className="py-4 whitespace-pre-wrap break-words max-h-60 overflow-y-auto">
             {selectedMessage?.content}
           </div>
-          <DialogClose asChild>
-            <Button>Close</Button>
-          </DialogClose>
+          <DialogFooter className='sm:justify-start gap-2'>
+            <Button type="button" variant="secondary" onClick={handleCopy}>
+                <Copy className="mr-2 h-4 w-4" />
+                Copy Content
+            </Button>
+            <DialogClose asChild>
+              <Button type="button">Close</Button>
+            </DialogClose>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
