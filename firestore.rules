@@ -16,8 +16,13 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == 'F7hBfGV8QYhgZ7KXbcmThjlisuo2';
     }
 
+    // Grant admin full access to everything
+    match /{path=**} {
+      allow read, write: if isAdmin();
+    }
+
     match /users/{userId} {
-      allow get, update: if isOwner(userId) || isAdmin();
+      allow get, update: if isOwner(userId);
       allow create: if isSignedIn() && request.auth.uid == userId;
       allow list: if isAdmin();
     }
@@ -28,8 +33,7 @@ service cloud.firestore {
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow write: if isAdmin(); // Admin can send messages to users
-      allow read, list, update: if isOwner(userId) || isAdmin();
+      allow read, list, update: if isOwner(userId);
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
@@ -42,44 +46,20 @@ service cloud.firestore {
 
     match /mining_machines/{machineId} {
       allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin();
     }
 
-    // Global collections for Admin review
-    match /deposit_transactions {
-      allow list, read, update: if isAdmin();
+    // Global collections for user creation
+    match /deposit_transactions/{depositId} {
       allow create: if isSignedIn();
-      match /{depositId} {
-        allow read, update: if isAdmin();
-        allow create: if isSignedIn();
-      }
     }
 
-    match /withdrawal_transactions {
-      allow list, read, update: if isAdmin();
+    match /withdrawal_transactions/{withdrawalId} {
       allow create: if isSignedIn();
-       match /{withdrawalId} {
-        allow read, update: if isAdmin();
-        allow create: if isSignedIn();
-      }
     }
     
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
-      allow create, list: if isAdmin();
-      allow update: if (isSignedIn() && resource.data.used == false && request.resource.data.used == true) || isAdmin();
-    }
-
-    match /notifications/{notificationId} {
-      allow read, write, list: if isAdmin();
-    }
-
-    // Collection Group permissions for admin
-    match /{path=**}/deposit_transactions/{id} {
-      allow list, read: if isAdmin();
-    }
-    match /{path=**}/withdrawal_transactions/{id} {
-      allow list, read: if isAdmin();
+      allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true;
     }
   }
 }
