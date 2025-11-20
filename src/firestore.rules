@@ -25,19 +25,23 @@ service cloud.firestore {
     // User-specific sub-collections
     match /users/{userId}/rentals/{rentalId} {
       allow read, write: if isOwner(userId) || isAdmin();
+      allow list: if isOwner(userId);
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow read, write, list: if isOwner(userId);
+      allow read, write: if isOwner(userId);
+      allow list: if isOwner(userId);
       allow create: if isAdmin();
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
       allow read, write: if isOwner(userId) || isAdmin();
+      allow list: if isOwner(userId);
     }
     
     match /users/{userId}/withdrawal_transactions/{withdrawalId} {
       allow read, write: if isOwner(userId) || isAdmin();
+       allow list: if isOwner(userId);
     }
 
     match /mining_machines/{machineId} {
@@ -60,9 +64,8 @@ service cloud.firestore {
     
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
-      allow create: if isAdmin();
+      allow create, list: if isAdmin();
       allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true;
-      allow list: if isAdmin();
     }
 
     match /daily_limits/{limitId} {
@@ -89,3 +92,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

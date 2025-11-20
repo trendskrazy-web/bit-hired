@@ -166,8 +166,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       let path: string;
       if (isAdmin) {
         // Admin gets all transactions from the root collection group
+        path = collectionName;
         q = query(collectionGroup(firestore, collectionName), orderBy('createdAt', 'desc'));
-        path = collectionName; // The path is the collection group name
       } else {
         // User gets only their own transactions from their sub-collection
         path = `users/${user.uid}/${collectionName}`;
@@ -341,3 +341,5 @@ export function useTransactions() {
   }
   return context;
 }
+
+    
