@@ -34,6 +34,7 @@ service cloud.firestore {
 
     match /users/{userId}/messages/{messageId} {
       allow read, list, update: if isOwner(userId);
+      allow create: if isAdmin();
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
@@ -60,6 +61,7 @@ service cloud.firestore {
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
       allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true;
+      allow list, create: if isAdmin();
     }
   }
 }
