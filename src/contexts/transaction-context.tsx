@@ -61,6 +61,8 @@ const useAdminTransactions = () => {
 
     useEffect(() => {
         if (!firestore) return;
+        
+        const unsubscribers: (()=> void)[] = [];
 
         const depositsQuery = query(collectionGroup(firestore, 'deposit_transactions'), orderBy('createdAt', 'desc'));
         const depositsUnsub = onSnapshot(depositsQuery, (snapshot) => {
@@ -70,6 +72,7 @@ const useAdminTransactions = () => {
             const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
             errorEmitter.emit('permission-error', permissionError);
         });
+        unsubscribers.push(depositsUnsub);
 
         const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawal_transactions'), orderBy('createdAt', 'desc'));
         const withdrawalsUnsub = onSnapshot(withdrawalsQuery, (snapshot) => {
@@ -79,10 +82,10 @@ const useAdminTransactions = () => {
            const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
            errorEmitter.emit('permission-error', permissionError);
         });
+        unsubscribers.push(withdrawalsUnsub);
 
         return () => {
-            depositsUnsub();
-            withdrawalsUnsub();
+            unsubscribers.forEach(unsub => unsub());
         };
     }, [firestore]);
 
@@ -97,6 +100,8 @@ const useUserTransactions = () => {
 
     useEffect(() => {
         if (!firestore || !user) return;
+        
+        const unsubscribers: (()=> void)[] = [];
 
         const userDepositsPath = `users/${user.uid}/deposit_transactions`;
         const userDepositsQuery = query(collection(firestore, userDepositsPath), orderBy('createdAt', 'desc'));
@@ -107,6 +112,7 @@ const useUserTransactions = () => {
             const permissionError = new FirestorePermissionError({ path: userDepositsPath, operation: 'list' });
             errorEmitter.emit('permission-error', permissionError);
         });
+        unsubscribers.push(userDepositsUnsub);
 
         const userWithdrawalsPath = `users/${user.uid}/withdrawal_transactions`;
         const userWithdrawalsQuery = query(collection(firestore, userWithdrawalsPath), orderBy('createdAt', 'desc'));
@@ -117,10 +123,10 @@ const useUserTransactions = () => {
             const permissionError = new FirestorePermissionError({ path: userWithdrawalsPath, operation: 'list' });
             errorEmitter.emit('permission-error', permissionError);
         });
+        unsubscribers.push(userWithdrawalsUnsub);
 
         return () => {
-            userDepositsUnsub();
-            userWithdrawalsUnsub();
+            unsubscribers.forEach(unsub => unsub());
         };
     }, [firestore, user]);
 
