@@ -22,9 +22,8 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow get, update: if isOwner(userId);
-      allow create: if isSignedIn() && request.auth.uid == userId;
-      allow list: if isAdmin();
+      allow get, update, create: if isOwner(userId);
+      // Admin list is covered by the global rule
     }
     
     // User-specific sub-collections
@@ -33,7 +32,8 @@ service cloud.firestore {
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow read, list, update, create: if isOwner(userId) || isAdmin();
+      allow read, list, update: if isOwner(userId);
+      // Admin create/read/list is covered by global rule
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
@@ -51,31 +51,18 @@ service cloud.firestore {
     // Global collections for user creation
     match /deposit_transactions/{depositId} {
       allow create: if isSignedIn();
-      allow read, update: if isAdmin();
+      // Admin access covered by global rule
     }
     
     match /withdrawal_transactions/{withdrawalId} {
       allow create: if isSignedIn();
-      allow read, update: if isAdmin();
-    }
-
-    // Collection Group queries for Admin
-    match /{path=**}/deposit_transactions/{depositId} {
-      allow read, list: if isAdmin();
-    }
-
-    match /{path=**}/withdrawal_transactions/{withdrawalId} {
-      allow read, list: if isAdmin();
+      // Admin access covered by global rule
     }
     
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
-      allow list, create: if isAdmin();
-      allow update: if (isSignedIn() && resource.data.used == false && request.resource.data.used == true) || isAdmin();
-    }
-
-    match /notifications/{notificationId} {
-        allow read, list, create: if isAdmin();
+      allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true;
+      // Admin access (create, list, update) covered by global rule
     }
   }
 }
