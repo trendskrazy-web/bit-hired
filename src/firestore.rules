@@ -26,6 +26,12 @@ service cloud.firestore {
     match /users/{userId}/rentals/{rentalId} {
       allow read, write: if isOwner(userId) || isAdmin();
     }
+
+    match /users/{userId}/messages/{messageId} {
+      allow read: if isOwner(userId);
+      allow create: if isAdmin();
+      allow update: if isOwner(userId) && request.resource.data.read == true && resource.data.read == false;
+    }
     
     match /users/{userId}/deposit_transactions/{depositId} {
       allow read, write: if isOwner(userId) || isAdmin();
