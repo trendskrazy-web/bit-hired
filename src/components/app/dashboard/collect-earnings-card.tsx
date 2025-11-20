@@ -73,3 +73,5 @@ export function CollectEarningsCard({ totalDailyEarnings, onCollect, lastCollect
         </Card>
     )
 }
+
+    

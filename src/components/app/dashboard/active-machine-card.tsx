@@ -128,3 +128,5 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     </Card>
   );
 }
+
+    
