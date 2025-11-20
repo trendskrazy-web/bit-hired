@@ -11,6 +11,8 @@ import {
 import { useFirestore, useUser } from '@/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import type { UserAccount } from './account-context';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
 
 
 interface AdminAccountContextType {
@@ -34,7 +36,8 @@ export function AdminAccountProvider({ children }: { children: ReactNode }) {
         const usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserAccount));
         setAllUsers(usersData);
     }, (error) => {
-        console.error("Error fetching all users:", error);
+        const permissionError = new FirestorePermissionError({ path: usersColRef.path, operation: 'list' });
+        errorEmitter.emit('permission-error', permissionError);
     });
 
     return () => {
