@@ -117,7 +117,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
   
       if (isAdmin) {
         path = collectionName;
-        q = query(collectionGroup(firestore, collectionName), orderBy('createdAt', 'desc'));
+        const ref = collection(firestore, path);
+        q = query(ref, orderBy('createdAt', 'desc'));
       } else {
         path = `users/${user.uid}/${collectionName}`;
         const ref = collection(firestore, path);
