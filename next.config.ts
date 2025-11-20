@@ -3,7 +3,6 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  strictMode: true,
   images: {
     remotePatterns: [
       {
@@ -19,7 +18,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https,"s',
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
