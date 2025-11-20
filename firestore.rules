@@ -20,6 +20,11 @@ service cloud.firestore {
     match /{path=**} {
       allow read, write: if isAdmin();
     }
+    
+    // Explicit rule for notifications collection group query for admin
+    match /{path=**}/notifications/{notificationId} {
+      allow read, list: if isAdmin();
+    }
 
     match /users/{userId} {
       allow get, update, create: if isOwner(userId);
