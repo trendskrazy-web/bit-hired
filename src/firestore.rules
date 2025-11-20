@@ -51,10 +51,12 @@ service cloud.firestore {
     // Global collections for user creation
     match /deposit_transactions/{depositId} {
       allow create: if isSignedIn();
+      allow read, update: if isAdmin();
     }
     
     match /withdrawal_transactions/{withdrawalId} {
       allow create: if isSignedIn();
+      allow read, update: if isAdmin();
     }
 
     // Collection Group queries for Admin
@@ -69,7 +71,7 @@ service cloud.firestore {
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
       allow list, create: if isAdmin();
-      allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true;
+      allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true || isAdmin();
     }
 
     match /notifications/{notificationId} {

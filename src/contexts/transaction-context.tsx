@@ -67,8 +67,7 @@ const useAdminTransactions = () => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deposit));
       setDeposits(data);
     }, (error) => {
-      const permissionError = new FirestorePermissionError({ path: 'deposit_transactions', operation: 'list' });
-      errorEmitter.emit('permission-error', permissionError);
+      console.error("Admin deposits listener error:", error);
     });
 
     const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawal_transactions'), orderBy('createdAt', 'desc'));
@@ -76,8 +75,7 @@ const useAdminTransactions = () => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Withdrawal));
       setWithdrawals(data);
     }, (error) => {
-      const permissionError = new FirestorePermissionError({ path: 'withdrawal_transactions', operation: 'list' });
-      errorEmitter.emit('permission-error', permissionError);
+       console.error("Admin withdrawals listener error:", error);
     });
 
     return () => {
