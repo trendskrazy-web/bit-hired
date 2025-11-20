@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,7 +27,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
 
   // Local state for this specific card instance
   const [cashedOutAmount, setCashedOutAmount] = useState(0); 
-  const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
+  const [lastCashOutDate, setLastCashOutDate] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMachines = async () => {
@@ -79,33 +78,35 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     return () => clearInterval(timer);
   }, [transaction.id, transaction.status, updateTransactionStatus, purchaseDate, totalDurationSeconds]);
 
-  const { canCashOutToday, availableToCashOut } = useMemo(() => {
+  const { canCashOut, availableToCashOut } = useMemo(() => {
     const now = new Date();
-    const oneDayInMs = 24 * 60 * 60 * 1000;
+    const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
 
     // 1. Check if 24 hours have passed since purchase
-    const hasBeenActiveFor24h = now.getTime() - purchaseDate.getTime() >= oneDayInMs;
+    const hasBeenActiveFor24h = (now.getTime() - purchaseDate.getTime()) >= twentyFourHoursInMs;
 
     // 2. Check if already cashed out today
-    const alreadyCashedOutToday = lastCashOutDate ? now.toDateString() === lastCashOutDate.toDateString() : false;
+    const lastCashOutDay = lastCashOutDate ? lastCashOutDate : null;
+    const todayDay = now.toISOString().split('T')[0];
+    const alreadyCashedOutToday = lastCashOutDay === todayDay;
     
     // 3. Check if machine is still active
     const isExpired = timeRemaining <= 0;
 
     if (!hasBeenActiveFor24h || alreadyCashedOutToday || isExpired) {
-        return { canCashOutToday: false, availableToCashOut: 0 };
+        return { canCashOut: false, availableToCashOut: 0 };
     }
     
     // If all checks pass, the user can cash out exactly the daily earning amount
-    return { canCashOutToday: true, availableToCashOut: dailyEarning };
+    return { canCashOut: true, availableToCashOut: dailyEarning };
   }, [purchaseDate, lastCashOutDate, timeRemaining, dailyEarning]);
 
 
   const handleCashOut = () => {
-    if (canCashOutToday && availableToCashOut > 0) {
+    if (canCashOut && availableToCashOut > 0) {
       addBalance(availableToCashOut);
       setCashedOutAmount((prev) => prev + availableToCashOut);
-      setLastCashOutDate(new Date());
+      setLastCashOutDate(new Date().toISOString().split('T')[0]);
 
       toast({
         title: 'Cash Out Successful!',
@@ -218,7 +219,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
           <Button
             onClick={handleCashOut}
             size="sm"
-            disabled={!canCashOutToday || availableToCashOut <= 0}
+            disabled={!canCashOut || availableToCashOut <= 0}
           >
             Cash Out
           </Button>
@@ -233,4 +234,3 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
     </Card>
   );
 }
-
