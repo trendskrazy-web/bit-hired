@@ -8,7 +8,6 @@ import {
   ReactNode,
   useEffect,
   useCallback,
-  useMemo,
 } from 'react';
 import type { Transaction, Machine } from '@/lib/data';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
