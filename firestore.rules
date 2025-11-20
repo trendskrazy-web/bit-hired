@@ -1,82 +1,133 @@
-
+/**
+ * This ruleset enforces a strict user-ownership security model for the BitHired application.
+ *
+ * Core Philosophy:
+ * The security model is centered around the user. All user-generated data, such as
+ * hiring transactions and payment records, is private and can only be accessed by the user
+ * who created it. Data that is intended for public consumption, like the list of available
+ * mining machines, is segregated into a separate top-level collection and made publicly readable.
+ *
+ * Data Structure:
+ * All private user data is nested within the `/users/{userId}` collection path. This includes
+ * the user's profile document as well as subcollections for `hiring_transactions` and
+ * `mpesa_transactions`. This structure allows for simple and performant path-based authorization.
+ * Global, non-sensitive data like `mining_machines` is stored in a top-level collection.
+ *
+ * Key Security Decisions:
+ * - User Isolation: A user can only read or write data within their own document tree
+ *   (i.e., `/users/{their_own_userId}/...`). Cross-user access is strictly forbidden.
+ * - No User Enumeration: Listing documents in the top-level `/users` collection is disallowed
+ *   to protect user privacy.
+ * - Public Read, Secure Writes: The `/mining_machines` collection is readable by anyone,
+ *   but write access is disabled by default, as the data model lacks an ownership field. This
+ *   prevents unauthorized modification and assumes that this data is managed by backend administrators.
+ * - Path-based Authorization: Rules rely on the `userId` wildcard in the path to grant access,
+ *   which is highly performant as it avoids extra database reads (`get()` calls) for authorization checks.
+ * - Relational Integrity: On creation, documents in user subcollections must contain a `userId` field
+ *   that matches the `userId` from the document path, ensuring a consistent and unbreakable link
+ *   to the owner.
+ */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    //-------------------------------------------------------------------------
+    // Helper Functions
+    //-------------------------------------------------------------------------
+
+    /**
+     * Checks if the current request is from a signed-in user.
+     */
     function isSignedIn() {
       return request.auth != null;
     }
 
+    /**
+     * Checks if the requesting user's UID matches the provided userId.
+     * This is the foundation of the user-ownership model.
+     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function isAdmin() {
-      // This is a hardcoded UID for the super admin.
-      return isSignedIn() && request.auth.uid == 'GEGZNzOWg6bnU53iwJLzL5LaXwR2';
+    /**
+     * Checks for ownership on an existing document. Used for safe updates and deletes.
+     * Prevents operations on non-existent documents and ensures the user is the owner.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
     }
 
+    //-------------------------------------------------------------------------
+    // Collection Rules
+    //-------------------------------------------------------------------------
+
+    /**
+     * @description Manages user profile documents. A user can create their own profile,
+     *   and can only read or update their own data thereafter.
+     * @path /users/{userId}
+     * @allow (create) An authenticated user with UID 'user123' creating their own profile at `/users/user123`.
+     * @deny (get) User 'user456' trying to read the profile of 'user123' at `/users/user123`.
+     * @deny (list) Any user trying to list all documents in the `/users` collection.
+     * @principle Restricts access to a user's own data tree and prevents user enumeration.
+     */
     match /users/{userId} {
-      allow get, update: if isOwner(userId) || isAdmin();
-      allow create: if isSignedIn() && request.auth.uid == userId;
-      allow list: if isAdmin();
-    }
-    
-    // User-specific sub-collections
-    match /users/{userId}/rentals/{rentalId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if false;
+
+      /**
+       * @description Secures a user's hiring transactions. Only the user who owns
+       *   the parent document can access these transactions.
+       * @path /users/{userId}/hiring_transactions/{transactionId}
+       * @allow (create) User 'user123' creating a new transaction in their own subcollection.
+       * @deny (list) User 'user456' trying to list transactions for 'user123'.
+       * @principle Enforces strict ownership for all operations on sensitive child documents.
+       */
+      match /hiring_transactions/{transactionId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
+
+      /**
+       * @description Secures a user's Mpesa payment transactions. Only the user who owns
+       *   the parent document can access these transactions.
+       * @path /users/{userId}/mpesa_transactions/{transactionId}
+       * @allow (get) User 'user123' reading their own transaction at `/users/user123/mpesa_transactions/tx_abc`.
+       * @deny (create) User 'user456' trying to create a transaction for 'user123'.
+       * @principle Enforces strict ownership for all operations on sensitive child documents.
+       */
+      match /mpesa_transactions/{transactionId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
     }
 
-    match /users/{userId}/messages/{messageId} {
-      allow read: if isOwner(userId);
-      allow write: if isAdmin();
-    }
-    
-    match /users/{userId}/deposit_transactions/{depositId} {
-      allow read, write: if isOwner(userId) || isAdmin();
-    }
-    
-    match /users/{userId}/withdrawal_transactions/{withdrawalId} {
-      allow read, write: if isOwner(userId) || isAdmin();
-    }
-
-
+    /**
+     * @description Manages the publicly available list of mining machines. This data
+     *   can be read by any client, but cannot be modified.
+     * @path /mining_machines/{machineId}
+     * @allow (get, list) Any user (authenticated or not) reading the list of machines.
+     * @deny (create, update, delete) Any client trying to add, change, or remove a machine.
+     * @principle Provides public read access for global data while securing it from client-side modification.
+     */
     match /mining_machines/{machineId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin();
-    }
+      allow get: if true;
+      allow list: if true;
 
-    // Global collections for Admin review
-    match /deposit_transactions/{depositId} {
-      allow get, create: if isSignedIn(); // Create is for users
-      allow update: if isAdmin(); // update for admin
-      allow list: if isAdmin(); // Only admins can list all transactions
-    }
-
-    match /withdrawal_transactions/{withdrawalId} {
-      allow get, create: if isSignedIn(); // Create for users
-      allow update: if isAdmin(); // update for admin
-      allow list: if isAdmin(); // Only admins can list all transactions
-    }
-    
-    match /redeem_codes/{code} {
-      allow get: if isSignedIn();
-      allow create: if isAdmin();
-      allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true;
-      allow list: if isAdmin();
-    }
-
-    match /daily_limits/{limitId} {
-        allow get, list: if isSignedIn();
-        allow write: if isSignedIn(); // Should be more secure in production
-    }
-
-    match /notifications/{notificationId} {
-      allow read, write: if isAdmin();
-    }
-    
-     match /notifications/{path=**} {
-      allow list: if isAdmin();
+      // CRITICAL: Cannot implement owner-only writes. The 'MiningMachine' entity is missing an 'ownerId' or 'adminId' field.
+      // Writes are disabled to prevent unauthorized modification. Assume this data is managed via the Firebase Console or a trusted backend server.
+      allow create: if false; // TODO: Add admin-only validation once an admin role system is implemented.
+      allow update: if false; // TODO: Add admin-only validation once an admin role system is implemented.
+      allow delete: if false; // TODO: Add admin-only validation once an admin role system is implemented.
     }
   }
 }

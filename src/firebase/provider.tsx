@@ -3,7 +3,7 @@
 import React, { DependencyList, createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
-import { Auth, User, onAuthStateChanged, IdTokenResult } from 'firebase/auth';
+import { Auth, User, onAuthStateChanged } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener'
 
 interface FirebaseProviderProps {
@@ -78,12 +78,8 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
     const unsubscribe = onAuthStateChanged(
       auth,
-      async (firebaseUser) => { // Auth state determined
-        if (firebaseUser) {
-           setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
-        } else {
-          setUserAuthState({ user: null, isUserLoading: false, userError: null });
-        }
+      (firebaseUser) => { // Auth state determined
+        setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
       },
       (error) => { // Auth listener error
         console.error("FirebaseProvider: onAuthStateChanged error:", error);

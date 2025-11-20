@@ -1,100 +1,35 @@
-
 {
   "entities": {
-    "UserAccount": {
+    "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "UserAccount",
+      "title": "User",
       "type": "object",
-      "description": "Represents a user account within the BitHired application.",
+      "description": "Represents a user of the BitHired application.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user account."
-        },
-        "name": {
-          "type": "string",
-          "description": "The user's full name."
-        },
-        "email": {
-          "type": "string",
-          "format": "email",
-          "description": "The user's email address, used for login."
+          "description": "Unique identifier for the user."
         },
         "mobileNumber": {
           "type": "string",
-          "description": "User's mobile phone number."
+          "description": "The user's mobile phone number."
         },
         "virtualBalance": {
           "type": "number",
-          "description": "The user's current virtual currency balance."
-        },
-        "referralCode": {
-            "type": "string",
-            "description": "A unique code assigned to the user for inviting others."
-        },
-        "invitedBy": {
-            "type": "string",
-            "description": "The UID of the user who referred this user."
-        },
-        "lastCollectedAt": {
-            "type": "string",
-            "format": "date",
-            "description": "The date (YYYY-MM-DD) the user last collected their daily earnings."
+          "description": "The user's current balance of virtual money."
         }
       },
       "required": [
         "id",
-        "name",
-        "email",
-        "mobileNumber"
-      ]
-    },
-    "UserMessage": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "UserMessage",
-      "type": "object",
-      "description": "Represents a message sent from an admin to a user's inbox.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the message."
-        },
-        "title": {
-          "type": "string",
-          "description": "The title or subject of the message."
-        },
-        "content": {
-          "type": "string",
-          "description": "The main body of the message, which can include redeem codes or other information."
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Timestamp when the message was sent."
-        },
-        "read": {
-          "type": "boolean",
-          "description": "Whether the user has read the message."
-        },
-        "userId": {
-          "type": "string",
-          "description": "The UID of the user who received the message."
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "content",
-        "createdAt",
-        "read",
-        "userId"
+        "mobileNumber",
+        "virtualBalance"
       ]
     },
     "MiningMachine": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "MiningMachine",
       "type": "object",
-      "description": "Represents a virtual mining machine available for hire.",
+      "description": "Represents a virtual mining machine available for hiring.",
       "properties": {
         "id": {
           "type": "string",
@@ -102,248 +37,110 @@
         },
         "name": {
           "type": "string",
-          "description": "Name of the mining machine."
+          "description": "The name of the mining machine."
         },
         "miningRate": {
           "type": "number",
-          "description": "The mining rate of the machine."
+          "description": "The mining rate of the machine (e.g., BTC/hour)."
+        },
+        "costPerDay": {
+          "type": "number",
+          "description": "The cost to hire the machine for one day in virtual currency."
         }
       },
       "required": [
         "id",
         "name",
-        "miningRate"
+        "miningRate",
+        "costPerDay"
       ]
     },
-    "RentalTransaction": {
+    "HiringTransaction": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "RentalTransaction",
+      "title": "HiringTransaction",
       "type": "object",
-      "description": "Represents a transaction where a user hires a mining machine.",
+      "description": "Represents a single hiring transaction for a mining machine.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the rental transaction."
+          "description": "Unique identifier for the hiring transaction."
         },
-        "userAccountId": {
+        "userId": {
           "type": "string",
-          "description": "Reference to UserAccount. (Relationship: UserAccount 1:N RentalTransaction)"
+          "description": "Reference to User. (Relationship: User 1:N HiringTransaction)"
         },
-        "miningMachineId": {
+        "machineId": {
           "type": "string",
-          "description": "Reference to MiningMachine. (Relationship: MiningMachine 1:N RentalTransaction)"
+          "description": "Reference to MiningMachine. (Relationship: MiningMachine 1:N HiringTransaction)"
         },
         "startDate": {
           "type": "string",
-          "description": "The start date of the rental period.",
+          "description": "The start date and time of the hiring period.",
           "format": "date-time"
         },
         "endDate": {
           "type": "string",
-          "description": "The end date of the rental period.",
+          "description": "The end date and time of the hiring period.",
           "format": "date-time"
         },
-        "rentalCost": {
+        "durationDays": {
           "type": "number",
-          "description": "The cost of renting the mining machine for the specified period."
+          "description": "The duration of the hiring period in days."
+        },
+        "cost": {
+          "type": "number",
+          "description": "The cost of the hiring transaction in virtual currency."
         }
       },
       "required": [
         "id",
-        "userAccountId",
-        "miningMachineId",
+        "userId",
+        "machineId",
         "startDate",
         "endDate",
-        "rentalCost"
+        "durationDays",
+        "cost"
       ]
     },
-    "DepositTransaction": {
+    "MpesaTransaction": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "DepositTransaction",
+      "title": "MpesaTransaction",
       "type": "object",
-      "description": "Represents a deposit transaction initiated by a user, awaiting admin confirmation.",
+      "description": "Represents a transaction for recharging the user's virtual money balance via Mpesa.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the deposit transaction."
+          "description": "Unique identifier for the Mpesa transaction."
         },
-        "userAccountId": {
+        "userId": {
           "type": "string",
-          "description": "Reference to UserAccount. (Relationship: UserAccount 1:N DepositTransaction)"
+          "description": "Reference to User. (Relationship: User 1:N MpesaTransaction)"
+        },
+        "mpesaCode": {
+          "type": "string",
+          "description": "The Mpesa transaction code."
         },
         "amount": {
           "type": "number",
-          "description": "The amount the user intends to deposit."
+          "description": "The amount of money transferred via Mpesa."
         },
-        "status": {
+        "transactionDate": {
           "type": "string",
-          "enum": [
-            "pending",
-            "completed",
-            "cancelled"
-          ],
-          "description": "The current status of the deposit."
+          "description": "The date and time of the Mpesa transaction.",
+          "format": "date-time"
         },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Timestamp when the deposit was initiated."
-        },
-        "mobileNumber": {
-          "type": "string",
-          "description": "The user's mobile number, denormalized for admin convenience."
+        "virtualMoneyCredited": {
+          "type": "number",
+          "description": "The amount of virtual money credited to the user's account as a result of this transaction."
         }
       },
       "required": [
         "id",
-        "userAccountId",
+        "userId",
+        "mpesaCode",
         "amount",
-        "status",
-        "createdAt",
-        "mobileNumber"
-      ]
-    },
-    "WithdrawalTransaction": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "WithdrawalTransaction",
-      "type": "object",
-      "description": "Represents a withdrawal transaction initiated by a user, awaiting admin confirmation.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the withdrawal transaction."
-        },
-        "userAccountId": {
-          "type": "string",
-          "description": "Reference to UserAccount."
-        },
-        "amount": {
-          "type": "number",
-          "description": "The amount the user intends to withdraw."
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "pending",
-            "completed",
-            "cancelled"
-          ],
-          "description": "The current status of the withdrawal."
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Timestamp when the withdrawal was initiated."
-        },
-        "mobileNumber": {
-          "type": "string",
-          "description": "The user's mobile number for the M-PESA transfer."
-        }
-      },
-      "required": [
-        "id",
-        "userAccountId",
-        "amount",
-        "status",
-        "createdAt",
-        "mobileNumber"
-      ]
-    },
-    "Notification": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Notification",
-      "type": "object",
-      "description": "Represents a notification for an admin action.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the notification."
-        },
-        "message": {
-          "type": "string",
-          "description": "The content of the notification message."
-        },
-        "read": {
-          "type": "boolean",
-          "description": "Whether the notification has been read."
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Timestamp when the notification was created."
-        },
-        "adminId": {
-          "type": "string",
-          "description": "The UID of the admin who performed the action."
-        }
-      },
-      "required": [
-        "id",
-        "message",
-        "read",
-        "createdAt",
-        "adminId"
-      ]
-    },
-    "RedeemCode": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "RedeemCode",
-      "type": "object",
-      "description": "Represents a redeemable code for users to add virtual currency.",
-      "properties": {
-        "code": {
-          "type": "string",
-          "description": "The unique redeem code string."
-        },
-        "amount": {
-          "type": "number",
-          "description": "The virtual currency amount this code provides."
-        },
-        "used": {
-          "type": "boolean",
-          "description": "Indicates whether the code has already been redeemed."
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Timestamp when the code was generated."
-        },
-        "usedBy": {
-          "type": "string",
-          "description": "The UID of the user who redeemed the code."
-        },
-        "usedAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Timestamp when the code was redeemed."
-        }
-      },
-      "required": [
-        "code",
-        "amount",
-        "used",
-        "createdAt"
-      ]
-    },
-    "DailyLimit": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "DailyLimit",
-      "type": "object",
-      "description": "Tracks the total daily transaction amount for a given payment account.",
-      "properties": {
-        "totalAmount": {
-          "type": "number",
-          "description": "The accumulated amount for the day."
-        },
-        "date": {
-          "type": "string",
-          "format": "date",
-          "description": "The date for which the limit is tracked (YYYY-MM-DD)."
-        }
-      },
-      "required": [
-        "totalAmount",
-        "date"
+        "transactionDate",
+        "virtualMoneyCredited"
       ]
     }
   },
@@ -358,160 +155,76 @@
       {
         "path": "/users/{userId}",
         "definition": {
-          "entityName": "UserAccount",
+          "entityName": "User",
           "schema": {
-            "$ref": "#/backend/entities/UserAccount"
+            "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user account information. Uses path-based ownership for private user data.",
+          "description": "Stores user profiles. Secured via path-based ownership.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier for the user account, matching the Firebase Auth UID."
+              "description": "The unique identifier of the user."
             }
           ]
         }
       },
       {
-        "path": "/users/{userId}/messages/{messageId}",
-        "definition": {
-          "entityName": "UserMessage",
-          "schema": {
-            "$ref": "#/backend/entities/UserMessage"
-          },
-          "description": "Stores inbox messages sent by an admin to a specific user. Only the user can read, only admin can write.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the user account."
-            },
-            {
-              "name": "messageId",
-              "description": "The unique identifier for the message."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/mining_machines/{miningMachineId}",
+        "path": "/mining_machines/{machineId}",
         "definition": {
           "entityName": "MiningMachine",
           "schema": {
             "$ref": "#/backend/entities/MiningMachine"
           },
-          "description": "Stores information about available mining machines.",
+          "description": "Stores information about available mining machines. Publicly readable.",
           "params": [
             {
-              "name": "miningMachineId",
-              "description": "The unique identifier for the mining machine."
+              "name": "machineId",
+              "description": "The unique identifier of the mining machine."
             }
           ]
         }
       },
       {
-        "path": "/users/{userId}/rentals/{rentalId}",
+        "path": "/users/{userId}/hiring_transactions/{transactionId}",
         "definition": {
-          "entityName": "RentalTransaction",
+          "entityName": "HiringTransaction",
           "schema": {
-            "$ref": "#/backend/entities/RentalTransaction"
+            "$ref": "#/backend/entities/HiringTransaction"
           },
-          "description": "Stores rental transaction data for a user. Includes denormalized 'userAccountId' to guarantee authorization independence.",
+          "description": "Stores hiring transactions for a specific user. Secured via path-based ownership.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier for the user account that created this rental transaction. (Relationship: UserAccount 1:N RentalTransaction)"
+              "description": "The unique identifier of the user."
             },
             {
-              "name": "rentalId",
-              "description": "The unique identifier for the rental transaction."
+              "name": "transactionId",
+              "description": "The unique identifier of the hiring transaction."
             }
           ]
         }
       },
       {
-        "path": "/deposit_transactions/{depositTransactionId}",
+        "path": "/users/{userId}/mpesa_transactions/{transactionId}",
         "definition": {
-          "entityName": "DepositTransaction",
+          "entityName": "MpesaTransaction",
           "schema": {
-            "$ref": "#/backend/entities/DepositTransaction"
+            "$ref": "#/backend/entities/MpesaTransaction"
           },
-          "description": "Stores all deposit transactions. Admin needs to read all of them to confirm. User can read their own.",
+          "description": "Stores Mpesa transactions for a specific user. Secured via path-based ownership.",
           "params": [
             {
-              "name": "depositTransactionId",
-              "description": "The unique identifier for the deposit transaction."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/withdrawal_transactions/{withdrawalTransactionId}",
-        "definition": {
-          "entityName": "WithdrawalTransaction",
-          "schema": {
-            "$ref": "#/backend/entities/WithdrawalTransaction"
-          },
-          "description": "Stores all withdrawal transactions. Admin needs to read all to confirm. User can read their own.",
-          "params": [
-            {
-              "name": "withdrawalTransactionId",
-              "description": "The unique identifier for the withdrawal transaction."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/notifications/{notificationId}",
-        "definition": {
-          "entityName": "Notification",
-          "schema": {
-            "$ref": "#/backend/entities/Notification"
-          },
-          "description": "Stores notifications for admin actions, like approving or declining deposits.",
-          "params": [
-            {
-              "name": "notificationId",
-              "description": "The unique identifier for the notification."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/redeem_codes/{code}",
-        "definition": {
-          "entityName": "RedeemCode",
-          "schema": {
-            "$ref": "#/backend/entities/RedeemCode"
-          },
-          "description": "Stores redeemable codes for users to add virtual currency.",
-          "params": [
-            {
-              "name": "code",
-              "description": "The unique redeem code string, used as the document ID."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/daily_limits/{date}_{accountNumber}",
-        "definition": {
-          "entityName": "DailyLimit",
-          "schema": {
-            "$ref": "#/backend/entities/DailyLimit"
-          },
-          "description": "Tracks daily transaction totals for each payment account to enforce limits.",
-          "params": [
-            {
-              "name": "date",
-              "description": "The date in YYYY-MM-DD format."
+              "name": "userId",
+              "description": "The unique identifier of the user."
             },
             {
-              "name": "accountNumber",
-              "description": "The payment account number being tracked."
+              "name": "transactionId",
+              "description": "The unique identifier of the Mpesa transaction."
             }
           ]
         }
       }
     ],
-    "reasoning": "The Firestore data structure is designed to ensure security, scalability, and ease of debugging. User-specific data like rentals and inbox messages are nested under the user's document for clear ownership and security. Global data like mining machines are in a root collection. Deposit transactions and notifications are in root collections so that admins can query all of them, with security rules ensuring users can only read their own deposits, while admins can read all and update status. Redeem codes are in a root collection for admin management and user redemption. Daily limits are stored in a root collection to be globally accessible for checking transaction thresholds."
+    "reasoning": "The Firestore data structure is designed to support the BitHired application, focusing on user management, mining machine hiring, and transaction tracking. It prioritizes security, scalability, and ease of debugging by adhering to the principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and Rules are not Filters (QAPs). \n\nAuthorization Independence is achieved through path-based ownership for user-specific data, such as hiring transactions and Mpesa transactions. This eliminates the need for `get()` calls in security rules to check parent document attributes. Collaborative data is not applicable in this schema, so Membership Maps are not needed. However, if the application evolves to include shared mining machines, membership maps should be adopted.\n\nStructural Segregation is enforced by keeping different data types in separate collections (e.g., users, mining machines). This ensures that all documents within a collection share the same security requirements, simplifying the rules.\n\nAccess Modeling utilizes path-based ownership for user-owned data. For example, hiring transactions are stored under `/users/{userId}/hiring_transactions/{transactionId}`, making it easy to secure access based on the authenticated user's ID. Mining machines are stored globally and can be read by all users.\n\nData Clarity and Predictability are maintained by using explicit field names and a consistent structure across all documents. This makes the data easier to understand and query.\n\nThis structure supports the required QAPs by enabling secure `list` operations. Because access control is based on path-based ownership, listing transactions for a specific user is secure and efficient. The separation of global mining machines from user-specific data also supports secure listing operations."
   }
 }
