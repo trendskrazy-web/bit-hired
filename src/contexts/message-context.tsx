@@ -14,8 +14,6 @@ import {
   useUser,
   addDocumentNonBlocking,
   updateDocumentNonBlocking,
-  FirestorePermissionError,
-  errorEmitter
 } from "@/firebase";
 import {
   collection,
@@ -63,11 +61,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
         const unread = userMessages.filter(msg => !msg.read).length;
         setUnreadCount(unread);
       }, (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: messagesColRef.path,
-          operation: 'list',
-        });
-        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error fetching messages:", error);
       });
 
       return () => unsubscribe();

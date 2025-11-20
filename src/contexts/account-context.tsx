@@ -12,8 +12,6 @@ import {
 import type { Transaction } from '@/lib/data';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
 import { collection, doc, onSnapshot, increment } from 'firebase/firestore';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 export interface UserAccount {
   id: string;
@@ -87,8 +85,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
       }
     }, (error) => {
-      const permissionError = new FirestorePermissionError({ path: userDocRef.path, operation: 'get' });
-      errorEmitter.emit('permission-error', permissionError);
+      console.error("Error fetching user data:", error);
     });
     unsubscribers.push(unsubscribeUser);
 
@@ -97,8 +94,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       const rentalData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Transaction));
       setTransactions(rentalData);
     }, (error) => {
-      const permissionError = new FirestorePermissionError({ path: rentalsColRef.path, operation: 'list' });
-      errorEmitter.emit('permission-error', permissionError);
+      console.error("Error fetching rental transactions:", error);
     });
     unsubscribers.push(unsubscribeRentals);
     

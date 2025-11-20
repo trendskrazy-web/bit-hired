@@ -14,8 +14,6 @@ import {
   updateDocumentNonBlocking,
   useFirestore,
   useUser,
-  FirestorePermissionError,
-  errorEmitter
 } from "@/firebase";
 import {
   collection,
@@ -72,11 +70,7 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
         const codesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RedeemCode));
         setCodes(codesData);
       }, (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: codesColRef.path,
-          operation: 'list',
-        });
-        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error fetching redeem codes:", error);
       });
 
       return () => unsubscribe();
@@ -148,16 +142,10 @@ export function RedeemCodeProvider({ children }: { children: ReactNode }) {
           amount: foundCode.amount,
         };
       } catch (error) {
-        // This is the proper way to handle permission errors.
-        const permissionError = new FirestorePermissionError({
-          path: codeDocRef.path,
-          operation: 'get',
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        // We still return a user-friendly error message for the UI.
+        console.error("Error redeeming code:", error);
         return {
           success: false,
-          message: "Could not verify redeem code. Check your permissions.",
+          message: "Could not verify redeem code. Please try again.",
           amount: 0,
         };
       }

@@ -11,8 +11,6 @@ import {
 } from 'react';
 import { useFirestore, useUser, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
 import { collection, doc, onSnapshot, query, where, setDoc, increment, getDocs, orderBy, CollectionReference, Query } from 'firebase/firestore';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 import { useAccount } from './account-context';
 
 export interface Deposit {
@@ -138,8 +136,6 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
 
     } catch (error) {
         console.error("Error fetching daily limits:", error);
-        const permissionError = new FirestorePermissionError({ path: 'daily_limits', operation: 'list' });
-        errorEmitter.emit('permission-error', permissionError);
         setDepositsEnabled(false);
     }
 }, [firestore]);
@@ -176,10 +172,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
             setData(data);
         }, (error) => {
-            // The path is extracted from the query object itself for accuracy.
-            const path = (q as any)._query.path.canonicalString();
-            const permissionError = new FirestorePermissionError({ path: path, operation: 'list' });
-            errorEmitter.emit('permission-error', permissionError);
+            console.error(`Error fetching ${collectionName}:`, error);
         });
         unsubscribers.push(unsubscribe);
     };
@@ -209,23 +202,13 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         userName: name,
       };
       setDoc(newDocRef, newDepositData).catch(error => {
-        const permissionError = new FirestorePermissionError({
-            path: newDocRef.path,
-            operation: 'create',
-            requestResourceData: newDepositData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error creating global deposit request:", error);
       });
       
       // 2. Denormalize: Add a copy to the user's sub-collection
       const userDepositDocRef = doc(firestore, `users/${user.uid}/deposit_transactions`, newDocRef.id);
       setDoc(userDepositDocRef, newDepositData).catch(error => {
-         const permissionError = new FirestorePermissionError({
-            path: userDepositDocRef.path,
-            operation: 'create',
-            requestResourceData: newDepositData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
+         console.error("Error creating user deposit request:", error);
       });
 
 
@@ -238,12 +221,7 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
         { totalAmount: increment(amount), date: today, account: depositTo }, 
         { merge: true }
       ).catch(error => {
-        const permissionError = new FirestorePermissionError({
-            path: limitDocRef.path,
-            operation: 'write',
-            requestResourceData: { totalAmount: `increment(${amount})`, date: today }
-        });
-        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error updating daily limit:", error);
       });
       // Immediately update the state to reflect the new designated account
       updateDesignatedAccount();
@@ -265,23 +243,13 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
           userName: name,
       };
       setDoc(newDocRef, newWithdrawalData).catch(error => {
-          const permissionError = new FirestorePermissionError({
-              path: newDocRef.path,
-              operation: 'create',
-              requestResourceData: newWithdrawalData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
+        console.error("Error creating global withdrawal request:", error);
       });
 
       // 2. Denormalize: Add a copy to the user's sub-collection
       const userWithdrawalDocRef = doc(firestore, `users/${user.uid}/withdrawal_transactions`, newDocRef.id);
       setDoc(userWithdrawalDocRef, newWithdrawalData).catch(error => {
-          const permissionError = new FirestorePermissionError({
-              path: userWithdrawalDocRef.path,
-              operation: 'create',
-              requestResourceData: newWithdrawalData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
+        console.error("Error creating user withdrawal request:", error);
       });
     }
   };
