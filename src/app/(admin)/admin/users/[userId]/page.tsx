@@ -131,7 +131,7 @@ export default function AdminUserDetailsPage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="message-content">Content</Label>
-                    <Textarea id="message-content" value={messageContent} onChange={(e) => setMessageContent(e.targe.value)} placeholder="Enter your message here. You can include a redeem code..." required />
+                    <Textarea id="message-content" value={messageContent} onChange={(e) => setMessageContent(e.target.value)} placeholder="Enter your message here. You can include a redeem code..." required />
                 </div>
             </CardContent>
             <CardFooter>
