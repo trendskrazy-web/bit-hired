@@ -61,8 +61,7 @@ export function ActiveMachineCard({ transaction }: ActiveMachineCardProps) {
   const [timeRemaining, setTimeRemaining] = useState(
     totalDuration - getElapsedTime()
   );
-  // These states are now managed within the transaction object if needed,
-  // but for daily cashout logic, we can simplify.
+  
   const [cashedOutAmount, setCashedOutAmount] = useState(0); 
   const [lastCashOutDate, setLastCashOutDate] = useState<Date | null>(null);
 
