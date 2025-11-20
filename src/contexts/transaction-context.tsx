@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -104,27 +105,25 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!firestore || !user) return;
-  
+
     const unsubscribers: (() => void)[] = [];
     const isAdmin = user.uid === SUPER_ADMIN_UID;
-  
+
     const createSubscription = <T extends { id: string }>(
       collectionName: 'deposit_transactions' | 'withdrawal_transactions',
       setData: React.Dispatch<React.SetStateAction<T[]>>
     ) => {
       let q: Query;
       let path: string;
-  
+
       if (isAdmin) {
         path = collectionName;
-        const ref = collection(firestore, path);
-        q = query(ref, orderBy('createdAt', 'desc'));
+        q = query(collectionGroup(firestore, path), orderBy('createdAt', 'desc'));
       } else {
         path = `users/${user.uid}/${collectionName}`;
-        const ref = collection(firestore, path);
-        q = query(ref, orderBy('createdAt', 'desc'));
+        q = query(collection(firestore, path), orderBy('createdAt', 'desc'));
       }
-  
+      
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
         setData(data);
@@ -134,11 +133,10 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       });
       unsubscribers.push(unsubscribe);
     };
-    
+
     createSubscription<Deposit>('deposit_transactions', setDeposits);
     createSubscription<Withdrawal>('withdrawal_transactions', setWithdrawals);
-  
-  
+
     return () => {
       unsubscribers.forEach((unsub) => unsub());
     };
