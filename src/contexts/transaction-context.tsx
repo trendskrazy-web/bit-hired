@@ -104,33 +104,33 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!firestore || !user) return;
-
+  
     const unsubscribers: (() => void)[] = [];
     const isAdmin = user.uid === SUPER_ADMIN_UID;
-
+  
     const createSubscription = <T extends { id: string }>(
       collectionName: 'deposit_transactions' | 'withdrawal_transactions',
       setData: React.Dispatch<React.SetStateAction<T[]>>
     ) => {
       let q: Query;
-      let path: string;
-
+      let pathForError: string;
+  
       if (isAdmin) {
         // Admin gets all transactions from the root collection group
-        path = collectionName;
+        pathForError = collectionName;
         q = query(collectionGroup(firestore, collectionName), orderBy('createdAt', 'desc'));
       } else {
         // User gets only their own transactions from their sub-collection
-        path = `users/${user.uid}/${collectionName}`;
-        const ref = collection(firestore, path);
+        pathForError = `users/${user.uid}/${collectionName}`;
+        const ref = collection(firestore, pathForError);
         q = query(ref, orderBy('createdAt', 'desc'));
       }
-
+  
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
         setData(data);
       }, (error) => {
-        const permissionError = new FirestorePermissionError({ path, operation: 'list' });
+        const permissionError = new FirestorePermissionError({ path: pathForError, operation: 'list' });
         errorEmitter.emit('permission-error', permissionError);
       });
       unsubscribers.push(unsubscribe);
@@ -138,8 +138,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     
     createSubscription<Deposit>('deposit_transactions', setDeposits);
     createSubscription<Withdrawal>('withdrawal_transactions', setWithdrawals);
-
-
+  
+  
     return () => {
       unsubscribers.forEach((unsub) => unsub());
     };
@@ -279,5 +279,7 @@ export function useTransactions() {
   }
   return context;
 }
+
+    
 
     

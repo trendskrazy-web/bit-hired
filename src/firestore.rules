@@ -28,8 +28,8 @@ service cloud.firestore {
     }
 
     match /users/{userId}/messages/{messageId} {
-      allow write: if isOwner(userId) || isAdmin();
-      allow read, list: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin(); // Admin can send messages to users
+      allow read, list, update: if isOwner(userId) || isAdmin();
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
@@ -47,15 +47,17 @@ service cloud.firestore {
 
     // Global collections for Admin review
     match /deposit_transactions/{depositId} {
-      allow get, create: if isSignedIn(); // Create is for users
+      allow get: if isSignedIn(); // User or admin can get single
+      allow create: if isSignedIn(); // Create is for users
       allow update: if isAdmin(); // update for admin
-      allow list: if isAdmin(); 
+      allow read, list: if isAdmin(); // Admin can list all
     }
 
     match /withdrawal_transactions/{withdrawalId} {
-      allow get, create: if isSignedIn(); // Create for users
+      allow get: if isSignedIn(); // User or admin can get single
+      allow create: if isSignedIn(); // Create for users
       allow update: if isAdmin(); // update for admin
-      allow list: if isAdmin();
+      allow read, list: if isAdmin(); // Admin can list all
     }
     
     match /redeem_codes/{code} {
@@ -80,3 +82,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

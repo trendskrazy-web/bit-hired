@@ -16,6 +16,8 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function AdminUserDetailsPage() {
   const { userId } = useParams();
@@ -39,6 +41,10 @@ export default function AdminUserDetailsPage() {
           } else {
             console.log('No such user!');
           }
+        })
+        .catch((error) => {
+            const permissionError = new FirestorePermissionError({ path: userDocRef.path, operation: 'get' });
+            errorEmitter.emit('permission-error', permissionError);
         })
         .finally(() => setIsLoading(false));
     }
@@ -144,3 +150,5 @@ export default function AdminUserDetailsPage() {
     </div>
   );
 }
+
+    
