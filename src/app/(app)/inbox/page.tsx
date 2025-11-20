@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -36,14 +35,32 @@ export default function InboxPage() {
       markMessageAsRead(message.id);
     }
   };
+
+  const copyToClipboard = (text: string) => {
+    // This is a more robust way to copy to clipboard that works in more environments
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      toast({
+        title: 'Content Copied',
+        description: 'The message content has been copied to your clipboard.',
+      });
+    } catch (err) {
+      toast({
+        title: 'Copy Failed',
+        description: 'Could not copy the content.',
+        variant: 'destructive',
+      });
+    }
+    document.body.removeChild(textarea);
+  };
   
   const handleCopy = () => {
     if (selectedMessage?.content) {
-        navigator.clipboard.writeText(selectedMessage.content);
-        toast({
-            title: "Content Copied",
-            description: "The message content has been copied to your clipboard.",
-        })
+        copyToClipboard(selectedMessage.content);
     }
   }
 
