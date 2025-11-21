@@ -16,24 +16,31 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == 'F7hBfGV8QYhgZ7KXbcmThjlisuo2';
     }
 
-    // Grant admin full access to everything
+    // Grant admin full access to everything, this rule needs to be comprehensive
+    // and correctly structured to avoid being overridden.
     match /{path=**} {
       allow read, write: if isAdmin();
     }
 
+    // --- User-specific rules ---
+
     match /users/{userId} {
+      // Users can create their own account, and read/update it if they are the owner.
+      // Admins can list all users.
+      allow create: if isOwner(userId);
       allow get, update: if isOwner(userId);
-      allow create: if isSignedIn() && request.auth.uid == userId;
       allow list: if isAdmin();
     }
     
-    // User-specific sub-collections
     match /users/{userId}/rentals/{rentalId} {
       allow read, write: if isOwner(userId);
     }
 
     match /users/{userId}/messages/{messageId} {
+      // Users can manage their own messages.
+      // Admins can create messages for users (e.g. notifications/warnings).
       allow read, list, update: if isOwner(userId);
+      allow create: if isAdmin();
     }
     
     match /users/{userId}/deposit_transactions/{depositId} {
@@ -43,23 +50,32 @@ service cloud.firestore {
     match /users/{userId}/withdrawal_transactions/{withdrawalId} {
       allow read, list, write: if isOwner(userId);
     }
+    
+    // --- Global Collection Rules ---
 
+    // All signed-in users can view the available machines.
     match /mining_machines/{machineId} {
       allow get, list: if isSignedIn();
     }
-
-    // Global collections for user creation
+    
+    // Signed-in users can create transaction documents in the global collections.
+    // Only admins can read the full list or update them.
     match /deposit_transactions/{depositId} {
       allow create: if isSignedIn();
+      allow read, update: if isAdmin();
     }
 
     match /withdrawal_transactions/{withdrawalId} {
       allow create: if isSignedIn();
+      allow read, update: if isAdmin();
     }
     
+    // Signed-in users can look up a redeem code and use it if it's not already used.
+    // Admins can do everything.
     match /redeem_codes/{code} {
       allow get: if isSignedIn();
       allow update: if isSignedIn() && resource.data.used == false && request.resource.data.used == true;
+      allow list, create: if isAdmin();
     }
   }
 }
