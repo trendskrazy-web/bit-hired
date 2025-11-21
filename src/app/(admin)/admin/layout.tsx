@@ -32,7 +32,6 @@ import { AppHeader } from '@/components/app/layout/header';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { NotificationProvider } from '@/contexts/notification-context';
 
 const adminMenuItems = [
   { href: '/admin/redeem-codes', label: 'Redeem Codes', icon: KeyRound },
@@ -159,9 +158,7 @@ export function AdminLayout({
 }) {
   return (
     <SidebarProvider>
-      <NotificationProvider>
         <AdminLayoutContent>{children}</AdminLayoutContent>
-      </NotificationProvider>
     </SidebarProvider>
   );
 }
